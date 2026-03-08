@@ -1,0 +1,360 @@
+# DOCUMENTO DE DISEÑO DE JUEGO (GDD)
+## PARTE 1: Identidad del Juego, Pilares de Diseño y Estética
+
+### 1. El Concepto Fundamental (Pitch)
+El juego es un título de Estrategia en Tiempo Real (RTS) basado en nodos y macro-gestión, ambientado íntegramente en un ecosistema microscópico. El jugador asume el papel de la "mente colmena" de una colonia de insectos (inicialmente hormigas), con el objetivo de expandir su territorio, asimilar genéticamente a sus rivales y sobrevivir a los peligros de un mundo cotidiano que, a esa escala, resulta titánico y letal. 
+
+La fantasía de poder central consiste en controlar un macro-enjambre. El núcleo del juego se basa en matemáticas puras y gestión de flujos: calcular porcentajes, redirigir colisiones lógicas y saturar las defensas enemigas mediante la superioridad numérica. Es un simulador de conquista territorial donde miles de unidades en pantalla actúan como un solo fluido orgánico.
+
+### 2. Diferenciadores Clave (Unique Selling Propositions - USPs)
+Aunque el juego nace de la base mecánica de títulos clásicos de nodos (como Solarmax, Auralux o Tentacle Wars), se separa radicalmente del género mediante las siguientes innovaciones en las mecánicas de estrategia de nodos:
+
+*   **Ataques de Enjambre y Automatización Opcional:** El método primordial de expansión es el ataque de enjambre masivo, enviando hordas desde un punto hacia otro para quebrar sus defensas. Una vez conquistados dos nodos propios, el jugador tiene la opción de invertir recursos para excavar "Túneles Logísticos" entre ellos. Esta mecánica establece un flujo constante y autónomo de tropas para reforzar el frente de batalla, transformando la micro-gestión en decisiones tácticas a largo plazo. Esta inversión conlleva un riesgo: si el enemigo captura uno de los nodos conectados, el túnel colapsa y los recursos invertidos en él se pierden definitivamente.
+*   **La Capa de Macro-Gestión (Estilo Tablero Estratégico):** El juego cuenta con un Tablero Estratégico persistente. Las batallas RTS son el medio para avanzar en una guerra territorial masiva, cruzando mecánicas de conquista de territorios por turnos con combates en tiempo real.
+*   **Enfoque Cenital de Alto Rendimiento:** El diseño abraza una perspectiva "Top-Down" (vista de dios) en un 2D extremadamente ligero. Esto permite enfocar absolutamente todos los recursos del hardware en la escala del combate, logrando mover fluidamente miles de unidades simultáneas en pantalla para generar la sensación real de un enjambre vivo.
+
+### 3. Psicología del Jugador
+El diseño del juego está construido para detonar tres gatillos psicológicos específicos en el usuario:
+
+*   **El "Zen" del Enjambre (Flujo Visual):** Existe una satisfacción intrínseca y casi hipnótica en observar el movimiento orgánico de las tropas, ya sea en un asalto caótico y envolvente sobre una base enemiga, o a través del tránsito constante de recursos en un túnel logístico recién establecido. Ver la superioridad numérica devorar matemáticamente las defensas enemigas genera un ciclo de recompensa constante.
+*   **Tensión por Riesgo / Recompensa:** El jugador toma decisiones constantes de micro y macro-gestión bajo presión. Decide si enviar su enjambre por asfalto caliente sacrificando un porcentaje de las tropas para lograr un flanqueo rápido, o si invertir recursos vitales en automatizar una ruta sabiendo que el enemigo acecha ese territorio.
+*   **Apego y Pérdida (Narrativa Emergente):** A través del sistema de Enjambres Veteranos, el jugador desarrolla un vínculo emocional con sus tropas mediante la inversión de tiempo y experiencia. El sistema de "Muerte Permanente" (Permadeath) asegura que una mala decisión táctica resulte en la pérdida absoluta de un escuadrón altamente mutado, generando picos de adrenalina únicos durante las misiones de alto riesgo.
+
+### 4. Dirección de Arte Visual
+La estética se rige por la regla del **Contraste Escalar**: entornos sumamente detallados enfrentados a tropas hiper-minimalistas.
+
+*   **Los Fondos (El Lienzo):** Imágenes estáticas en 2D de altísima calidad (fotorrealistas o de ilustración estilizada). Representan el macro-mundo: las grietas secas de una acera de concreto, el patrón cuadriculado de un mantel de picnic abandonado o un charco de barro con hojas otoñales flotando. Estos fondos brindan el contexto narrativo de la escaramuza.
+*   **Los Nodos (Las Bases):** Son *sprites* 2D nítidos y fácilmente identificables que destacan sobre el fondo. Un nodo de producción rápida es un terrón de azúcar cristalizado; un nodo defensivo es un nido de zarzas espinosas; un nodo de tránsito es una fisura oscura en la tierra. 
+*   **Las Tropas (Minimalismo Funcional):** Las unidades básicas se renderizan exclusivamente mediante código de dibujo puro (Canvas API).
+    *   *Forma:* **Elipsoides** (forma de balón de fútbol americano o grano de arroz).
+    *   *Comportamiento Visual:* Estos elipsoides son de colores sólidos y planos (Ej. Azul para el jugador, Rojo para la IA). Su rotación se actualiza en tiempo real para que la "punta" del elipsoide siempre mire hacia la dirección de su vector de movimiento.
+    *   *Impacto:* Al mover miles de estos elipsoides en bloque sobre un fondo de tierra realista, el cerebro humano completa la ilusión óptica y los percibe inmediatamente como un enjambre de insectos vivos y frenéticos. Esta decisión estética garantiza una fluidez absoluta del motor gráfico.
+
+### 5. Diseño Sonoro (Filosofía Funcional)
+El apartado auditivo se diseña bajo un enfoque minimalista, donde todo el audio sirve directamente a la jugabilidad y a la lectura de la interfaz:
+
+*   **Sonidos de Interfaz (UI):** Tonos secos, orgánicos y satisfactorios al seleccionar nodos y navegar por los menús.
+*   **Feedback de Bucle Táctico:** Tonos electrónicos generados dinámicamente informan el estado de la batalla. Al enviar un porcentaje de tropas, el juego emite un tono confirmatorio. La captura de un nodo neutral emite un acorde ascendente; la pérdida de un nodo propio genera un tono grave y descendente.
+*   **Alertas y Señales de Peligro (Cues):** El sonido actúa como el sistema nervioso del enjambre, alertando al jugador de eventos fuera de su campo de visión. Una infección parasitaria en un nodo genera un zumbido sutil, obligando al jugador a revisar sus bases. Un evento climático inminente (como la caída de la Gota de Agua) o la aparición de una Invasión Sorpresa se anuncia con un cambio brusco en la acústica del nivel o una alerta percusiva fuerte, indicando un cambio en las reglas de la partida.
+
+
+
+
+## PARTE 2: Hoja de Ruta Maestra (Del MVP al Lanzamiento Final)
+
+### 1. Filosofía de Desarrollo Iterativo
+La construcción del proyecto se rige por el principio de "Desarrollo en Público" (Build in Public). El objetivo es establecer un núcleo técnico extremadamente sólido y escalable que permita añadir capas de complejidad de manera progresiva. Este enfoque garantiza que la mecánica de combate sea intrínsecamente divertida antes de implementar sistemas meta-estratégicos o de monetización. La progresión se divide en cuatro fases críticas de evolución del producto.
+
+### 2. Fase 1: El MVP 1.0 (Prototipo de Validación Técnica)
+El objetivo de esta fase es validar la arquitectura matemática del enjambre y el rendimiento del motor gráfico en entornos web. Se prioriza la estabilidad de los cálculos de colisiones y la fluidez del renderizado de miles de unidades.
+
+*   **Alcance Funcional:**
+    *   **Mecánica Base:** Sistema de arrastre manual (Drag & Drop) para el envío de tropas desde nodos de origen a destino.
+    *   **Control de Volumen:** Implementación de la barra de porcentaje (10% a 100%) para definir la cantidad de elipsoides enviados en cada orden.
+    *   **Ecosistema Inicial:** Inclusión de Hormigueros Básicos y Hormigueros Enriquecidos. Estos últimos son nodos con fuentes de comida integradas que poseen distintos niveles de tamaño, ofreciendo una capacidad y velocidad de producción de tropas significativamente superior.
+    *   **Contenido:** Tres mapas de escaramuza fijos, diseñados mediante archivos JSON, con dificultad creciente para testear el equilibrio de la Inteligencia Artificial básica.
+    *   **Interfaz:** HUD minimalista que muestra la cantidad de tropas por nodo y el selector de porcentaje.
+*   **Exclusiones:** En esta fase se omite el mapa estratégico, los túneles de cualquier tipo, eventos climáticos, evolución de unidades, mecánicas de sigilo, multijugador y facciones especiales.
+
+### 3. Fase 2: Early Access (Expansión de Profundidad Táctica)
+Una vez validado el bucle de combate, el proyecto evoluciona introduciendo opciones tácticas avanzadas, variantes de tropas y control territorial complejo.
+
+*   **Evolución y Especialización de Nodos:**
+    *   **Evolución de Unidades:** Capacidad de generar tropas de mayor tamaño, fuerza y resistencia invirtiendo recursos para mutar hormigueros específicos.
+    *   **Hormigueros de Artillería (Ácido):** Nodos especializados que alteran el control del mapa creando amplias zonas de peligro. Disparan proyectiles o daño de área a cualquier unidad enemiga que cruce su radio de acción, incluso si no están atacando el nodo directamente.
+    *   **Nodos Defensivos:** Introducción del Tronco Espinoso, una estructura que inflige daño pasivo a las tropas enemigas antes del cálculo numérico de conquista.
+*   **Nuevas Vías de Movimiento:**
+    *   **Túneles de Mapa:** Estructuras estáticas preexistentes en el terreno que conectan dos extremos distantes del nivel. Permiten traslados inmediatos de tropas, facilitando flanqueos sorpresa y forzando a los jugadores a vigilar constantemente su retaguardia.
+    *   **Túneles Logísticos (Autoflujo):** Herramienta de automatización opcional donde el jugador invierte tropas de un nodo conquistado para establecer una ruta de envío de porcentaje constante hacia otro nodo.
+*   **Capa Estratégica Inicial:**
+    *   **Tablero de Conquista Básico:** Primer prototipo del mapa de campaña, funcionando como un selector de niveles narrativo donde el jugador asegura territorios fijos y experimenta la progresión territorial.
+
+### 4. Fase 3: Versión 1.0 (Lanzamiento del Juego Completo)
+Esta fase consolida la visión original, transformando el juego de niveles aislados en una experiencia de campaña rejugable e introduciendo las mecánicas de sigilo.
+
+*   **Mecánicas de Infección:**
+    *   **El Parásito y la Purga:** Sistema avanzado de infiltración táctica. Se envían unidades invisibles que infectan la producción enemiga desde adentro. Incluye la mecánica de limpieza (Purga), permitiendo al jugador sacrificar unidades propias para erradicar la infección de sus nodos.
+*   **La Campaña de "Anillos Concéntricos":**
+    *   **Tablero Dinámico:** Implementación total del mapa estratégico circular con 6 facciones compitiendo simultáneamente por alcanzar el centro del entorno.
+    *   **Elementos Roguelike:** Activación de los Puntos de Interés Épicos, el Árbol de Evolución Global y la obtención de Mutaciones Aleatorias Raras al conquistar territorios clave.
+    *   **Gestión de Unidades:** Sistema de Enjambres Veteranos con nombres personalizados, acumulación de experiencia por combate y la regla de Muerte Permanente (Permadeath) al perder una batalla.
+*   **El Mundo Vivo:**
+    *   **Clima Dinámico y Entorno:** Eventos destructivos telegrafiados como "La Gota de Agua" o "La Lupa", junto con zonas de terreno que aplican modificadores de velocidad (barro ralentizante, vidrio acelerador).
+    *   **Amenazas Evolucionadas:** Aparición de la Amenaza A (Invasiones sorpresa masivas de una facción externa en medio de una partida) y la Amenaza B (Depredadores neutrales de alto nivel custodiando nodos valiosos).
+    *   **Auto-Resolver:** Lógica de resolución matemática automática de batallas para agilizar la campaña en mapas previamente dominados por el jugador.
+
+### 5. Fase 4: Ecosistema y Expansión (Sostenibilidad a Largo Plazo)
+La fase final se centra en la comunidad y la escalabilidad comercial, convirtiendo el juego en una plataforma de contenido infinito.
+
+*   **Multijugador y Conectividad:**
+    *   **Arquitectura P2P:** Lanzamiento de los modos Versus y Cooperativo en tiempo real mediante tecnología WebRTC, incorporando el sistema de cesión de la IA para eliminar tiempos de espera.
+    *   **Modo Torneo:** Interruptor de balance competitivo en el vestíbulo que desactiva todos los elementos aleatorios (RNG) para partidas basadas puramente en la habilidad táctica.
+*   **Contenido Generado por el Usuario (UGC):**
+    *   **Editor de Mapas:** Herramienta visual integrada que permite a los jugadores diseñar sus propios niveles, posicionar nodos y exportar las creaciones en formato JSON.
+    *   **Portal de Comunidad:** Infraestructura para compartir, jugar y calificar campañas y mapas creados por otros usuarios.
+*   **Expansión Comercial:**
+    *   **Facciones Premium:** Lanzamiento escalonado de nuevas especies de insectos (Avispas, Arañas, Escarabajos) como contenido descargable (DLC). Cada facción introduce mecánicas disruptivas exclusivas que alteran las estrategias establecidas.
+    *   **Lanzamiento Multiplataforma:** Empaquetado final de la aplicación web progresiva (PWA) mediante contenedores nativos para su distribución comercial en Steam y ecosistemas móviles.
+    
+    
+## PARTE 3: Modelo de Negocio, Distribución y Marketing ($0 Presupuesto)
+
+### 1. Estructura de Monetización: El Modelo "Freemium" Ético
+La estrategia financiera se basa en eliminar cualquier barrera de entrada para construir una masa crítica de jugadores, monetizando a través de contenido expansivo y estético que no afecte el equilibrio competitivo (*Fair Play*).
+
+*   **Juego Base Gratuito (Hormigas):** El núcleo completo del juego es gratuito. Esto incluye la campaña principal, el modo escaramuza, el multijugador básico con la facción de hormigas y el editor de mapas. El objetivo es que el "Free-to-Play" se sienta como una experiencia premium completa.
+*   **Facciones DLC (Pago):** La fuente principal de ingresos proviene de la venta de nuevas especies de insectos (Avispas, Arañas, Escarabajos, Termitas). 
+    *   *Valor Añadido:* Cada facción no es solo un cambio visual, sino una expansión mecánica (ej. las avispas introducen vuelo; las arañas, trampas de red).
+    *   *Balance:* En el modo competitivo, estas facciones se equilibran matemáticamente contra las hormigas base para evitar el *Pay-to-Win*.
+*   **Tienda de Cosméticos (Skins):** Siguiendo el éxito de proyectos previos, se integran paquetes de apariencias estéticas para los nodos y las tropas (ej. skins de "Hormigas de Neón", "Nodos de Maquinaria Vapor/Steampunk" o "Estilo Medieval"). Estos cambios son puramente visuales y se adquieren mediante microtransacciones únicas.
+
+### 2. Hoja de Ruta de Distribución Escalar
+El despliegue del juego se realiza en fases, utilizando los ingresos de una etapa para financiar los costos de la siguiente, manteniendo un riesgo financiero de cero.
+
+*   **Fase 1: Validación en Itch.io:** Publicación inicial como juego web (PWA). Itch.io permite donaciones voluntarias ("paga lo que quieras") y la venta de los primeros paquetes de skins. Esta fase sirve para pulir el juego con el *feedback* de la comunidad y recaudar los primeros $100 USD.
+*   **Fase 2: Portales de Juegos Web (Poki / CrazyGames):** Una vez que el juego es estable y divertido, se somete a portales masivos. Estas plataformas ofrecen un modelo de ingreso compartido (50/50 o similar) basado en anuncios que el jugador ve antes de empezar o para obtener recompensas no críticas. El tráfico masivo de estos sitios proporciona visibilidad global sin costo de publicidad.
+*   **Fase 3: Salto a Steam (PC):** Con los $100 USD recaudados en las fases previas, se paga la tarifa de *Steam Direct*. El juego se publica como "Free-to-Play" con las Facciones DLC como contenido descargable de pago. Se utiliza la infraestructura de Steam para gestionar logros, estadísticas y la visibilidad orgánica de la tienda.
+*   **Fase 4: Expansión a Móvil (Android/iOS):** Utilizando el mismo código web, se empaqueta la aplicación para las tiendas móviles, donde el modelo de facciones DLC y skins premium es altamente aceptado.
+
+### 3. Estrategia de Marketing Orgánico ($0 Presupuesto)
+La promoción se apoya en la autenticidad del desarrollo y en la participación activa en comunidades nicho.
+
+*   **Build in Public (Construcción en Público):** Compartir actualizaciones semanales en comunidades de Reddit (r/gamedev, r/IndieDev) y Discord. Mostrar el progreso técnico (ej. "Cómo logré mover 5,000 hormigas en un navegador") genera respeto y una base de fans leales antes del lanzamiento.
+*   **Contenido de Formato Corto (Shorts / TikTok / Reels):** Crear clips rápidos de 15-30 segundos mostrando momentos caóticos de la batalla, invasiones sorpresa de la Amenaza A o el uso creativo de los túneles. Estos formatos tienen el mayor potencial de viralidad orgánica en 2026.
+*   **Comunidad y UGC:** Al proporcionar un editor de mapas desde el inicio, se incentiva a los jugadores a compartir sus creaciones. Esto convierte a los usuarios en promotores del juego, atrayendo a nuevos jugadores para probar mapas específicos.
+
+### 4. Herramientas de Empaquetado y Conversión Técnica
+Para transformar el desarrollo web en productos comerciales nativos sin contratar programadores adicionales:
+
+*   **Para Escritorio (Steam):** Uso de **Tauri**. A diferencia de otros marcos pesados, Tauri crea ejecutables extremadamente ligeros (menos de 10MB), utilizando el motor del sistema operativo para renderizar el juego, lo que garantiza el mejor rendimiento para el enjambre en PC.
+*   **Para Móvil:** Uso de **Ionic Capacitor**. Permite envolver la PWA en un contenedor nativo de Android e iOS, dando acceso a las tiendas oficiales y a funciones del dispositivo sin reescribir el código.
+*   **Persistencia de Datos:** Todos los perfiles de jugador, progreso de campaña y compras se gestionan de forma local inicialmente (IndexedDB/LocalStorage) y se sincronizan mediante las API básicas de las tiendas (Steam Cloud / Google Play Services) para asegurar que el jugador no pierda su progreso.
+
+## PARTE 4: El Bucle Táctico RTS (Batallas, Escaramuzas y Micro-Gestión)
+
+### 1. El Motor del Enjambre: Representación Visual y Lógica
+El núcleo del juego se basa en un modelo de **Flujo de Partículas Inteligentes**. La prioridad absoluta es el rendimiento gráfico para renderizar miles de unidades simultáneas sin comprometer la fluidez.
+
+*   **Representación Visual (Sin Números):** Siguiendo la estética minimalista de los grandes referentes del género, los nodos **no muestran contadores numéricos de tropas**. La fuerza de un hormiguero es puramente visual: el jugador percibe cuántas unidades tiene por la densidad del enjambre que lo rodea o el tamaño/brillo del nodo. Esto obliga al jugador a desarrollar un instinto táctico basado en la observación del campo de batalla.
+*   **Dibujo de Unidades (Elipsoides):** Las unidades se generan mediante la API de Canvas (`ctx.ellipse`).
+    *   *Geometría:* Forma de elipsoide (grano de arroz).
+    *   *Orientación:* Rotación dinámica; la "punta" siempre indica la dirección del movimiento.
+    *   *Colores:* Sólidos por facción (Azul, Rojo, etc.).
+*   **Lógica de Ataque:** El comportamiento estándar es el **Enjambre**. Las unidades no avanzan en fila, sino que forman una nube orgánica que flanquea y envuelve el objetivo, permitiendo colisiones múltiples y una saturación visual del nodo enemigo.
+
+### 2. Interfaz de Comando y Slider de Porcentaje
+La interacción es rápida y táctil, diseñada para que el flujo de órdenes no se detenga nunca.
+
+*   **Barra de Selección de Volumen:** Un slider persistente permite al jugador definir qué porcentaje de las unidades del nodo de origen se enviará (del 10% al 100%).
+*   **Vaciado de Nodo:** Si el slider se sitúa en el 100%, el jugador puede decidir vaciar por completo un hormiguero (dejándolo en 0 o 1 unidad) para realizar un ataque desesperado o una evacuación total.
+*   **Acción de Envío:** Clic/Toque en nodo propio y arrastre hacia el objetivo. Al soltar, el porcentaje seleccionado se lanza como un enjambre.
+
+### 3. Especialización y Evolución de Hormigueros
+Los nodos pueden evolucionar para cambiar drásticamente la composición del ejército o la defensa del territorio.
+
+*   **Hormiguero Básico y Enriquecido:** Nodos de producción. Los enriquecidos (con fuentes de comida integradas) tienen varios niveles de tamaño; a mayor tamaño, más rápida es la generación de tropas.
+*   **Hormiguero de Hormigas Grandes (Tanques):** Nodo evolucionado que genera unidades de mayor tamaño y resistencia. En el combate matemático, cada hormiga grande equivale a 3 unidades estándar, ideal para romper defensas pesadas.
+*   **Hormiguero de Artillería (Disparador de Ácido):** Nodo de largo alcance que crea una zona de control amplia. Dispara ráfagas de ácido de forma automática a cualquier unidad enemiga que entre en su radio de acción, sin necesidad de que el nodo esté siendo atacado directamente.
+*   **Tronco Espinoso:** Nodo defensivo que inflige daño pasivo a las tropas atacantes antes de que estas lleguen a pelear con el interior. Las tropas dueñas del nodo pasan por las espinas sin recibir daño.
+
+### 4. Sistemas de Tránsito: Túneles de Mapa y Logísticos
+*   **Túneles de Mapa (Huecos de Conquista):** Son nodos estratégicos que no producen tropas. Funcionan como puntos de entrada y salida entre extremos distantes del mapa.
+    *   *Mecánica:* Para usar un túnel, primero hay que **conquistar el hueco** como si fuera cualquier otro nodo. 
+    *   *Uso:* Una vez conquistado, al hacer clic en el hueco, la cámara o el flujo te lleva al otro extremo. Si el hueco de salida pertenece a un enemigo, se desata una batalla inmediata en el túnel para decidir quién toma el control del acceso.
+*   **Túneles Logísticos (Flujo Automatizado):** Una herramienta de automatización que se puede crear entre dos nodos propios ya conquistados.
+    *   *Mecánica:* El jugador establece una conexión permanente. El porcentaje seleccionado en la barra (por ejemplo, el 50% o el 100% para vaciar constantemente el origen) se enviará de forma ininterrumpida hacia el destino.
+    *   *Inversión:* El flujo se puede invertir o cancelar con un clic sobre el camino, pero si el enemigo captura uno de los extremos, el túnel desaparece.
+
+### 5. Mecánica de Parásitos, Infección y Purga
+El sigilo y la infiltración añaden una capa de riesgo interno constante.
+
+*   **Infección Silenciosa:** Se envían esporas/parásitos invisibles que se mezclan con las tropas enemigas. No restan puntos al entrar; infectan la producción.
+*   **Toma de Control:** Las unidades infectadas permanecen ocultas. Si el número de infectados supera el 50% de las tropas totales del hormiguero, las unidades "zombis" atacan automáticamente a las sanas desde dentro, tomando el control total del nodo para el jugador infiltrado. Si el nodo es atacado desde fuera, las tropas infectadas se revelan y se unen al ejército atacante.
+*   **La Purga (Doble Clic):** El jugador debe estar atento a la pista visual (parpadeo sutil del nodo).
+    *   *Acción:* Se realiza mediante un **doble clic rápido** sobre el propio hormiguero.
+    *   *Efecto:* Las hormigas sanas del nodo gastan sus fuerzas para eliminar a las infectadas en un combate 1 a 1.
+    *   *Sin Penalización de Tiempo:* A diferencia de otras mecánicas, la purga no paraliza el nodo. Se gastan las tropas necesarias y el juego continúa sin interrupciones, manteniendo el ritmo frenético del RTS.
+    
+## PARTE 5: La Campaña y El Tablero Estratégico (Macro-Gestión)
+
+### 1. El Tablero: El Anillo de Convergencia
+La campaña principal se desarrolla en un mapa estratégico con geometría de anillos concéntricos, similar a una telaraña. Este diseño centraliza el conflicto y asegura una progresión constante hacia el clímax del juego.
+
+*   **Puntos de Inicio:** Las 6 facciones en juego (el jugador y 5 IAs) comienzan la partida en el borde exterior del mapa, situadas en puntos equidistantes para garantizar un equilibrio de distancia inicial.
+*   **El Objetivo Final:** El centro del tablero contiene el nodo de "El Gran Picnic", un territorio masivo con recursos ilimitados. La victoria se obtiene al conquistar y asegurar este punto central.
+*   **Geometría de Colisión:** Los caminos del tablero se estrechan a medida que las facciones avanzan hacia los anillos interiores. Esto obliga a los ejércitos a cruzarse, generando disputas territoriales fronterizas desde las etapas iniciales de la campaña.
+*   **Tutorial de Combate Directo:** El primer turno de la campaña activa un evento de ataque automático. Una facción vecina o una fuerza neutral invade el territorio inicial del jugador, forzando la transición al primer mapa RTS para instruir al usuario en las mecánicas de mando y defensa.
+
+### 2. Tipología de Territorios y Recompensas Roguelike
+Cada nodo del tablero estratégico representa un escenario de batalla único y ofrece beneficios específicos para la progresión de la colonia.
+
+*   **Nodos Comunes (Tierra y Pasto):** Representan la mayoría del mapa. Su conquista otorga Puntos de Evolución estándar, utilizados en el árbol de habilidades globales para mejoras permanentes de la facción.
+*   **Nodos Épicos (Puntos de Interés):** Son territorios singulares como "La Lata de Refresco" o "El Escarabajo Muerto". Su conquista activa la mecánica Roguelike de Mutación: el jugador elige una entre tres mejoras aleatorias de alto nivel para potenciar su ejército. Estos nodos están custodiados permanentemente por la Amenaza B (Depredadores).
+*   **Nodos de Tránsito:** Actúan como puntos de conexión rápida entre anillos, permitiendo movimientos estratégicos para flanquear enemigos o huir de zonas de peligro.
+
+### 3. Gestión de Ejércitos: Enjambres Veteranos
+El jugador maneja fichas de ejército en el tablero estratégico que representan batallones masivos. Estos ejércitos poseen una identidad propia y progresan individualmente.
+
+*   **Personalización y Nivel:** El jugador asigna nombres únicos a sus ejércitos. Cada batalla RTS ganada de forma manual otorga experiencia a la ficha correspondiente, permitiendo subir de nivel y desbloquear rasgos específicos para ese batallón.
+*   **Evolución por Supervivencia:** Los ejércitos veteranos desarrollan resistencias y habilidades especiales (ej. mayor velocidad en barro, mayor resistencia al ácido) que los distinguen de las tropas recién reclutadas.
+*   **Regla de Muerte Permanente (Permadeath):** La aniquilación de un ejército en un mapa RTS conlleva la eliminación definitiva de la ficha en el tablero estratégico. El jugador pierde todos los niveles y mutaciones acumuladas en ese batallón, obligándolo a generar un nuevo ejército de nivel 1 desde su capital.
+
+### 4. Dinámica de Guerra y Asimilación Genética
+La campaña es una carrera de 6 bandos donde la eliminación de competidores fortalece a los supervivientes.
+
+*   **Conflictos Multi-Bando:** Las facciones de la IA avanzan de forma independiente hacia el centro. El jugador debe decidir si intercepta a sus rivales para frenar su avance o si acelera su propia ruta hacia el objetivo.
+*   **Recompensas por Aniquilación:** Al capturar el último nodo de una facción enemiga y eliminarla del tablero, el jugador asimila parte de sus Puntos de Evolución acumulados.
+*   **Habilidades Consumibles:** La eliminación de un rival otorga una habilidad especial basada en el ADN de la facción derrotada. Estas habilidades son de uso limitado (objetos consumibles) y permiten activar ventajas críticas en batallas posteriores de alta dificultad.
+
+### 5. Resolución de Batallas y Diseño de Mapas
+El sistema de juego equilibra el diseño de niveles artesanal con la agilidad necesaria para una campaña de larga duración.
+
+*   **Mapas Hechos a Mano:** Cada territorio del tablero estratégico corresponde a un mapa RTS diseñado individualmente. Los niveles varían en disposición de nodos, eventos climáticos y presencia de amenazas ambientales, ofreciendo retos tácticos distintos en cada sector del parque.
+*   **Sistema de Auto-Resolver:** El tablero permite calcular el resultado de una batalla de forma matemática e instantánea. Esta opción está disponible exclusivamente para territorios que el jugador ya haya conquistado y superado manualmente en una ocasión anterior. El uso del auto-resolver conlleva un coste mayor de bajas en comparación con la ejecución manual perfecta.
+*   **Estrategia de Evitación:** El jugador puede observar las características del mapa RTS antes de atacar un territorio en el tablero. Los expertos pueden elegir rutas que eviten biomas peligrosos para su facción o buscar específicamente terrenos donde sus Enjambres Veteranos tengan ventaja táctica.
+
+
+
+
+# DOCUMENTO DE DISEÑO DE JUEGO (GDD)
+## PARTE 6A: Entorno, Clima y Evolución de Nodos
+
+### 1. Modificadores de Entorno y Geometría Cambiante
+El ecosistema microscópico actúa como un participante activo en cada escaramuza. El terreno de juego contiene elementos interactivos y dinámicos que alteran drásticamente la movilidad de los ejércitos mediante multiplicadores matemáticos y barreras físicas.
+
+*   **Zonas de Alteración de Velocidad:** Áreas topográficas delimitadas aplican multiplicadores directos al vector de movimiento de las tropas.
+    *   *Superficies Ralentizantes:* Los charcos de barro viscoso o restos de savia aplican un multiplicador del 0.5x a la velocidad base. Estas zonas funcionan como cuellos de botella naturales, ideales para posicionar defensas perimetrales y diezmar tropas enemigas atrapadas en el avance lento.
+    *   *Superficies Aceleradoras:* Los fragmentos de vidrio liso o plástico de un mantel de picnic aplican un multiplicador del 2.0x a la velocidad. Cruzar estas zonas permite ejecutar emboscadas fulminantes y flanqueos de alta velocidad.
+*   **Bloqueos de Ruta Intermitentes:** Elementos ambientales obstruyen los caminos logísticos de forma cíclica, obligando al jugador a sincronizar sus asaltos.
+    *   Una ramita movida por el viento funciona como un péndulo físico, cortando y liberando el paso en un sendero específico a intervalos rítmicos.
+    *   Un aspersor rotativo proyecta una barrera de agua infranqueable que se desplaza circularmente por el nivel, forzando la cancelación de rutas de autoflujo temporalmente.
+*   **Geometría Cambiante (Nodos Móviles):** Ciertos mapas RTS incorporan bases situadas sobre plataformas inestables, como una hoja flotando en la corriente de un charco o un trozo de corteza empujado por la brisa. Estas estructuras se desplazan continuamente por el nivel. La distancia relativa entre el nodo móvil y las bases estáticas cambia en tiempo real, alterando constantemente los tiempos de viaje de las tropas y exigiendo recálculos tácticos permanentes.
+
+### 2. Visibilidad y Clima Dinámico
+El control de la información y la adaptación a eventos catastróficos son pilares de la supervivencia en el micro-mundo.
+
+*   **Niebla de Guerra Estricta:** La percepción visual del jugador está severamente restringida por elementos del entorno como sombras proyectadas por hojas gigantes o parches de césped denso. El jugador posee visión clara exclusivamente dentro del radio de influencia de los nodos bajo su control y en un pequeño perímetro alrededor de sus tropas en tránsito. Descubrir la topografía completa, ubicar las bases enemigas y detectar amenazas ocultas requiere el envío táctico de pequeños destacamentos de exploración.
+*   **Eventos Climáticos Telegrafiados:** Peligros ambientales de escala masiva impactan la partida en tiempo real, exigiendo respuestas inmediatas.
+    *   *La Gota de Agua:* Impacta en zonas circulares específicas. Lava y elimina instantáneamente a todas las tropas que se encuentren dentro de su radio de efecto al momento del impacto.
+    *   *La Lupa:* Concentra un haz de luz solar mortal que barre y calcina líneas enteras de terreno, desintegrando cualquier ejército en su camino.
+    *   *Sistema de Alerta:* Ambos eventos emiten advertencias visuales inconfundibles varios segundos antes de su detonación. Sombras crecientes delimitan la zona de impacto de la gota, y halos de luz intensos marcan la trayectoria de la lupa. Estas señales otorgan al jugador una ventana de tiempo estricta para evacuar zonas comprometidas o cancelar flujos logísticos.
+
+### 3. Sistema de Evolución de Nodos (Menú Radial)
+La progresión territorial y la especialización militar se gestionan a través de un sistema de evolución directo e intuitivo. Este sistema contextualiza la toma de decisiones en el propio campo de batalla.
+
+*   **Mecánica Base de Conquista:** La captura exitosa de un hueco o nodo neutral lo transforma inmediatamente en un Hormiguero Básico. Este nodo inicia la producción estándar de tropas de la facción correspondiente.
+*   **Interacción de Mejora:** Al hacer clic sobre un Hormiguero Básico bajo control propio, se despliega un Menú Radial en la interfaz. Este menú presenta tres vías de evolución distintas.
+*   **Costo de Evolución:** Seleccionar una mejora consume una cantidad específica de las tropas almacenadas actualmente en ese nodo. Diferentes evoluciones poseen costos variables dependientes de su impacto táctico y del momento de la campaña en el que se encuentren desbloqueadas.
+*   **Vías de Especialización (Las 3 Ramas):**
+    *   **Rama 1: Tronco Espinoso (Defensa Estática).** Transforma la estructura en un baluarte defensivo. Genera un perímetro de daño pasivo que diezma las tropas enemigas invasoras antes de que inicien el cálculo matemático de conquista del nodo. Las tropas aliadas transitan por este perímetro con total inmunidad.
+    *   **Rama 2: Nido de Artillería (Control de Área).** Convierte el nodo en una plataforma ofensiva de largo alcance. Establece una zona circular de amenaza masiva alrededor de la estructura. El nido dispara automáticamente ráfagas de ácido a cualquier batallón enemigo que cruce su radio de acción, independientemente de si el enemigo está atacando ese nodo o simplemente transitando hacia otro objetivo.
+    *   **Rama 3: Nido de Tanques (Ruptura de Asedio).** Altera biológicamente la producción del nodo para generar tropas de élite gigantes. Estas unidades colosales poseen resistencias innatas contra el daño pasivo del ácido y las espinas. En el cálculo de colisiones y conquista, cada unidad tanque posee el valor matemático exacto de 3 unidades estándar. Su función primordial es liderar cargas frontales para quebrar líneas defensivas fuertemente atrincheradas.
+    
+
+
+
+# DOCUMENTO DE DISEÑO DE JUEGO (GDD)
+## PARTE 6B: Facciones Asimétricas y Curva de Dificultad
+
+### 1. Las 6 Facciones Base de Hormigas (Dificultad de Campaña)
+La elección de la colonia al inicio de la campaña determina directamente el nivel de dificultad general del juego. Esta dificultad surge de la combinación entre las ventajas biológicas de la especie, su posición inicial en el Tablero Estratégico y la agresividad del entorno que la rodea.
+
+*   **Hormigas Carpinteras (Dificultad: Muy Fácil)**
+    *   *Habilidad Biológica:* Poseen un descuento permanente del 10% en el costo de tropas al utilizar el Menú Radial para evolucionar nodos (Troncos Espinosos, Artillería o Tanques). Facilita la experimentación y el establecimiento de defensas tempranas.
+    *   *Contexto Estratégico:* Inician la campaña en una esquina remota y aislada del Tablero Estratégico. Cuentan con un único frente fronterizo, limitando la exposición a ataques sorpresivos.
+
+*   **Hormigas Negras (Dificultad: Fácil)**
+    *   *Habilidad Biológica:* Reducen un 20% la inversión de tropas inicial requerida para establecer Túneles Logísticos (rutas de autoflujo). Optimizan la creación de redes de refuerzo automatizadas desde las primeras etapas.
+    *   *Contexto Estratégico:* Su posición de inicio es periférica y geográficamente segura, permitiendo una expansión metódica hacia los anillos interiores.
+
+*   **Hormigas Tejedoras (Dificultad: Normal)**
+    *   *Habilidad Biológica:* Cuentan con un multiplicador del +10% aplicado a su velocidad de movimiento base en absolutamente todos los biomas y terrenos del juego.
+    *   *Contexto Estratégico:* Su ubicación en el tablero las expone al contacto directo con dos facciones rivales desde los primeros turnos, exigiendo un dominio equilibrado entre las tácticas de ataque y defensa.
+
+*   **Hormigas Cortadoras de Hojas (Dificultad: Difícil)**
+    *   *Habilidad Biológica:* Presentan una tasa de generación de tropas incrementada en un 30% al controlar Hormigueros Enriquecidos (Fuentes de Comida). Sus unidades individuales poseen una fragilidad matemática mayor, requiriendo superioridad numérica absoluta para asegurar victorias en el desgaste frente a tropas estándar.
+    *   *Contexto Estratégico:* Comienzan la campaña en un sector topográfico con escasez de recursos iniciales, fuertemente custodiado por entidades de la Amenaza B (Depredadores).
+
+*   **Hormigas de Fuego (Dificultad: Muy Difícil)**
+    *   *Habilidad Biológica:* Aplican el estado alterado de "Incendio" directamente sobre la estructura de los nodos enemigos asaltados. El nodo afectado pierde tropas aliadas gradualmente durante los 5 segundos posteriores al impacto, promoviendo tácticas de asalto y retirada. Sufren una penalización a su velocidad de movimiento general, acentuada en terrenos geográficamente complejos.
+    *   *Contexto Estratégico:* Inician encajonadas entre tres frentes hostiles fuertemente agresivos, forzando un estilo de juego hiper-ofensivo para ganar espacio vital.
+
+*   **Hormigas Legionarias o Bala (Dificultad: Infernal)**
+    *   *Habilidad Biológica:* Cuentan con el rasgo de "Vampirismo Táctico". Generan instantáneamente 1 tropa aliada directamente en el frente de batalla por cada 3 unidades enemigas eliminadas durante el combate matemático. Su subsistencia y crecimiento dependen estrictamente del consumo de las hordas rivales.
+    *   *Contexto Estratégico:* Ostentan la posición central más castigada y expuesta de todo el Tablero Estratégico. Las cinco facciones rivales convergen hacia su territorio y las hostigan mediante ataques coordinados desde el Turno 1.
+
+### 2. Facciones Premium (Expansión Comercial Asimétrica)
+Las especies de insectos ajenas a la familia de las hormigas se integran como contenido de expansión. Estas facciones incorporan reglas físicas y matemáticas disruptivas, alterando por completo la dinámica del mapa y requiriendo estrategias de contrarresto específicas.
+
+*   **Termitas (Modificación Topográfica)**
+    *   *Mecánica Exclusiva:* Habilidad de consumo ambiental. El jugador invierte cantidades específicas de tropas para devorar obstáculos físicos del mapa, como ramitas o paredes de tierra. Esta acción traza rutas directas y exclusivas en terrenos donde otras facciones están obligadas a realizar rodeos extensos. Ignoran completamente las penalizaciones visuales de la Niebla de Guerra.
+
+*   **Avispas (Supremacía Aérea)**
+    *   *Mecánica Exclusiva:* Capacidad de vuelo autónomo. Sus unidades surcan el mapa en líneas completamente rectas, superando obstáculos terrestres, bloqueos intermitentes y zonas de alteración de velocidad (barro, agua). Su tasa de reproducción es estrictamente fija y sumamente lenta. Carecen de la capacidad biológica para adquirir los multiplicadores de generación de las Fuentes de Comida, otorgando un valor táctico altísimo a cada unidad individual. Tambien aplican un estado alterado al nodo, "aguijon" que es mas fuerte que el incendio pero parecido en funcionamiento, solventando su bajo numero.
+
+*   **Arañas (Control de Área y Eclosión por Oleadas)**
+    *   *Mecánica Exclusiva:* Reproducción mediante ciclos de eclosión espaciados (Burst). El contador de tropas del nodo permanece estático durante ventanas de 30 a 40 segundos, culminando en la generación instantánea de un enjambre masivo. Depositan telarañas de forma pasiva sobre sus rutas de tránsito, creando zonas de ralentización topográfica permanentes para castigar la movilidad de los ejércitos rivales. Favorecen un estilo de juego de contención táctica hasta el momento de la eclosión.
+
+*   **Escarabajos (Asedio Acorazado Ininterrumpible)**
+    *   *Mecánica Exclusiva:* Despliegue de unidades de asalto colosales. Las tropas operan como entidades individuales fuertemente acorazadas con un proceso de captura de nodos único. Al ingresar a una base enemiga, el contador matemático de conquista se activa y se mantiene en progreso de forma constante e ininterrumpida, omitiendo las reglas de pausa por ataques de fuerzas defensoras. Exigen al jugador rival concentrar daño masivo (mediante Tanques o Nidos de Artillería) para destruir al escarabajo antes de la finalización de su largo ciclo de captura, o recurrir a la captura de las bases restantes por superioridad de velocidad.
+    
+
+
+
+# DOCUMENTO DE DISEÑO DE JUEGO (GDD)
+## PARTE 7: Modos de Juego, Multijugador y Ecosistema de la Comunidad
+
+### 1. Multijugador de Campaña (Sistema Sin Tiempos Muertos)
+La experiencia multijugador integrada en el Tablero Estratégico erradica los periodos de inactividad que caracterizan a los juegos de estrategia por turnos tradicionales. Ambos participantes mantienen un nivel de interacción constante mediante el sistema de "Cesión Táctica".
+
+*   **Campaña Versus (PvP Activo):** Dos jugadores compiten por alcanzar el centro del Tablero Estratégico. Cuando el Jugador 1 decide atacar un territorio neutral o un nodo controlado por la Inteligencia Artificial, el motor de juego transfiere inmediatamente el control absoluto de esa fuerza defensora de la IA al Jugador 2. El Jugador 2 utiliza los recursos y unidades de la máquina para intentar aniquilar el enjambre de su rival humano. Esta mecánica transforma cada escaramuza PvE rutinaria en un enfrentamiento táctico de alto riesgo.
+*   **Campaña Cooperativa (PvE Compartido):** Dos jugadores navegan el mapa estratégico como una alianza unificada contra las facciones de la IA. Al iniciar una batalla RTS para conquistar un nuevo territorio, el jugador atacante delega exactamente el 50% de sus nodos iniciales al jugador aliado. Ambos comandantes operan en el mismo mapa simultáneamente, coordinando flujos logísticos, dividiendo la micro-gestión de las purgas de parásitos y ejecutando asaltos de pinza sincronizados contra las bases enemigas.
+
+### 2. Modo Torneo (Entorno Competitivo Estricto)
+El juego cuenta con un ecosistema diseñado específicamente para el juego clasificado y los torneos de la comunidad. Un interruptor maestro en el vestíbulo de creación de partida aplica un conjunto de reglas inflexibles que suprimen cualquier variable de suerte.
+
+*   **Simetría Topográfica:** El motor generador anula los mapas asimétricos de la campaña y despliega arenas de combate perfectamente espejadas. Las distancias entre nodos, las zonas de alteración de velocidad y los túneles de mapa mantienen una equidad matemática absoluta para ambos competidores.
+*   **Supresión de Eventos Dinámicos:** El Modo Torneo desactiva la aparición de eventos climáticos aleatorios (Gota de Agua, Lupa). Asimismo, bloquea la intervención del Ecosistema Hostil, eliminando cualquier posibilidad de que una invasión sorpresa (Amenaza A) o un depredador errante (Amenaza B) interfiera en el resultado del combate.
+*   **Árbol de Habilidades Determinista:** El sistema Roguelike de Mutaciones Aleatorias Raras se sustituye por un árbol de habilidades fijo, visible y predecible desde el inicio de la partida. Los jugadores planifican sus mejoras a largo plazo y ejecutan estrategias de contra-armado (counter-builds) basándose exclusivamente en sus decisiones tácticas y su capacidad de anticipación.
+
+### 3. Contenido Generado por Usuarios (Arquitectura UGC)
+La escalabilidad del proyecto y su retención a largo plazo se fundamentan en otorgar a la comunidad herramientas de desarrollo nativas y ligeras, operativas desde el Día 1.
+
+*   **Editor Visual Integrado:** Una herramienta accesible desde el menú principal permite a los usuarios construir mapas RTS y tableros de campaña personalizados. El creador funciona mediante una interfaz de "Arrastrar y Soltar" (Drag & Drop). El usuario selecciona un lienzo de fondo de alta resolución, ubica los distintos tipos de nodos, define los valores iniciales de tropas y dibuja las zonas de alteración de velocidad o los túneles de mapa.
+*   **Gestión de Evoluciones Predefinidas:** El diseñador del mapa posee la autoridad para establecer nodos neutrales ya evolucionados (por ejemplo, un Nido de Artillería o un Tronco Espinoso abandonado) como puntos de interés clave, forzando a los jugadores a adaptar sus estrategias para capturar estas posiciones fortificadas.
+*   **Estructuración de Datos Ligeros (JSON):** El motor gráfico compila la totalidad del mapa personalizado en un archivo de texto estructurado en formato JSON. Esta arquitectura omite la necesidad de servidores de alojamiento masivos para el intercambio de niveles.
+*   **Distribución Comunitaria Fricción Cero:** Los creadores comparten sus mapas simplemente copiando y pegando cadenas de texto en foros, servidores de Discord o redes sociales. El cliente del juego de cualquier otro usuario interpreta este código JSON y ensambla el mapa jugable instantáneamente en su navegador o aplicación, consolidando un ecosistema de contenido infinito y autogestionado por la base de jugadores.
+
+
+
+
+# DOCUMENTO DE DISEÑO DE JUEGO (GDD)
+## PARTE 8: Arquitectura Técnica y Entorno de Desarrollo (Stack 2026)
+
+### 1. Entorno de Desarrollo Agent-First (Presupuesto $0)
+La construcción del proyecto se fundamenta en un flujo de trabajo asistido por Inteligencia Artificial, maximizando la eficiencia de un desarrollador en solitario sin requerir inversión de capital inicial.
+
+*   **Integración de Google Antigravity y Gemini 3:** El código fuente se estructura y genera utilizando entornos de desarrollo *Agent-First*. El desarrollador delega la creación de la lógica matemática compleja (como algoritmos de colisión, *pathfinding* de enjambres y cálculos de trigonometría para la rotación de elipsoides) directamente a los modelos de IA integrados en el IDE.
+*   **Modularidad de Código:** El proyecto mantiene una arquitectura de archivos estrictamente modular. Cada sistema (Gestor de Nodos, Motor de Enjambre, Interfaz de Usuario, Lógica de Campaña) reside en su propio módulo independiente. Esta separación garantiza que la IA pueda leer, analizar y modificar fragmentos específicos del código sin romper el ecosistema global de la aplicación.
+
+### 2. Motor Gráfico y Optimización de Rendimiento
+El apartado visual exige mover volúmenes masivos de entidades en pantalla. La selección de herramientas y paradigmas de renderizado garantiza una tasa estable de 60 fotogramas por segundo (FPS) en dispositivos móviles y navegadores de escritorio.
+
+*   **Framework de Renderizado (Phaser 4):** El proyecto emplea la versión más reciente de Phaser, optimizada nativamente para el manejo de miles de sprites y primitivas gráficas mediante WebGL y la API de Canvas de HTML5.
+*   **Renderizado de Primitivas:** El dibujo de las tropas prescinde totalmente del uso de elementos DOM (HTML/CSS). Cada unidad se dibuja directamente en el *Canvas* como un elipsoide sólido. El motor gráfico agrupa las llamadas de dibujado (Batch Rendering) por facción y color, reduciendo drásticamente la carga de la CPU y la GPU.
+*   **Game Loop y Físicas Ligeras:** La actualización de las posiciones de más de 5,000 unidades se ejecuta dentro del ciclo nativo `requestAnimationFrame`. El sistema reemplaza los costosos motores de físicas tradicionales (como Matter.js o Box2D) por cálculos matriciales y vectores de dirección personalizados, aplicando fórmulas de desplazamiento directo (Punto A hacia Punto B) y fuerzas de separación simples para mantener la forma orgánica del enjambre.
+
+### 3. Arquitectura de Datos y Persistencia (PWA)
+La aplicación opera como una *Progressive Web App* (PWA) con soporte total para ejecución *offline*, garantizando que el usuario mantenga su progreso en cualquier circunstancia.
+
+*   **Estructura de Datos JSON:** Toda la información estructural del juego reside en archivos de texto ligero. El diseño de los mapas, la configuración de la campaña, los atributos de las 6 facciones base y los parámetros de las especies premium se cargan a través de esquemas JSON estructurados.
+*   **Almacenamiento Local:** El progreso del Tablero Estratégico, el inventario de Enjambres Veteranos, las mutaciones desbloqueadas y los niveles creados en el Editor de Mapas se guardan directamente en el dispositivo del usuario utilizando `IndexedDB` y `LocalStorage`.
+*   **Sincronización en la Nube:** Al detectar conexión a internet y vinculación con tiendas oficiales (Steam Cloud, Google Play Games), la aplicación ejecuta una comprobación de versiones en segundo plano y respalda el archivo JSON de guardado, asegurando la continuidad de la partida entre múltiples dispositivos.
+
+### 4. Netcode y Multijugador P2P (Arquitectura Serverless)
+La infraestructura multijugador implementa un sistema robusto que facilita el juego en red fluido sin incurrir en costos de mantenimiento de servidores dedicados.
+
+*   **Conexiones WebRTC:** El intercambio de datos entre los jugadores opera mediante el protocolo WebRTC. Esto establece una conexión *Peer-to-Peer* (P2P) directa entre el navegador del Jugador 1 y el navegador del Jugador 2, garantizando la latencia más baja posible para las partidas cooperativas y competitivas.
+*   **Sincronización Lockstep Determinista:** La arquitectura de red transmite exclusivamente las acciones (inputs) del jugador, acompañadas de su marca de tiempo exacta (Tick). El sistema envía paquetes de datos minúsculos del tipo: *"En el Tick 450, el Jugador 1 ordenó enviar el 50% de las tropas del Nodo A hacia el Nodo B"*. 
+*   **Simulación Idéntica:** Ambos clientes (ordenadores) ejecutan el motor matemático del juego de forma estrictamente determinista. Al recibir los mismos inputs en los mismos *ticks*, ambas máquinas calculan y renderizan la posición exacta de las 5,000 tropas localmente de forma idéntica, manteniendo la sincronización perfecta de la partida.
+*   **Signaling Server Gratuito:** El emparejamiento inicial para que las dos computadoras se encuentren en internet se realiza mediante un servidor de señalización básico alojado en capas gratuitas (Firebase o Render). Una vez completado el protocolo de enlace (*handshake*), el servidor se aparta y los jugadores continúan comunicándose directamente por la ruta P2P.

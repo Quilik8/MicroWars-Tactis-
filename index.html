@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MicroWars: Swarm Tactics</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- PixiJS v8 via CDN import map — sin instalación requerida -->
+    <script type="importmap">
+    {
+        "imports": {
+            "pixi.js": "https://cdn.jsdelivr.net/npm/pixi.js@8.9.1/dist/pixi.mjs"
+        }
+    }
+    </script>
+
+    <script type="module" src="main.js"></script>
+</head>
+
+<body>
+    <button id="pauseBtn">⏸ Pausa</button>
+
+    <!-- UI Overlay (Menús Fijos) -->
+    <div id="uiLayer">
+        <!-- Menú Principal -->
+        <div id="mainMenu" class="screen active">
+            <h1>MicroWars</h1>
+            <h2>Tácticas de Enjambre</h2>
+            <button id="btnPlay" class="primary-btn">INICIAR CAMPAÑA</button>
+            <button id="btnLevels" class="secondary-btn">SELECCIONAR NIVEL</button>
+        </div>
+
+        <!-- Pantalla de Selección de Nivel -->
+        <div id="levelSelection" class="screen hidden">
+            <h1>SELECCIONAR ESCARAMUZA</h1>
+            <div id="levelGrid" class="level-grid">
+                <!-- Se poblará dinámicamente desde main.js -->
+            </div>
+            <button id="btnBackToMenu" class="secondary-btn" style="margin-top: 20px;">VOLVER AL MENÚ</button>
+        </div>
+
+        <!-- Pantalla de Introducción de Nivel (Tutorial) -->
+        <div id="levelIntro" class="screen hidden"
+            style="background: rgba(10, 10, 12, 0.7); pointer-events: auto; cursor: pointer;">
+            <h1 id="introTitle">Nivel 1</h1>
+            <h2 id="introDesc" style="color: #fff; max-width: 600px; text-align: center; line-height: 1.5;">Descripción
+                del nivel</h2>
+            <p style="color: #aaa; margin-top: 20px; font-family: monospace; animation: pulse 1.5s infinite;">(Haz Clic
+                en cualquier lado para continuar)</p>
+        </div>
+
+        <!-- Pantalla de Victoria -->
+        <div id="levelComplete" class="screen hidden">
+            <h1>¡VICTORIA!</h1>
+            <h2>El territorio es nuestro</h2>
+            <button id="btnNextLevel" class="primary-btn">SIGUIENTE NIVEL</button>
+            <button id="btnMenuFromWin" class="secondary-btn">VOLVER AL MENÚ</button>
+        </div>
+
+        <!-- Pantalla de Derrota -->
+        <div id="gameOver" class="screen hidden">
+            <h1>LA COLONIA HA CAYÓ</h1>
+            <h2>Nuestros números no fueron suficientes</h2>
+            <button id="btnRestart" class="primary-btn">REINTENTAR</button>
+            <button id="btnMenuFromLoss" class="secondary-btn">VOLVER AL MENÚ</button>
+        </div>
+    </div>
+    <!-- HUD de diagnóstico -->
+    <div id="hud">
+        <span id="hudFPS">FPS: --</span>
+        <span id="hudUnits">Unidades: 0</span>
+    </div>
+
+    <!-- Barra de porcentaje inferior -->
+    <div id="sendBar">
+        <span id="sendLabel">Enviar: <strong id="sendPct">50%</strong></span>
+        <input type="range" id="sendSlider" min="10" max="100" step="10" value="50">
+        <button id="btnZoomOut" class="hud-btn">- Zoom</button>
+        <button id="btnZoomIn" class="hud-btn">+ Zoom</button>
+        <span class="hint">Túnel: arrastrar | Retorno: Clic derecho</span>
+        <button id="btnSurrender" class="hud-btn surrender-btn">RENDIRSE</button>
+    </div>
+
+    <!-- El canvas ya NO se define aquí, PixiJS crea el suyo propio optimizado para WebGL -->
+    <div id="gameContainer"></div>
+
+    <!-- MENÚ RADIAL DE EVOLUCIÓN (Estilo Kingdom Rush) -->
+    <div id="evolutionMenu" class="evolution-menu hidden">
+        <button class="evo-btn" data-evo="espinoso" title="Tronco Espinoso (30)">🌵</button>
+        <button class="evo-btn" data-evo="artilleria" title="Artillería (40)">🔫</button>
+        <button class="evo-btn" data-evo="tanque" title="Tanques (35)">🛡️</button>
+        <button class="evo-btn cancel" data-evo="cancel" title="Cancelar">✕</button>
+    </div>
+</body>
+
+</html>

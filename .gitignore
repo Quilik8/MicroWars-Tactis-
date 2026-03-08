@@ -1,0 +1,14 @@
+# OS generated files
+Thumbs.db
+Desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+
+# Temp files
+tmp/
+*.log
+
+# Project specific ignores
+# (Add any large assets or sensitive data if applicable)

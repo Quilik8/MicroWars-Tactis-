@@ -1,0 +1,86 @@
+
+
+
+# MAPA DEL PLAN DE EJECUCIÓN (HOJA DE RUTA TÉCNICA)
+## FASE 1: Motor Gráfico y Física de Enjambre (Semilla Técnica)
+Esta fase establece los cimientos de renderizado y rendimiento. El objetivo es configurar el entorno local y programar la lógica matemática pura del movimiento masivo, garantizando 60 FPS con miles de unidades antes de introducir cualquier regla de juego.
+
+*   **Configuración del Entorno de Desarrollo ($0 Presupuesto):**
+    *   Inicialización de un proyecto web estándar (HTML5, CSS ligero y JavaScript puro/Módulos ES6).
+    *   Integración de la librería PixiJS v8 (WebGL) optimizada para renderizado WebGL con *fallback* a Canvas.
+    *   Preparación del entorno PWA mediante la creación del archivo `manifest.json` y el `Service Worker` básico para permitir el almacenamiento en caché y la ejecución *offline*.
+*   **Renderizado Masivo de Entidades:**
+    *   Programación de la función de dibujado utilizando primitivas geométricas (`ctx.ellipse`).
+    *   Implementación de *Batch Rendering* para agrupar el dibujado de elipsoides por color (facción), reduciendo las llamadas a la GPU.
+*   **Lógica Vectorial y Orientación:**
+    *   Cálculo de trayectorias mediante vectores directos desde una coordenada de origen (Punto A) hacia un destino (Punto B).
+    *   Aplicación de trigonometría básica (`Math.atan2`) para rotar el elipsoide dinámicamente en cada fotograma, asegurando que la punta geométrica apunte exactamente a la dirección del movimiento.
+*   **Comportamiento de Enjambre (Swarming):**
+    *   Programación de algoritmos de separación ligera (fuerzas de repulsión mínimas entre unidades aliadas). Esto genera una nube orgánica que se expande lateralmente al avanzar, cubriendo área visual y evitando la formación de líneas rectas artificiales.
+
+## FASE 2: El Bucle RTS y la Interfaz (El MVP Táctico)
+En esta etapa se introducen las mecánicas de interacción del jugador, el control de la economía de tropas y la resolución de combates matemáticos. Se valida que el ciclo de ordenar tropas y conquistar territorios sea funcional.
+
+*   **Estructuración de Nodos Base:**
+    *   Programación del renderizado de estructuras circulares estáticas en el Canvas, representando el Hormiguero Básico y el Hormiguero Enriquecido (Fuente de Comida).
+    *   Implementación de tasas de regeneración matemática en segundo plano mediante temporizadores (`setInterval` o variables asociadas al `Tick` del motor), incrementando la masa de tropas invisiblemente.
+*   **Interfaz de Comando y Gestos:**
+    *   Creación de la barra inferior (Slider) en el DOM o directamente en el Canvas, vinculando su valor numérico a una variable global de porcentaje (10% - 100%).
+    *   Programación del detector de eventos de ratón/pantalla táctil para habilitar el gesto de *Drag & Drop* (Arrastrar y Soltar) desde un nodo propio hacia cualquier otro punto de interés.
+*   **Resolución de Colisiones y Conquista:**
+    *   Detección de superposición geométrica entre el elipsoide atacante y el radio del nodo objetivo.
+    *   Ejecución de la matemática de desgaste: la llegada de una unidad enemiga resta un punto al valor interno del nodo. Al alcanzar el valor cero, el nodo cambia su variable de pertenencia a la facción atacante y actualiza su color.
+*   **Inteligencia Artificial de Escaramuza (Nivel 1):**
+    *   Programación de una máquina de estados finitos (FSM) muy básica para la IA enemiga.
+    *   La IA evalúa su número de tropas y lanza asaltos aleatorios o dirigidos al nodo neutral más cercano cuando sus números superan un umbral predefinido.
+
+## FASE 3: Sistemas Avanzados y Evolución
+Se programa la especialización táctica, las herramientas de automatización logística y la mecánica de sigilo. El juego adquiere su identidad mecánica definitiva.
+
+*   **Menú Radial y Evolución de Nodos:**
+    *   Implementación de un detector de clic sobre nodos conquistados para desplegar una interfaz gráfica circular (Menú Radial).
+    *   Programación del sistema de cobro: seleccionar una opción resta la cantidad requerida del valor interno de tropas del nodo.
+    *   **Tronco Espinoso:** Adición de un radio exterior visible que aplica daño pasivo y matemático a los elipsoides enemigos que lo atraviesan.
+    *   **Nido de Artillería:** Programación de un escáner de radio amplio que detecta elipsoides enemigos y genera proyectiles de ácido en movimiento hacia sus coordenadas con daño de área.
+    *   **Nido de Tanques:** Modificación de la función de generación para instanciar elipsoides de doble tamaño, asignándoles una variable de peso igual a 3 para la fase de colisión.
+*   **Sistemas de Tránsito (Túneles):**
+    *   **Huecos de Mapa:** Creación de nodos que teletransportan elipsoides instantáneamente a coordenadas vinculadas en el archivo JSON.
+    *   **Autoflujo Logístico:** Programación de una directiva permanente que lee el porcentaje del Slider y genera envíos constantes en cada ciclo del motor hacia un nodo destino. Inclusión de la función de cancelación/inversión al hacer clic en el trazado visual del túnel.
+*   **Infiltración y Purga (Sigilo):**
+    *   Programación del envío de unidades con la bandera `invisible` activada.
+    *   Infección: Modificación de la tasa de producción del nodo objetivo para generar unidades zombis en variables ocultas.
+    *   Señal visual: Activación de una interpolación de color (parpadeo verdoso) en el nodo infectado.
+    *   Detector de **Doble Clic** en el nodo propio para ejecutar la resta matemática 1:1 entre tropas sanas e infectadas de manera instantánea.
+
+## FASE 4: El Tablero Estratégico y la Persistencia (Metajuego)
+Construcción de la capa de macro-gestión, enlazando las escaramuzas aisladas en una campaña continua de supervivencia y conquista.
+
+*   **Arquitectura del Tablero Concéntrico:**
+    *   Diseño de un esquema JSON maestro que contiene las coordenadas, conexiones y anillos del mapa estratégico.
+    *   Desarrollo de una interfaz de tablero donde el jugador mueve fichas de ejército entre territorios interconectados.
+    *   Asignación de las posiciones de inicio para las 6 Facciones Base de hormigas y programación de sus modificadores matemáticos (descuentos, velocidad, daño de incendio).
+*   **Persistencia y Enjambres Veteranos:**
+    *   Integración de la API `IndexedDB` para guardar el progreso del jugador en formato JSON local.
+    *   Programación de la lógica de experiencia (XP) para los ejércitos, habilitando la selección de mutaciones pasivas al subir de nivel.
+    *   Activación del disparador de *Permadeath*: eliminación de la variable del ejército en el archivo de guardado al perder todos los nodos en la fase RTS.
+*   **Auto-Resolver y Transiciones:**
+    *   Implementación de una fórmula matemática que evalúa el tamaño del ejército y las mutaciones contra la defensa de un nodo estratégico previamente conquistado, generando un resultado de victoria con penalización de bajas calculada.
+    *   Programación del paso de variables entre escenas: transferencia de datos desde el estado del Tablero Estratégico hacia la inicialización del mapa RTS correspondiente.
+
+## FASE 5: Ecosistema Vivo, UGC y Multijugador
+Se culmina el desarrollo integrando los elementos dinámicos del entorno, las herramientas de comunidad y la arquitectura de red P2P.
+
+*   **Entorno Dinámico y Amenazas:**
+    *   Programación de rectángulos y polígonos de colisión invisible que alteran los vectores de velocidad (Zonas Lentas y Rápidas) al ser atravesados por elipsoides.
+    *   Implementación de temporizadores de advertencia visual y funciones de destrucción en área masiva para los Eventos Climáticos (Gota de Agua, Lupa).
+    *   Activación de la Niebla de Guerra ocultando elementos fuera del radio calculado de visión del jugador.
+    *   Instanciación programada de la Invasión Sorpresa (Amenaza A) y la lógica defensiva de los Depredadores Jefes (Amenaza B).
+*   **Herramienta de Creador de Mapas (UGC):**
+    *   Desarrollo de una interfaz visual de usuario que permite arrastrar íconos de nodos y herramientas de terreno sobre un lienzo en blanco.
+    *   Programación del compilador que lee las coordenadas y tipos de elementos en pantalla, convirtiéndolos en una cadena de texto JSON para su exportación e importación mediante el portapapeles del sistema operativo.
+*   **Arquitectura WebRTC y Multijugador Lockstep:**
+    *   Integración de librerías ligeras de WebRTC para navegadores.
+    *   Configuración de un servidor de señalización (*Signaling Server*) básico en la nube para la resolución de direcciones IP y el emparejamiento.
+    *   Sincronización del Game Loop: Programación de un sistema que empaqueta las acciones de la interfaz del jugador (ej. orden de Drag & Drop) junto a un número de *Tick* del motor.
+    *   Transmisión exclusiva de estos paquetes ligeros a través de la conexión P2P, garantizando que ambos clientes ejecuten el cálculo matemático simultáneamente sin necesidad de un servidor dedicado.
+    *   Implementación del Modo Torneo, bloqueando la lectura de funciones aleatorias (`Math.random()`) y forzando la carga de mapas simétricos.
