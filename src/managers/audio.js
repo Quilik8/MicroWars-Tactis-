@@ -6,26 +6,31 @@
  */
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
-const actx = new AudioContext();
+let actx = null;
+let masterGain = null;
 
-// ── Nodo maestro de volumen ──
-const masterGain = actx.createGain();
-masterGain.gain.value = 1.0;
-masterGain.connect(actx.destination);
+function ensureAudio() {
+    if (!actx) {
+        actx = new AudioContext();
+        masterGain = actx.createGain();
+        masterGain.gain.value = 1.0;
+        masterGain.connect(actx.destination);
 
-// Reanudar contexto en la primera interacción (Regla de navegadores moderna)
-const resumeOnInteraction = () => {
-    if (actx.state === 'suspended') actx.resume();
-    window.removeEventListener('click', resumeOnInteraction);
-    window.removeEventListener('touchstart', resumeOnInteraction);
-};
-window.addEventListener('click', resumeOnInteraction);
-window.addEventListener('touchstart', resumeOnInteraction);
+        const resumeOnInteraction = () => {
+            if (actx && actx.state === 'suspended') actx.resume();
+            window.removeEventListener('click', resumeOnInteraction);
+            window.removeEventListener('touchstart', resumeOnInteraction);
+        };
+        window.addEventListener('click', resumeOnInteraction);
+        window.addEventListener('touchstart', resumeOnInteraction);
+    }
+}
 
 // ══════════════════════════════════════════════════
 // SFX (Efectos de Sonido Puntuales)
 // ══════════════════════════════════════════════════
 function playTone(freq, type, duration, vol, slideFreq) {
+    ensureAudio();
     if (actx.state === 'suspended') actx.resume();
     const osc = actx.createOscillator();
     const gain = actx.createGain();
@@ -80,6 +85,7 @@ export const SFX = {
 };
 
 export function resumeAudio() {
+    ensureAudio();
     if (actx.state === 'suspended') actx.resume();
 }
 
@@ -102,6 +108,7 @@ let musicNodes = [];
 let musicTimers = [];
 
 function createFilter(type, freq, Q) {
+    ensureAudio();
     const filter = actx.createBiquadFilter();
     filter.type = type;
     filter.frequency.value = freq;
@@ -110,6 +117,7 @@ function createFilter(type, freq, Q) {
 }
 
 function playMusicalNote(freq, type, duration, vol, filterFreq) {
+    ensureAudio();
     if (actx.state === 'suspended') return;
 
     const osc = actx.createOscillator();
@@ -145,6 +153,7 @@ function playMusicalNote(freq, type, duration, vol, filterFreq) {
  * @param {number} levelIndex Índice del nivel para variar parámetros
  */
 export function startMusic(theme = 'LEVEL', levelIndex = 0) {
+    ensureAudio();
     if (musicPlaying && currentTheme === theme) return;
     if (musicPlaying) stopMusic(); // Cambiar de tema
 
@@ -234,6 +243,7 @@ export function startMusic(theme = 'LEVEL', levelIndex = 0) {
 }
 
 export function stopMusic() {
+    ensureAudio();
     musicPlaying = false;
     currentTheme = null;
 

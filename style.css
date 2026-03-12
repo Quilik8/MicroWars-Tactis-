@@ -259,7 +259,7 @@ html {
 .secondary-btn:hover {
     color: #fff;
     border-color: #8ab4f8;
-    background: rgba(255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 /* ── Selector de Niveles Premium (Glassmorphism) ── */
@@ -493,14 +493,207 @@ html {
 .owner-player {
     color: #5dade2;
     text-transform: uppercase;
+    font-weight: bold;
 }
 
 .owner-enemy {
     color: #e74c3c;
     text-transform: uppercase;
+    font-weight: bold;
 }
 
 .owner-neutral {
     color: #95a5a6;
     text-transform: uppercase;
+}
+
+/* ══════════════════════════════════════════
+   CAMPAIGN SCREEN ENHANCEMENTS
+   ══════════════════════════════════════════ */
+#campaignScreen {
+    background: transparent !important;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 60px;
+    width: 100vw;
+    height: 100vh;
+}
+
+#campaignScreen * {
+    pointer-events: auto;
+}
+
+.campaign-title {
+    font-size: 3.2rem;
+    letter-spacing: 0.8rem;
+    color: #fff;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, #fff 0%, #aaa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+    pointer-events: none;
+}
+
+#mapContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    z-index: -1;
+}
+
+.campaign-footer {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.campaign-footer .secondary-btn {
+    pointer-events: auto;
+    padding: 12px 40px;
+    background: rgba(10, 10, 12, 0.9);
+    border: 1px solid #444;
+    transition: all 0.3s ease;
+}
+
+.campaign-footer .secondary-btn:hover {
+    border-color: #777;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+/* ── Selección de Facciones ── */
+.faction-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    width: 92%;
+    max-width: 1200px;
+    margin-top: 20px;
+    pointer-events: all;
+    perspective: 1000px;
+}
+
+.faction-card {
+    background: rgba(20, 20, 25, 0.8);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+}
+
+.faction-card:hover:not(.premium-locked) {
+    transform: translateY(-10px) rotateX(5deg);
+    border-color: var(--f-color);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 30px var(--f-color-alpha);
+    background: rgba(30, 30, 45, 0.95);
+}
+
+.faction-card.premium-locked {
+    cursor: not-allowed;
+    filter: grayscale(0.6) brightness(0.7);
+    border-color: rgba(241, 196, 15, 0.3);
+}
+
+.faction-card.premium-locked::after {
+    content: "🔒 PREMIUM";
+    position: absolute;
+    top: 20px;
+    right: -30px;
+    transform: rotate(45deg);
+    background: #f1c40f;
+    color: #000;
+    font-weight: bold;
+    padding: 5px 40px;
+    font-size: 0.7rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.faction-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+    box-shadow: 0 0 20px var(--f-color-alpha);
+    border: 3px solid #fff;
+}
+
+.faction-card h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+}
+
+.faction-trait {
+    font-size: 0.8rem;
+    color: var(--f-color);
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.faction-desc {
+    font-size: 0.85rem;
+    color: #bbb;
+    line-height: 1.5;
+    margin-bottom: 25px;
+    flex-grow: 1;
+}
+
+.difficulty-badge {
+    padding: 4px 15px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.diff-facil {
+    color: #2ecc71;
+    border-color: #2ecc7133;
+}
+
+.diff-normal {
+    color: #3498db;
+    border-color: #3498db33;
+}
+
+.diff-dificil {
+    color: #e67e22;
+    border-color: #e67e2233;
+}
+
+.diff-experto {
+    color: #e74c3c;
+    border-color: #e74c3c33;
+}
+
+.diff-maestro {
+    color: #9b59b6;
+    border-color: #9b59b633;
+}
+
+.diff-leyenda {
+    color: #f1c40f;
+    border-color: #f1c40f33;
 }

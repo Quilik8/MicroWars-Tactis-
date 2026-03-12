@@ -1,5 +1,5 @@
-import { LEVELS } from './levels.js';
-import { Node } from './node.js';
+import { LEVELS } from '../data/levels.js';
+import { Node } from '../entities/node.js';
 
 export class LevelManager {
     constructor(game, world, ui, sfx, music) {
@@ -7,10 +7,14 @@ export class LevelManager {
         this.world = world;
         this.ui = ui;
         this.sfx = sfx;
-        this.startMusic = music.start; // reference to startMusic
+        this.startMusic = music.start;
 
         this.currentLevelIndex = 0;
         this.unlockedLevels = 1;
+
+        // FIX #18: gracia para evitar race condition de victoria/derrota al cargar nivel
+        this._levelStartGrace = 0;
+        this._GRACE_DURATION = 1.5; // segundos hasta que se comprueba victoria
 
         this.loadProgress();
     }
@@ -31,11 +35,10 @@ export class LevelManager {
     loadLevel(index) {
         if (index >= LEVELS.length) index = 0;
         this.currentLevelIndex = index;
+        // FIX #18: reiniciar el contador de gracia al cargar nivel
+        this._levelStartGrace = 0;
 
-        // 1. Set state to PLAYING first (hides menus/intro)
         this.ui.setGameState('PLAYING');
-
-        // 2. Clear and reset camera
         this.world.clearLevel();
         if (this.ui.callbacks && this.ui.callbacks.onResetCamera) {
             this.ui.callbacks.onResetCamera();
@@ -53,14 +56,13 @@ export class LevelManager {
             this.world.createNodeGfx(n);
         }
 
-        // Populate nodes
         for (let i = 0; i < this.world.nodes.length; i++) {
             let n = this.world.nodes[i];
-            let cant = Math.floor(n.maxUnits * 0.5);
-            this.world.spawnUnitsAt(n, levelData.nodes[i].owner, cant);
+            let nData = levelData.nodes[i];
+            let cant = (nData.startUnits !== undefined) ? nData.startUnits : Math.floor(n.maxUnits * 0.4);
+            this.world.spawnUnitsAt(n, nData.owner, cant);
         }
 
-        // UI Intro
         const introTitle = document.getElementById('introTitle');
         const introDesc = document.getElementById('introDesc');
         const introScreen = document.getElementById('levelIntro');
@@ -84,7 +86,11 @@ export class LevelManager {
         if (this.startMusic) this.startMusic('LEVEL', index);
     }
 
-    checkVictory(playerNodes, enemyNodes, playerUnits, enemyUnits) {
+    checkVictory(dt, playerNodes, enemyNodes, playerUnits, enemyUnits) {
+        // FIX #18: no evaluar condiciones de victoria durante el período de gracia inicial
+        this._levelStartGrace += dt;
+        if (this._levelStartGrace < this._GRACE_DURATION) return null;
+
         if (playerNodes === 0 && playerUnits === 0) {
             this.ui.setGameState('GAMEOVER');
             return false;

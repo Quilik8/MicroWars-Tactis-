@@ -1,11 +1,13 @@
-import { Engine, PIXI } from './engine.js';
-import { UIManager } from './ui_manager.js';
-import { AIManager } from './ai_manager.js';
-import { WorldManager } from './world_manager.js';
-import { InputManager } from './input_manager.js';
-import { LevelManager } from './level_manager.js';
-import { SFX, resumeAudio, startMusic, stopMusic } from './audio.js';
-import { LEVELS } from './levels.js';
+import { Engine, PIXI } from './src/core/engine.js';
+import { UIManager } from './src/managers/ui_manager.js';
+import { AIManager } from './src/managers/ai_manager.js';
+import { WorldManager } from './src/managers/world_manager.js';
+import { InputManager } from './src/managers/input_manager.js';
+import { LevelManager } from './src/managers/level_manager.js';
+import { CampaignCore } from './src/campaign/campaign_core.js';
+import { SFX, resumeAudio, startMusic, stopMusic } from './src/managers/audio.js';
+import { FACTIONS } from './src/campaign/faction_data.js';
+import { LEVELS } from './src/data/levels.js';
 
 // ══════════════════════════════════════════════════════════════
 // CONFIGURACIÓN Y BOOTSTRAP
@@ -36,13 +38,26 @@ const ui = new UIManager({
     onSendPercentChange: (val) => input.setSendPercent(val),
     onRestartLevel: () => level.loadLevel(level.currentLevelIndex),
     onNextLevel: () => level.loadLevel(level.currentLevelIndex + 1),
-    onZoom: (factor) => input.doZoom(factor)
+    onZoom: (factor) => input.doZoom(factor),
+    onStartCampaign: () => campaign.start(),
+    onStopCampaign: () => campaign.stop(),
+    onPlayIntro: () => SFX.intro(),
+    onRenderFactions: () => {
+        ui.renderFactionSelection(FACTIONS, (selectedFaction) => {
+            campaign.setPlayerFaction(selectedFaction);
+            ui.setGameState('CAMPAIGN');
+        });
+    }
 });
 const world = new WorldManager(game, ui, CONFIG);
 
 const ai = new AIManager({ attackInterval: CONFIG.aiAttackInterval });
 const input = new InputManager(game, world, ui, SFX);
 const level = new LevelManager(game, world, ui, SFX, { start: startMusic });
+const campaign = new CampaignCore(game, ui);
+
+// Exponer para InputManager (Auditoría: Fallo de desacoplamiento temporal)
+window.campaign = campaign;
 
 // ══════════════════════════════════════════════════════════════
 // LÓGICA DE CONTROL GLOBAL
@@ -66,22 +81,26 @@ game.onUpdate = (dt) => {
 
     // 2. Lógica específica de partida activa
     if (ui.gameState === 'PLAYING' && !ui.isPaused) {
-        ai.update(dt, world.nodes, world.allUnits);
+        // IDs dinámicos basados en el modo (Campaña vs Skirmish)
+        const pId = campaign.isStarted ? (campaign.playerFaction?.id || 'player') : 'player';
+        const eId = 'enemy'; // Por ahora, la IA siempre es el bloque 'enemy' clásico
+
+        ai.update(dt, world.nodes, world.allUnits, eId, pId);
 
         // 3. Telemetría y HUD
         const fps = game.app ? Math.round(game.app.ticker.FPS) : 0;
         let pUnits = 0, pPower = 0, eUnits = 0, eNodes = 0, pNodes = 0;
 
         for (let n of world.nodes) {
-            if (n.owner === 'player') pNodes++;
-            else if (n.owner === 'enemy') eNodes++;
+            if (n.owner === pId) pNodes++;
+            else if (n.owner === eId) eNodes++;
         }
         for (let u of world.allUnits) {
             if (u.pendingRemoval) continue;
-            if (u.faction === 'player') {
+            if (u.faction === pId) {
                 pUnits++;
                 pPower += (u.power || 1);
-            } else if (u.faction === 'enemy') {
+            } else if (u.faction === eId) {
                 eUnits++;
             }
         }
@@ -89,7 +108,7 @@ game.onUpdate = (dt) => {
         ui.updateHUD(fps, pUnits, pPower);
 
         // 4. Condiciones de Victoria/Derrota
-        level.checkVictory(pNodes, eNodes, pUnits, eUnits);
+        level.checkVictory(dt, pNodes, eNodes, pUnits, eUnits);
     }
 };
 
@@ -105,6 +124,7 @@ window.addEventListener('load', async () => {
     await game.init();
     world.init(game.app);
     input.init();
+    campaign.init();
     ui.renderLevelGrid(LEVELS, level.unlockedLevels, (idx) => level.loadLevel(idx));
     ui.setGameState('MENU');
 });
@@ -112,7 +132,6 @@ window.addEventListener('load', async () => {
 // Desbloquear audio
 window.addEventListener('pointerdown', () => {
     resumeAudio();
-    SFX.intro();
 }, { once: true });
 
 

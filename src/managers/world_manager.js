@@ -1,7 +1,8 @@
-import { Unit } from './unit.js';
-import { Node } from './node.js';
-import { SpatialHashGrid } from './logic_grid.js';
-import { PIXI } from './engine.js';
+import { Unit } from '../entities/unit.js';
+import { Node } from '../entities/node.js';
+import { SpatialHashGrid } from '../core/logic_grid.js';
+import { PIXI } from '../core/engine.js';
+import { FACTIONS } from '../campaign/faction_data.js';
 
 export class WorldManager {
     constructor(game, ui, config) {
@@ -18,10 +19,19 @@ export class WorldManager {
         this.textures = {};
 
         this.combatInterval = config.combatInterval || 0.7;
+        // FIX #8: dirty flag para evitar redibujar túneles en cada frame
+        this._tunnelsDirty = true;
     }
 
     init(app) {
-        this.textures.player = this.makeTexture(app, 0x5dade2);
+        // Inicializar texturas para todas las facciones base y premium
+        FACTIONS.forEach(f => {
+            this.textures[f.id] = this.makeTexture(app, f.color);
+        });
+
+        // ── ESTÉTICA CLÁSICA PARA "NIVELES" ──
+        // (Azul Intenso y Rojo Sangre clásicos)
+        this.textures.player = this.makeTexture(app, 0x3498db);
         this.textures.enemy = this.makeTexture(app, 0xe74c3c);
         this.textures.neutral = this.makeTexture(app, 0x95a5a6);
 
@@ -53,11 +63,16 @@ export class WorldManager {
         g.bezierCurveTo(-3, 5.5, -11, 5.5, -11, 0);
         g.fill({ color });
         g.stroke({ color: 0x000000, alpha: 0.7, width: 1.2, alignment: 0 });
+
         return app.renderer.generateTexture(g);
     }
 
     attachSprite(unit) {
-        const tex = this.textures[unit.faction] || this.textures.neutral;
+        const tex = this.textures[unit.faction] || this.textures.player || this.textures.neutral;
+        if (!tex) {
+            console.warn("No texture found for faction:", unit.faction);
+            return;
+        }
         const sprite = new PIXI.Sprite(tex);
         sprite.anchor.set(0.5);
         sprite.x = unit.x;
@@ -118,11 +133,8 @@ export class WorldManager {
     }
 
     clearMenuAnts() {
-        for (let a of this.menuAnts) {
-            if (a.sprite) {
-                if (this.game.layerMenu) this.game.layerMenu.removeChild(a.sprite);
-                a.sprite.destroy();
-            }
+        if (this.game.layerMenu) {
+            this.game.layerMenu.removeChildren();
         }
         this.menuAnts = [];
     }
@@ -154,7 +166,7 @@ export class WorldManager {
     }
 
     update(dt, gameState, isPaused, SFX) {
-        if (gameState === 'MENU' || gameState === 'LEVELS') {
+        if (gameState === 'MENU') {
             this.updateMenuAnts(dt);
             return;
         }
@@ -189,29 +201,31 @@ export class WorldManager {
 
     updateNodeCounts() {
         for (let n of this.nodes) {
+            // Inicializar con 0 explícito para TODAS las facciones conocidas
+            // Esto previene 'undefined' que causa NaN en tooltip y otros calculos
             n.counts = { player: 0, enemy: 0, neutral: 0 };
             n.population = { player: 0, enemy: 0, neutral: 0 };
             n.power = { player: 0, enemy: 0, neutral: 0 };
         }
 
-        const CAPTURE_DIST_MULT = 4.5; // Capturar incluso si están orbitando lejos
+        const CAPTURE_DIST_MULT = 4.5;
 
         for (let u of this.allUnits) {
             if (u.pendingRemoval || !u.targetNode) continue;
 
             const node = u.targetNode;
             const p = u.power || 1;
+            const f = u.faction;
 
-            // Si la unidad está cerca de su destino o ya está orbitando, cuenta para ese destino
             const dx = u.x - node.x;
             const dy = u.y - node.y;
             const distSq = dx * dx + dy * dy;
             const captureRangeSq = (node.radius * CAPTURE_DIST_MULT) * (node.radius * CAPTURE_DIST_MULT);
 
             if (u.state === 'idle' || distSq < captureRangeSq) {
-                node.counts[u.faction]++;
-                node.population[u.faction] += p;
-                node.power[u.faction] += p;
+                node.counts[f] = (node.counts[f] || 0) + 1;
+                node.population[f] = (node.population[f] || 0) + p;
+                node.power[f] = (node.power[f] || 0) + p;
             }
         }
     }
@@ -250,7 +264,7 @@ export class WorldManager {
             } else {
                 this.neighbors.length = 0;
             }
-            u.updateForces(u.targetNode.x, u.targetNode.y, targetR, this.neighbors, this.allUnits);
+            u.updateForces(dt, u.targetNode.x, u.targetNode.y, targetR, this.neighbors, this.allUnits);
         }
 
         // Idle units (orbit)
@@ -301,12 +315,28 @@ export class WorldManager {
 
     drawTunnels() {
         if (!this.tunnelGraphics) return;
+
+        // FIX #8: Solo redibujar si hay túneles activos
+        let hasActiveTunnel = false;
+        for (let n of this.nodes) {
+            if (n.tunnelTo && n.tunnelTo.owner === n.owner) { hasActiveTunnel = true; break; }
+        }
+
+        // Si no hay túneles y el canvas ya está limpio, no hacer nada
+        if (!hasActiveTunnel && !this._tunnelsDirty) return;
+        if (!hasActiveTunnel) {
+            this.tunnelGraphics.clear();
+            this._tunnelsDirty = false;
+            return;
+        }
+
         this.tunnelGraphics.clear();
+        this._tunnelsDirty = false;
 
         const time = performance.now();
         for (let n of this.nodes) {
             if (n.tunnelTo && n.tunnelTo.owner === n.owner) {
-                const c = Node.COLORS[n.owner];
+                const c = Node.COLORS[n.owner] || Node.COLORS.neutral;
                 const x1 = n.x, y1 = n.y;
                 const x2 = n.tunnelTo.x, y2 = n.tunnelTo.y;
 
@@ -352,35 +382,44 @@ export class WorldManager {
         let node = this.nodes[nodeIdx];
         let prevOwner = node.owner;
         let p = node.power;
-        let pc = node.counts.player, ec = node.counts.enemy, nc = node.counts.neutral;
 
-        let factionsPresent = (pc > 0 ? 1 : 0) + (ec > 0 ? 1 : 0) + (nc > 0 ? 1 : 0);
+        const factionIds = Object.keys(node.counts).filter(f => node.counts[f] > 0);
 
-        if (factionsPresent > 1) {
+        if (factionIds.length > 1) {
             node.combatTimer += dt;
             if (node.combatTimer >= this.combatInterval) {
                 node.combatTimer = 0;
-                let playerAtk = p.player * 0.1;
-                let enemyAtk = p.enemy * 0.1;
-                let neutralAtk = p.neutral * 0.05;
-                if (p.player > 0) this.killNPower(node, 'player', enemyAtk + neutralAtk);
-                if (p.enemy > 0) this.killNPower(node, 'enemy', playerAtk + neutralAtk);
-                if (p.neutral > 0) this.killNPower(node, 'neutral', playerAtk + enemyAtk);
+
+                // Daño recíproco: cada facción recibe daño de todas las demás combinadas
+                for (let f of factionIds) {
+                    let totalDamage = 0;
+                    for (let otherF of factionIds) {
+                        if (f === otherF) continue;
+                        let atkStrength = (otherF === 'neutral') ? 0.05 : 0.1;
+                        totalDamage += (p[otherF] || 0) * atkStrength;
+                    }
+                    this.killNPower(node, f, totalDamage);
+                }
             }
         } else {
             node.combatTimer = 0;
         }
 
-        // Re-calculate after potential deaths (simplified for speed, actual re-calc in next frame)
-        if (pc > 0 && ec === 0 && nc === 0) node.owner = 'player';
-        else if (ec > 0 && pc === 0 && nc === 0) node.owner = 'enemy';
-        else if (nc > 0 && pc === 0 && ec === 0) node.owner = 'neutral';
+        // Determinar nuevo dueño basado en quién domina el nodo (exclusividad)
+        if (factionIds.length === 1) {
+            node.owner = factionIds[0];
+        } else if (factionIds.length === 0) {
+            // Se queda como estaba o neutral si todos murieron (simplificado)
+        }
 
         if (node.owner !== prevOwner) {
-            node.redraw();
+            // Actualizar visual del nodo con data de facción si no es classic
+            const factionData = FACTIONS.find(f => f.id === node.owner);
+            node.redraw(factionData);
+
             if (SFX) {
-                if (node.owner === 'player') SFX.capture();
-                else if (prevOwner === 'player') SFX.lost();
+                if (node.owner === 'player' || node.owner === 'carpinteras') SFX.capture();
+                else if (prevOwner === 'player' || prevOwner === 'carpinteras') SFX.lost();
             }
             for (let n of this.nodes) {
                 if (n.tunnelTo === node || n === node) n.tunnelTo = null;
@@ -443,11 +482,20 @@ export class WorldManager {
     }
 
     cleanupUnits() {
-        for (let i = this.allUnits.length - 1; i >= 0; i--) {
+        // BUGFIX #6: Array.splice() es O(n) por elemento → O(n²) total.
+        // Swap-and-pop es O(1): intercambia el elemento con el último y hace pop().
+        // Nota: el orden del array no importa para la simulación.
+        let i = this.allUnits.length - 1;
+        while (i >= 0) {
             if (this.allUnits[i].pendingRemoval) {
                 this.allUnits[i].destroy();
-                this.allUnits.splice(i, 1);
+                const last = this.allUnits.length - 1;
+                if (i !== last) {
+                    this.allUnits[i] = this.allUnits[last];
+                }
+                this.allUnits.pop();
             }
+            i--;
         }
     }
 
@@ -456,21 +504,16 @@ export class WorldManager {
     popAt(node, faction) { return node.population ? (node.population[faction] || 0) : 0; }
     powerAt(node, faction) { return node.power ? (node.power[faction] || 0) : 0; }
 
-    sendTroops(fromNode, toNode, percent) {
+    sendTroops(fromNode, toNode, percent, faction = 'player') {
         const CAPTURE_DIST = fromNode.radius * 4.5;
         const CAPTURE_SQ = CAPTURE_DIST * CAPTURE_DIST;
 
         let eligible = this.allUnits.filter(u => {
-            if (u.faction !== 'player' || u.pendingRemoval) return false;
-
-            // Si el objetivo es el nodo origen, es elegible
+            if (u.faction !== faction || u.pendingRemoval) return false;
             if (u.targetNode === fromNode) return true;
-
-            // O si está físicamente cerca del nodo origen (captura incluso si tiene túnel activo)
             const dx = u.x - fromNode.x;
             const dy = u.y - fromNode.y;
             if (dx * dx + dy * dy < CAPTURE_SQ) return true;
-
             return false;
         });
 
@@ -484,9 +527,9 @@ export class WorldManager {
         }
     }
 
-    recallToHome(targetNode) {
+    recallToHome(targetNode, faction = 'player') {
         for (let u of this.allUnits) {
-            if (u.faction === 'player' && u.targetNode === targetNode) {
+            if (u.faction === faction && u.targetNode === targetNode) {
                 if (u.homeNode && u.homeNode !== targetNode) {
                     u.targetNode = u.homeNode;
                     u.state = 'traveling';

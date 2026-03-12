@@ -46,13 +46,14 @@ export class Unit {
     }
 
     /**
+     * @param {number} dt  Tiempo transcurrido en segundos (delta time)
      * @param {number} targetX
      * @param {number} targetY
      * @param {number} nodeRadius
      * @param {Array}  neighborIds
      * @param {Array}  unitsList
      */
-    updateForces(targetX, targetY, nodeRadius, neighborIds, unitsList) {
+    updateForces(dt, targetX, targetY, nodeRadius, neighborIds, unitsList) {
         // Detectar cambio de nodo → reasignar posición personal
         if (targetX !== this._lastTargetX || targetY !== this._lastTargetY) {
             this.personalTheta = Math.random() * Math.PI * 2;
@@ -133,8 +134,12 @@ export class Unit {
 
         let tVx = desiredVx + sepVx;
         let tVy = desiredVy + sepVy;
-        this.vx = this.vx * 0.88 + tVx * 0.12;
-        this.vy = this.vy * 0.88 + tVy * 0.12;
+
+        // FÍSICA INDEPENDIENTE DE FPS:
+        // Usamos un factor de suavizado basado en dt (aprox 7.5 unidades de velocidad por segundo)
+        const lerpFactor = 1 - Math.exp(-7.5 * dt);
+        this.vx += (tVx - this.vx) * lerpFactor;
+        this.vy += (tVy - this.vy) * lerpFactor;
 
         if (this.vx !== 0 || this.vy !== 0) {
             this.angle = Math.atan2(this.vy, this.vx);

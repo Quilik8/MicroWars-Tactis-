@@ -60,6 +60,11 @@ export class Node {
         this.regenTimer = 0;
         this.combatTimer = 0;
 
+        // BUGFIX #7: timer para el flash visual (reemplaza setTimeout)
+        this.flashTimer = 0;
+        this.flashColor = 0xffffff; // color al que volver al terminar el flash
+        this.flashTargetColor = null; // null = sin flash activo
+
         // Gráficos PixiJS
         this.gfx = null;
     }
@@ -71,9 +76,9 @@ export class Node {
     };
 
     static COLORS = {
-        player: { fill: 0x1a5276, stroke: 0x3498db, glow: 0x3498db, alpha: 0.35 },
-        enemy: { fill: 0x6e2c21, stroke: 0xe74c3c, glow: 0xe74c3c, alpha: 0.35 },
-        neutral: { fill: 0x2c3e50, stroke: 0x7f8c8d, glow: 0x7f8c8d, alpha: 0.20 },
+        player: { fill: 0x2e86c1, stroke: 0x5dade2, glow: 0x3498db, alpha: 0.50 },
+        enemy: { fill: 0x922b21, stroke: 0xe74c3c, glow: 0xe74c3c, alpha: 0.50 },
+        neutral: { fill: 0x4d5656, stroke: 0x95a5a6, glow: 0x95a5a6, alpha: 0.35 },
     };
 
     static EVOLUTION_COLORS = {
@@ -89,63 +94,66 @@ export class Node {
     };
 
     /** Dibuja el nodo en su PIXI.Graphics — se llama cuando cambia estado */
-    redraw() {
+    redraw(factionData = null) {
         if (!this.gfx || this.gfx.destroyed) return;
-        const c = Node.COLORS[this.owner];
+
+        // 1. Determinar esquema de colores
+        const c = Node.COLORS[this.owner] || Node.COLORS.neutral;
+
+        let fill = factionData ? factionData.color : c.fill;
+        let stroke = factionData ? 0xffffff : c.stroke;
+        let alpha = factionData ? 0.45 : c.alpha;
+        let glow = factionData ? factionData.color : (c.glow || fill);
+
         const r = this.radius;
         const g = this.gfx;
-        const ev = this.evolution ? Node.EVOLUTION_COLORS[this.evolution] : null;
-
         g.clear();
 
-        // Halo exterior (glow suave)
+        // ── Capas de Renderizado ──
+
+        // A. Halo exterior (glow reactivo)
+        const ev = this.evolution ? Node.EVOLUTION_COLORS[this.evolution] : null;
         g.circle(this.x, this.y, r + 6);
-        g.stroke({ color: ev ? ev.accent : c.glow, alpha: 0.3, width: 10 });
+        g.stroke({ color: ev ? ev.accent : glow, alpha: 0.25, width: 8 });
 
-        // Relleno del nodo
+        // B. Cuerpo principal
         g.circle(this.x, this.y, r);
-        g.fill({ color: c.fill, alpha: c.alpha });
+        g.fill({ color: fill, alpha: alpha });
+        g.stroke({ color: stroke, alpha: 0.5, width: 2.5 });
 
-        // ── Visual diferenciado por evolución ──
+        // ── Evoluciones Visuales ──
         if (this.evolution === 'espinoso') {
-            // Anillo verde espinoso (Espinas mucho más finas y abundantes)
-            const numSpikes = 30;
+            const numSpikes = 26;
             for (let i = 0; i < numSpikes; i++) {
                 const ang = (i / numSpikes) * Math.PI * 2;
                 const rx = this.x + Math.cos(ang) * (r + 4);
                 const ry = this.y + Math.sin(ang) * (r + 4);
-                const rx2 = this.x + Math.cos(ang) * (r + 22);
-                const ry2 = this.y + Math.sin(ang) * (r + 22);
-                g.moveTo(rx, ry);
-                g.lineTo(rx2, ry2);
+                const rx2 = this.x + Math.cos(ang) * (r + 18);
+                const ry2 = this.y + Math.sin(ang) * (r + 18);
+                g.moveTo(rx, ry).lineTo(rx2, ry2);
             }
-            g.stroke({ color: 0x27ae60, alpha: 0.9, width: 1.2 });
+            g.stroke({ color: 0x27ae60, alpha: 0.8, width: 1.5 });
         } else if (this.evolution === 'artilleria') {
-            // Cruz dorada
-            g.moveTo(this.x - r * 0.5, this.y);
-            g.lineTo(this.x + r * 0.5, this.y);
-            g.moveTo(this.x, this.y - r * 0.5);
-            g.lineTo(this.x, this.y + r * 0.5);
-            g.stroke({ color: 0xf39c12, alpha: 0.9, width: 3 });
-            // Círculo de rango (tenue)
+            g.moveTo(this.x - r * 0.4, this.y).lineTo(this.x + r * 0.4, this.y);
+            g.moveTo(this.x, this.y - r * 0.4).lineTo(this.x, this.y + r * 0.4);
+            g.stroke({ color: 0xf39c12, alpha: 0.9, width: 4 });
             g.circle(this.x, this.y, this.artilleryRange);
-            g.stroke({ color: 0xf39c12, alpha: 0.08, width: 1 });
+            g.stroke({ color: 0xf39c12, alpha: 0.1, width: 1 });
         } else if (this.evolution === 'tanque') {
-            // Círculo interior morado (indica tanques)
-            g.circle(this.x, this.y, r * 0.5);
-            g.fill({ color: 0x8e44ad, alpha: 0.5 });
+            g.circle(this.x, this.y, r * 0.6);
+            g.fill({ color: 0x8e44ad, alpha: 0.4 });
+            g.stroke({ color: 0xffffff, alpha: 0.3, width: 1 });
         }
 
-        // Anillo de selección
+        // C. Indicadores de Estado
         if (this.isSelected) {
             g.circle(this.x, this.y, r + 10);
-            g.stroke({ color: 0xffffff, alpha: 0.9, width: 2 });
+            g.stroke({ color: 0xffffff, alpha: 1, width: 2.5 });
         }
 
-        // Anillo de evolución disponible (solo nodos propios sin evolución)
         if (!this.evolution && this.owner === 'player') {
             g.circle(this.x, this.y, r + 2);
-            g.stroke({ color: c.stroke, alpha: 0.5, width: 1 });
+            g.stroke({ color: 0xffffff, alpha: 0.2, width: 1 });
         }
     }
 
@@ -197,18 +205,32 @@ export class Node {
     update(dt, grid, allUnits, layerNodes, sfx) {
         if (this.owner === 'neutral') return;
 
+        // BUGFIX #7: gestionar flash visual dentro del game loop (reemplaza setTimeout)
+        if (this.flashTimer > 0) {
+            this.flashTimer -= dt;
+            if (this.flashTimer <= 0) {
+                this.flashTimer = 0;
+                if (this.gfx && !this.gfx.destroyed) this.gfx.tint = 0xffffff;
+            }
+        }
+
         // 1. ESPINOSO: Daño pasivo al enjambre enemigo cercano
         if (this.evolution === 'espinoso') {
             const neighbors = [];
             grid.findNear(this.x, this.y, this.radius + 15, neighbors);
+
+            // Daño basado en tiempo: 2.4 unidades por segundo aprox (antes 4% en 60fps)
+            const killProbability = 2.4 * dt;
+
             for (let idx of neighbors) {
                 let u = allUnits[idx];
                 if (u && u.faction !== this.owner && !u.pendingRemoval) {
-                    if (Math.random() < 0.04) { // 4% chance por frame de morir al tocar espinas
+                    if (Math.random() < killProbability) {
                         u.pendingRemoval = true;
-                        if (this.gfx && !this.gfx.destroyed) {
+                        // Flash rojo sin setTimeout
+                        if (this.gfx && !this.gfx.destroyed && this.flashTimer <= 0) {
                             this.gfx.tint = 0xff6666;
-                            setTimeout(() => { if (this.gfx && !this.gfx.destroyed) this.gfx.tint = 0xffffff; }, 150);
+                            this.flashTimer = 0.15;
                         }
                     }
                 }
@@ -240,8 +262,7 @@ export class Node {
                         let u = targets[i];
                         u.pendingRemoval = true;
 
-                        // Rastro visual (pool de objetos pendiente)
-                        // Rastro visual con Pool de Objetos
+                        // Rastro visual con Pool de Objetos (el bullet se recicla via timer en el proximo disparo)
                         const bullet = Node.getBullet(layerNodes);
                         if (!bullet || bullet.destroyed) continue;
                         bullet.clear();
@@ -249,18 +270,29 @@ export class Node {
                         bullet.stroke({ color: 0xffffff, width: 2, alpha: 0.8 });
                         bullet.visible = true;
 
-                        setTimeout(() => {
-                            if (bullet && !bullet.destroyed) {
-                                bullet.visible = false;
-                                Node.recycleBullet(bullet);
-                            }
-                        }, 100);
+                        // Usar un campo expiry en el bullet en lugar de setTimeout
+                        bullet._expiryTimer = 0.1;
                     }
+                    // Flash amarillo sin setTimeout
                     if (this.gfx && !this.gfx.destroyed) {
                         this.gfx.tint = 0xffdd44;
-                        setTimeout(() => { if (this.gfx && !this.gfx.destroyed) this.gfx.tint = 0xffffff; }, 100);
+                        this.flashTimer = 0.1;
                     }
                     if (sfx) sfx.shoot();
+                }
+            }
+
+            // Tick de expiry para bullets activos (gestiona reciclado dentro del game loop)
+            if (layerNodes) {
+                for (let i = layerNodes.children.length - 1; i >= 0; i--) {
+                    const child = layerNodes.children[i];
+                    if (child._expiryTimer !== undefined && child._expiryTimer > 0) {
+                        child._expiryTimer -= dt;
+                        if (child._expiryTimer <= 0) {
+                            child._expiryTimer = 0;
+                            Node.recycleBullet(child);
+                        }
+                    }
                 }
             }
         }

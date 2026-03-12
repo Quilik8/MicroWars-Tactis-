@@ -28,8 +28,10 @@
         <div id="mainMenu" class="screen active">
             <h1>MicroWars</h1>
             <h2>Tácticas de Enjambre</h2>
-            <button id="btnPlay" class="primary-btn">INICIAR CAMPAÑA</button>
-            <button id="btnLevels" class="secondary-btn">SELECCIONAR NIVEL</button>
+            <div class="menu-buttons">
+                <button id="btnCampaign" class="primary-btn">MODO CAMPAÑA</button>
+                <button id="btnLevels" class="secondary-btn">MISIONES (NIVELES)</button>
+            </div>
         </div>
 
         <!-- Pantalla de Selección de Nivel -->
@@ -39,6 +41,28 @@
                 <!-- Se poblará dinámicamente desde main.js -->
             </div>
             <button id="btnBackToMenu" class="secondary-btn" style="margin-top: 20px;">VOLVER AL MENÚ</button>
+        </div>
+
+        <!-- Pantalla de Selección de Facción -->
+        <div id="factionSelection" class="screen hidden">
+            <h1 class="campaign-title">ELIGE TU ENJAMBRE</h1>
+            <div class="faction-grid">
+                <!-- Se poblará dinámicamente -->
+            </div>
+            <div class="campaign-footer">
+                <button id="btnBackToMenuFromFactions" class="secondary-btn">VOLVER AL MENÚ</button>
+            </div>
+        </div>
+
+        <!-- Pantalla de Campaña (Mapa Estratégico) -->
+        <div id="campaignScreen" class="screen hidden">
+            <h1 class="campaign-title">MAPA ESTRATÉGICO</h1>
+            <div id="mapContainer">
+                <!-- PixiJS renders here -->
+            </div>
+            <div class="campaign-footer">
+                <button id="btnBackFromCampaign" class="secondary-btn">VOLVER AL MENÚ</button>
+            </div>
         </div>
 
         <!-- Pantalla de Introducción de Nivel (Tutorial) -->
@@ -61,7 +85,7 @@
 
         <!-- Pantalla de Derrota -->
         <div id="gameOver" class="screen hidden">
-            <h1>LA COLONIA HA CAYÓ</h1>
+            <h1>LA COLONIA HA CAÍDO</h1>
             <h2>Nuestros números no fueron suficientes</h2>
             <button id="btnRestart" class="primary-btn">REINTENTAR</button>
             <button id="btnMenuFromLoss" class="secondary-btn">VOLVER AL MENÚ</button>

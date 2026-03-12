@@ -59,13 +59,25 @@ export class UIManager {
         }
 
         // Botones Generales de Pantallas
-        const btnPlay = document.getElementById('btnPlay');
-        if (btnPlay) btnPlay.onclick = () => {
-            if (this.callbacks.onStartLevel) this.callbacks.onStartLevel(0);
+        const btnCampaign = document.getElementById('btnCampaign');
+        if (btnCampaign) btnCampaign.onclick = () => {
+            if (this.callbacks.onPlayIntro) this.callbacks.onPlayIntro();
+            this.setGameState('FACTIONS');
+        };
+
+        const btnBackToMenuFromFactions = document.getElementById('btnBackToMenuFromFactions');
+        if (btnBackToMenuFromFactions) btnBackToMenuFromFactions.onclick = () => {
+            this.setGameState('MENU');
         };
 
         const btnLevels = document.getElementById('btnLevels');
-        if (btnLevels) btnLevels.onclick = () => this.setGameState('LEVELS');
+        if (btnLevels) btnLevels.onclick = () => {
+            if (this.callbacks.onPlayIntro) this.callbacks.onPlayIntro();
+            this.setGameState('LEVELS');
+        };
+
+        const btnBackFromCampaign = document.getElementById('btnBackFromCampaign');
+        if (btnBackFromCampaign) btnBackFromCampaign.onclick = () => this.setGameState('MENU');
 
         const btnBackToMenu = document.getElementById('btnBackToMenu');
         if (btnBackToMenu) btnBackToMenu.onclick = () => this.setGameState('MENU');
@@ -115,13 +127,19 @@ export class UIManager {
 
     showNodeTooltip(node) {
         if (!this.nodeTooltip) return;
+        if (!node.gfx || node.gfx.destroyed || !node.gfx.parent) return;
 
         const world = node.gfx.parent.parent; // Access world container to get scale/position
+        if (!world) return;
         const screenX = node.x * world.scale.x + world.position.x;
         const screenY = node.y * world.scale.y + world.position.y;
 
-        const p = node.population;
-        const total = p.player + p.enemy + p.neutral;
+        // BUGFIX #3: usar || 0 para evitar NaN cuando no hay unidades de una faccion
+        const p = node.population || {};
+        const pPlayer = p.player || 0;
+        const pEnemy = p.enemy || 0;
+        const pNeutral = p.neutral || 0;
+        const total = pPlayer + pEnemy + pNeutral;
         const evLabel = node.evolution ? `Evo: ${node.evolution.toUpperCase()}` : 'Sin evolución';
 
         this.nodeTooltip.innerHTML = `
@@ -130,8 +148,8 @@ export class UIManager {
             <div class="tooltip-row"><span>Dueño:</span> <span class="owner-${node.owner}">${node.owner}</span></div>
             <div class="tooltip-row"><span>Límite:</span> <span>${Math.round(total)} / ${node.maxUnits}</span></div>
             <div class="tooltip-divider"></div>
-            <div class="tooltip-row"><span>Azules:</span> <span class="owner-player">${Math.round(p.player)}</span></div>
-            <div class="tooltip-row"><span>Rojos:</span> <span class="owner-enemy">${Math.round(p.enemy)}</span></div>
+            <div class="tooltip-row"><span>Azules:</span> <span class="owner-player">${Math.round(pPlayer)}</span></div>
+            <div class="tooltip-row"><span>Rojos:</span> <span class="owner-enemy">${Math.round(pEnemy)}</span></div>
         `;
 
         this.nodeTooltip.style.left = `${screenX + node.radius * world.scale.x + 10}px`;
@@ -193,6 +211,7 @@ export class UIManager {
         if (state === 'MENU') {
             this.showScreen('mainMenu');
             this.hideNodeTooltip();
+            if (this.callbacks.onStopCampaign) this.callbacks.onStopCampaign();
             if (this.callbacks.onClearLevel) this.callbacks.onClearLevel();
             if (this.callbacks.onResetCamera) this.callbacks.onResetCamera();
             if (this.callbacks.onSpawnMenuAnts) this.callbacks.onSpawnMenuAnts();
@@ -200,10 +219,21 @@ export class UIManager {
         } else if (state === 'LEVELS') {
             this.showScreen('levelSelection');
             this.hideNodeTooltip();
+            if (this.callbacks.onClearMenuAnts) this.callbacks.onClearMenuAnts();
             if (this.callbacks.onClearLevel) this.callbacks.onClearLevel();
+        } else if (state === 'CAMPAIGN') {
+            this.showScreen('campaignScreen');
+            this.hideNodeTooltip();
+            if (this.callbacks.onClearMenuAnts) this.callbacks.onClearMenuAnts();
+            if (this.callbacks.onStartMusic) this.callbacks.onStartMusic('MENU');
+            if (this.callbacks.onStartCampaign) this.callbacks.onStartCampaign();
+        } else if (state === 'FACTIONS') {
+            this.showScreen('factionSelection');
+            if (this.callbacks.onClearMenuAnts) this.callbacks.onClearMenuAnts();
+            if (this.callbacks.onRenderFactions) this.callbacks.onRenderFactions();
         } else if (state === 'PLAYING') {
             // Hide all potential interfering screens
-            ['mainMenu', 'levelSelection', 'levelComplete', 'gameOver', 'levelIntro'].forEach(id => {
+            ['mainMenu', 'levelSelection', 'levelComplete', 'gameOver', 'levelIntro', 'campaignScreen'].forEach(id => {
                 const s = document.getElementById(id);
                 if (s) { s.classList.remove('active'); s.classList.add('hidden'); }
             });
@@ -217,6 +247,38 @@ export class UIManager {
             this.showScreen('gameOver');
             if (this.callbacks.onStopMusic) this.callbacks.onStopMusic();
         }
+    }
+
+    renderFactionSelection(factions, onSelect) {
+        const grid = document.querySelector('.faction-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        factions.forEach(f => {
+            const card = document.createElement('div');
+            card.className = `faction-card ${f.isPremium ? 'premium-locked' : ''}`;
+
+            // Colores CSS variables para los hover dinámicos
+            const colorHex = '#' + f.color.toString(16).padStart(6, '0');
+            card.style.setProperty('--f-color', colorHex);
+            card.style.setProperty('--f-color-alpha', colorHex + '44');
+
+            card.innerHTML = `
+                <div class="faction-icon" style="background: ${colorHex}"></div>
+                <h3>${f.name}</h3>
+                <div class="faction-trait">${f.trait}</div>
+                <div class="faction-desc">${f.description}</div>
+                <div class="difficulty-badge diff-${f.difficulty.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}">${f.difficulty}</div>
+            `;
+
+            if (!f.isPremium) {
+                card.onclick = () => onSelect(f);
+            } else {
+                card.onclick = () => alert("¡Esta facción es exclusiva de la versión Premium!");
+            }
+
+            grid.appendChild(card);
+        });
     }
 
     setPauseState(isPaused, skipCallback = false) {

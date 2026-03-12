@@ -1,5 +1,6 @@
-import { PIXI } from './engine.js';
-import { Node } from './node.js';
+import { PIXI } from '../core/engine.js';
+import { Node } from '../entities/node.js';
+import { FACTIONS } from '../campaign/faction_data.js';
 
 export class InputManager {
     constructor(game, world, ui, sfx) {
@@ -28,7 +29,6 @@ export class InputManager {
 
     setSendPercent(val) {
         this.sendPercent = Math.max(0.01, Math.min(1.0, val));
-        console.log("Send Percent updated to:", (this.sendPercent * 100).toFixed(0) + "%");
     }
 
     init() {
@@ -85,11 +85,17 @@ export class InputManager {
     }
 
     onPointerMove(e) {
-        // Ignorar si estamos moviendo el mouse sobre la UI y no estamos paneando
-        if (!this.isPanning && (e.target.closest('#sendBar') || e.target.closest('#hud') || e.target.id === 'pauseBtn' || e.target.closest('#uiLayer'))) {
+        // Ignorar si el mouse está sobre la UI (y no estamos paneando)
+        const onUI = e.target.closest('#sendBar') || e.target.closest('#hud') || e.target.id === 'pauseBtn' || e.target.closest('#uiLayer');
+        if (!this.isPanning && onUI) return;
+
+        this.updateMouseCoords(e.clientX, e.clientY);
+
+        if (this.ui.gameState === 'CAMPAIGN') {
+            this.handleCampaignInput(e, 'move');
             return;
         }
-        this.updateMouseCoords(e.clientX, e.clientY);
+
         const w = this.game.world;
         if (this.isPanning && w) {
             w.position.x = this.worldStart.x + (this.mouseX - this.panStart.x);
@@ -101,14 +107,19 @@ export class InputManager {
     }
 
     onPointerDown(e) {
-        if (this.ui.gameState !== 'PLAYING' || this.ui.isPaused) return;
+        const canInteract = (this.ui.gameState === 'PLAYING' && !this.ui.isPaused) || (this.ui.gameState === 'CAMPAIGN');
+        if (!canInteract) return;
 
-        // IGNORAR SI EL CLIC ES EN LA UI (Slider, botones, etc)
-        if (e.target.closest('#sendBar') || e.target.closest('#hud') || e.target.id === 'pauseBtn' || e.target.closest('#uiLayer')) {
-            return;
-        }
+        // IGNORAR SI EL CLIC ES EN LA UI 
+        const onUI = e.target.closest('#sendBar') || e.target.closest('#hud') || e.target.id === 'pauseBtn' || e.target.closest('#uiLayer');
+        if (onUI) return;
 
         this.updateMouseCoords(e.clientX, e.clientY);
+
+        if (this.ui.gameState === 'CAMPAIGN') {
+            this.handleCampaignInput(e, 'down');
+            return;
+        }
 
         if (!this.evoMenu.classList.contains('hidden') && !this.evoMenu.contains(e.target)) {
             this.evoMenu.classList.add('hidden');
@@ -277,6 +288,20 @@ export class InputManager {
         }
     }
 
+    handleCampaignInput(e, type) {
+        // Obtenemos la instancia de campaña desde main (o vía callback)
+        // Por simplicidad, asumimos que MapVisuals tiene acceso a los datos
+        const campaign = window.campaign; // Necesitaremos exponerlo o pasar el core
+        if (!campaign || !campaign.visuals) return;
+
+        const visuals = campaign.visuals;
+        if (type === 'move') {
+            visuals.checkHover(this.mouseX, this.mouseY);
+        } else if (type === 'down') {
+            visuals.checkClick(this.mouseX, this.mouseY);
+        }
+    }
+
     draw(ctx) {
         if (this.ui.gameState !== 'PLAYING' || this.ui.isPaused) return;
 
@@ -296,12 +321,16 @@ export class InputManager {
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 10) return;
 
+        // BUGFIX #1: 'angle' nunca estaba definida. Se calcula aquí.
         const angle = Math.atan2(dy, dx);
-        const color = owner === 'player' ? '#3498db' : '#e74c3c';
+
+        const factionData = FACTIONS.find(f => f.id === owner);
+        const color = factionData ? `#${factionData.color.toString(16).padStart(6, '0')}` : (owner === 'player' ? '#3498db' : '#e74c3c');
 
         ctx.strokeStyle = color;
         ctx.fillStyle = color;
         ctx.lineWidth = 4;
+        ctx.globalAlpha = 0.85;
 
         // Línea principal
         ctx.beginPath();
@@ -317,5 +346,7 @@ export class InputManager {
         ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
         ctx.closePath();
         ctx.fill();
+
+        ctx.globalAlpha = 1.0;
     }
 }
