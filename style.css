@@ -251,15 +251,19 @@ html {
 }
 
 .secondary-btn {
-    background: transparent;
-    color: #bbb;
-    border: 2px solid #555;
+    background: rgba(40, 40, 50, 0.8);
+    color: #fff;
+    border: 2px solid #8ab4f8;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
 }
 
 .secondary-btn:hover {
     color: #fff;
-    border-color: #8ab4f8;
-    background: rgba(255, 255, 255, 0.05);
+    border-color: #5dade2;
+    background: rgba(60, 60, 80, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(93, 173, 226, 0.3);
 }
 
 /* ── Selector de Niveles Premium (Glassmorphism) ── */

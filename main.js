@@ -83,9 +83,11 @@ game.onUpdate = (dt) => {
     if (ui.gameState === 'PLAYING' && !ui.isPaused) {
         // IDs dinámicos basados en el modo (Campaña vs Skirmish)
         const pId = campaign.isStarted ? (campaign.playerFaction?.id || 'player') : 'player';
-        const eId = 'enemy'; // Por ahora, la IA siempre es el bloque 'enemy' clásico
 
-        ai.update(dt, world.nodes, world.allUnits, eId, pId);
+        const activeEnemies = ['enemy', 'fuego', 'carpinteras', 'bala', 'tejedoras'];
+        for (let enemyFaction of activeEnemies) {
+            ai.update(dt, world.nodes, world.allUnits, enemyFaction, pId);
+        }
 
         // 3. Telemetría y HUD
         const fps = game.app ? Math.round(game.app.ticker.FPS) : 0;
@@ -93,14 +95,14 @@ game.onUpdate = (dt) => {
 
         for (let n of world.nodes) {
             if (n.owner === pId) pNodes++;
-            else if (n.owner === eId) eNodes++;
+            else if (n.owner !== 'neutral') eNodes++;
         }
         for (let u of world.allUnits) {
             if (u.pendingRemoval) continue;
             if (u.faction === pId) {
                 pUnits++;
                 pPower += (u.power || 1);
-            } else if (u.faction === eId) {
+            } else if (u.faction !== 'neutral') {
                 eUnits++;
             }
         }
@@ -125,7 +127,7 @@ window.addEventListener('load', async () => {
     world.init(game.app);
     input.init();
     campaign.init();
-    ui.renderLevelGrid(LEVELS, level.unlockedLevels, (idx) => level.loadLevel(idx));
+    ui.renderLevelGrid(LEVELS, LEVELS.length, (idx) => level.loadLevel(idx)); // Temporarily unlock all
     ui.setGameState('MENU');
 });
 

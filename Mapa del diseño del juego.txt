@@ -11,7 +11,7 @@ Aunque el juego nace de la base mecánica de títulos clásicos de nodos (como S
 
 *   **Ataques de Enjambre y Automatización Opcional:** El método primordial de expansión es el ataque de enjambre masivo, enviando hordas desde un punto hacia otro para quebrar sus defensas. Una vez conquistados dos nodos propios, el jugador tiene la opción de invertir recursos para excavar "Túneles Logísticos" entre ellos. Esta mecánica establece un flujo constante y autónomo de tropas para reforzar el frente de batalla, transformando la micro-gestión en decisiones tácticas a largo plazo. Esta inversión conlleva un riesgo: si el enemigo captura uno de los nodos conectados, el túnel colapsa y los recursos invertidos en él se pierden definitivamente.
 *   **La Capa de Macro-Gestión (Estilo Tablero Estratégico):** El juego cuenta con un Tablero Estratégico persistente. Las batallas RTS son el medio para avanzar en una guerra territorial masiva, cruzando mecánicas de conquista de territorios por turnos con combates en tiempo real.
-*   **Enfoque Cenital de Alto Rendimiento:** El diseño abraza una perspectiva "Top-Down" (vista de dios) en un 2D extremadamente ligero. Esto permite enfocar absolutamente todos los recursos del hardware en la escala del combate, logrando mover fluidamente miles de unidades simultáneas en pantalla para generar la sensación real de un enjambre vivo.
+*   **Enfoque Cenital de Alto Rendimiento: El diseño abraza una perspectiva "Top-Down" (vista de dios) en un 2D extremadamente ligero. Esto permite enfocar absolutamente todos los recursos del hardware en la escala del combate, logrando mover fluidamente un límite estricto de 3,000 unidades simultáneas en pantalla. Esta restricción garantiza mantener los 60 FPS casi estables en todo momento, generando la sensación real de un enjambre vivo sin sacrificar el rendimiento del navegador.
 
 ### 3. Psicología del Jugador
 El diseño del juego está construido para detonar tres gatillos psicológicos específicos en el usuario:
@@ -28,7 +28,7 @@ La estética se rige por la regla del **Contraste Escalar**: entornos sumamente 
 *   **Las Tropas (Minimalismo Funcional):** Las unidades básicas se renderizan exclusivamente mediante código de dibujo puro (Canvas API).
     *   *Forma:* **Elipsoides** (forma de balón de fútbol americano o grano de arroz).
     *   *Comportamiento Visual:* Estos elipsoides son de colores sólidos y planos (Ej. Azul para el jugador, Rojo para la IA). Su rotación se actualiza en tiempo real para que la "punta" del elipsoide siempre mire hacia la dirección de su vector de movimiento.
-    *   *Impacto:* Al mover miles de estos elipsoides en bloque sobre un fondo de tierra realista, el cerebro humano completa la ilusión óptica y los percibe inmediatamente como un enjambre de insectos vivos y frenéticos. Esta decisión estética garantiza una fluidez absoluta del motor gráfico.
+    *   *Impacto:* Al mover hasta **3,000 de estos elipsoides** en bloque sobre un fondo de tierra realista, el cerebro humano completa la ilusión óptica y los percibe inmediatamente como un enjambre de insectos vivos y frenéticos. Esta decisión estética garantiza una fluidez absoluta del motor gráfico.
 
 ### 5. Diseño Sonoro (Filosofía Funcional)
 El apartado auditivo se diseña bajo un enfoque minimalista, donde todo el audio sirve directamente a la jugabilidad y a la lectura de la interfaz:
@@ -338,11 +338,14 @@ La construcción del proyecto se fundamenta en un flujo de trabajo asistido por 
 *   **Modularidad de Código:** El proyecto mantiene una arquitectura de archivos estrictamente modular. Cada sistema (Gestor de Nodos, Motor de Enjambre, Interfaz de Usuario, Lógica de Campaña) reside en su propio módulo independiente. Esta separación garantiza que la IA pueda leer, analizar y modificar fragmentos específicos del código sin romper el ecosistema global de la aplicación.
 
 ### 2. Motor Gráfico y Optimización de Rendimiento
-El apartado visual exige mover volúmenes masivos de entidades en pantalla. La selección de herramientas y paradigmas de renderizado garantiza una tasa estable de 60 fotogramas por segundo (FPS) en dispositivos móviles y navegadores de escritorio.
+ El apartado visual exige mover volúmenes masivos de entidades en pantalla. La selección de herramientas y paradigmas de renderizado garantiza una tasa casi estable de 60 fotogramas por segundo (FPS) en dispositivos móviles y navegadores de escritorio.
 
-*   **Framework de Renderizado (Phaser 4):** El proyecto emplea la versión más reciente de Phaser, optimizada nativamente para el manejo de miles de sprites y primitivas gráficas mediante WebGL y la API de Canvas de HTML5.
-*   **Renderizado de Primitivas:** El dibujo de las tropas prescinde totalmente del uso de elementos DOM (HTML/CSS). Cada unidad se dibuja directamente en el *Canvas* como un elipsoide sólido. El motor gráfico agrupa las llamadas de dibujado (Batch Rendering) por facción y color, reduciendo drásticamente la carga de la CPU y la GPU.
-*   **Game Loop y Físicas Ligeras:** La actualización de las posiciones de más de 5,000 unidades se ejecuta dentro del ciclo nativo `requestAnimationFrame`. El sistema reemplaza los costosos motores de físicas tradicionales (como Matter.js o Box2D) por cálculos matriciales y vectores de dirección personalizados, aplicando fórmulas de desplazamiento directo (Punto A hacia Punto B) y fuerzas de separación simples para mantener la forma orgánica del enjambre.
+ *   **Framework de Renderizado (PixiJS v8):** El proyecto emplea la versión más reciente de PixiJS, el motor de renderizado 2D más rápido del mercado para WebGL. Su arquitectura está diseñada específicamente para manejar enormes cantidades de objetos visuales con un costo de CPU y GPU ínfimo en comparación con motores pesados.
+
+ *   **Renderizado de Primitivas:** El dibujo de las tropas prescinde totalmente del uso de elementos DOM (HTML/CSS). Cada unidad se dibuja directamente en el Canvas como un diseño hormiga sólido. El motor agrupa las llamadas de dibujado (Batch Rendering) por facción y color.
+
+ *   **Game Loop y Límite de Físicas:** La actualización de posiciones tiene un techo técnico inamovible de **3,000 hormigas simultáneas**. El sistema reemplaza los motores de físicas tradicionales por cálculos matriciales y vectores de dirección personalizados en el `requestAnimationFrame`, aplicando fórmulas de desplazamiento directo sin sobrecargar el procesador.
+
 
 ### 3. Arquitectura de Datos y Persistencia (PWA)
 La aplicación opera como una *Progressive Web App* (PWA) con soporte total para ejecución *offline*, garantizando que el usuario mantenga su progreso en cualquier circunstancia.
@@ -356,5 +359,5 @@ La infraestructura multijugador implementa un sistema robusto que facilita el ju
 
 *   **Conexiones WebRTC:** El intercambio de datos entre los jugadores opera mediante el protocolo WebRTC. Esto establece una conexión *Peer-to-Peer* (P2P) directa entre el navegador del Jugador 1 y el navegador del Jugador 2, garantizando la latencia más baja posible para las partidas cooperativas y competitivas.
 *   **Sincronización Lockstep Determinista:** La arquitectura de red transmite exclusivamente las acciones (inputs) del jugador, acompañadas de su marca de tiempo exacta (Tick). El sistema envía paquetes de datos minúsculos del tipo: *"En el Tick 450, el Jugador 1 ordenó enviar el 50% de las tropas del Nodo A hacia el Nodo B"*. 
-*   **Simulación Idéntica:** Ambos clientes (ordenadores) ejecutan el motor matemático del juego de forma estrictamente determinista. Al recibir los mismos inputs en los mismos *ticks*, ambas máquinas calculan y renderizan la posición exacta de las 5,000 tropas localmente de forma idéntica, manteniendo la sincronización perfecta de la partida.
+*   **Simulación Idéntica:** Ambos clientes (ordenadores) ejecutan el motor matemático del juego de forma estrictamente determinista. Al recibir los mismos inputs en los mismos *ticks*, ambas máquinas calculan y renderizan la posición exacta de las maximo 3,000 tropas localmente de forma idéntica, manteniendo la sincronización perfecta de la partida.
 *   **Signaling Server Gratuito:** El emparejamiento inicial para que las dos computadoras se encuentren en internet se realiza mediante un servidor de señalización básico alojado en capas gratuitas (Firebase o Render). Una vez completado el protocolo de enlace (*handshake*), el servidor se aparta y los jugadores continúan comunicándose directamente por la ruta P2P.

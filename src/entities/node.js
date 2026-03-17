@@ -1,6 +1,5 @@
 /**
  * Clase Node — Nodo táctico del mapa (PixiJS / WebGL)
- * Soporta evolución (espinoso, artillería, tanque) y menú radial.
  */
 import * as PIXI from 'pixi.js';
 
@@ -65,6 +64,16 @@ export class Node {
         this.flashColor = 0xffffff; // color al que volver al terminar el flash
         this.flashTargetColor = null; // null = sin flash activo
 
+        // Animación de Chispas (Combat sparks)
+        this.sparks = []; 
+        this.battleCooldown = 0;
+        this.lastDominantColor = 0xffffff;
+        this.lastSparkIntensity = 0;
+
+        // Conquista Visual (Anillo)
+        this.conquestProgress = 0; // 0.0 a 1.0
+        this.conqueringFaction = null;
+
         // Gráficos PixiJS
         this.gfx = null;
     }
@@ -72,13 +81,21 @@ export class Node {
     static TYPES = {
         normal: { radius: 25, maxUnits: 200, regenInterval: 1.0 },
         enjambre: { radius: 35, maxUnits: 300, regenInterval: 0.5 },
-        gigante: { radius: 60, maxUnits: 500, regenInterval: 1.25 }
+        gigante: { radius: 60, maxUnits: 500, regenInterval: 1.25 },
+        tunel: { radius: 35, maxUnits: 0, regenInterval: 9999 } // Transport tunnel
     };
 
     static COLORS = {
-        player: { fill: 0x2e86c1, stroke: 0x5dade2, glow: 0x3498db, alpha: 0.50 },
-        enemy: { fill: 0x922b21, stroke: 0xe74c3c, glow: 0xe74c3c, alpha: 0.50 },
-        neutral: { fill: 0x4d5656, stroke: 0x95a5a6, glow: 0x95a5a6, alpha: 0.35 },
+        player: { fill: 0x3498db, stroke: 0x2980b9, accent: 0x85c1e9, name: "Azul" }, // Azul
+        enemy: { fill: 0xe74c3c, stroke: 0xc0392b, accent: 0xf1948a, name: "Rojo" },  // Rojo
+        neutral: { fill: 0x95a5a6, stroke: 0x7f8c8d, name: "Neutral" },
+        fuego: { fill: 0xd35400, stroke: 0xa04000, accent: 0xe59866, name: "Naranja" }, // Naranja
+        carpinteras: { fill: 0x5dade2, stroke: 0x2874a6, accent: 0x85c1e9, name: "Celeste" },
+        negras: { fill: 0x566573, stroke: 0x273746, name: "Gris oscuro" },
+        bala: { fill: 0x111111, stroke: 0x000000, name: "Negro" },
+        tejedoras: { fill: 0x2ecc71, stroke: 0x27ae60, accent: 0x82e0aa, name: "Verde" },
+        // Legacy support por si usan ID mostaza
+        mostaza: { fill: 0xf39c12, stroke: 0xd68910, accent: 0xf8c471, name: "Mostaza" } 
     };
 
     static EVOLUTION_COLORS = {
@@ -117,22 +134,49 @@ export class Node {
         g.stroke({ color: ev ? ev.accent : glow, alpha: 0.25, width: 8 });
 
         // B. Cuerpo principal
-        g.circle(this.x, this.y, r);
-        g.fill({ color: fill, alpha: alpha });
-        g.stroke({ color: stroke, alpha: 0.5, width: 2.5 });
+        if (this.type === 'tunel') {
+            g.circle(this.x, this.y, r);
+            g.fill({ color: 0x080808, alpha: 0.95 }); // Fondo oscuro (hoyo)
+            g.stroke({ color: stroke, alpha: 0.9, width: 3 });
+            // Anillos internos
+            g.circle(this.x, this.y, r * 0.6);
+            g.stroke({ color: fill, alpha: 0.6, width: 2, dashArray: [4, 4] });
+            g.circle(this.x, this.y, r * 0.2);
+            g.fill({ color: fill, alpha: 0.8 });
+        } else {
+            g.circle(this.x, this.y, r);
+            g.fill({ color: fill, alpha: alpha });
+            g.stroke({ color: stroke, alpha: 0.5, width: 2.5 });
+        }
 
         // ── Evoluciones Visuales ──
         if (this.evolution === 'espinoso') {
-            const numSpikes = 26;
+            const numSpikes = 20;
+            const spikeMaxDist = this.radius + (this.artilleryRange * 0.25);
             for (let i = 0; i < numSpikes; i++) {
                 const ang = (i / numSpikes) * Math.PI * 2;
-                const rx = this.x + Math.cos(ang) * (r + 4);
-                const ry = this.y + Math.sin(ang) * (r + 4);
-                const rx2 = this.x + Math.cos(ang) * (r + 18);
-                const ry2 = this.y + Math.sin(ang) * (r + 18);
+                const rx = this.x + Math.cos(ang) * (r + 2);
+                const ry = this.y + Math.sin(ang) * (r + 2);
+                const rx2 = this.x + Math.cos(ang) * spikeMaxDist;
+                const ry2 = this.y + Math.sin(ang) * spikeMaxDist;
                 g.moveTo(rx, ry).lineTo(rx2, ry2);
             }
-            g.stroke({ color: 0x27ae60, alpha: 0.8, width: 1.5 });
+            g.stroke({ color: 0x27ae60, alpha: 0.9, width: 3.5 });
+
+            for (let i = 0; i < numSpikes; i++) {
+                const ang = (i / numSpikes) * Math.PI * 2;
+                const perpAng = ang + Math.PI / 2;
+                const tinyLen = 4;
+                for (let j = 1; j <= 2; j++) {
+                    const distAlong = r + 8 + (j * 14);
+                    if (distAlong > spikeMaxDist - 5) continue;
+                    const mx = this.x + Math.cos(ang) * distAlong;
+                    const my = this.y + Math.sin(ang) * distAlong;
+                    g.moveTo(mx, my).lineTo(mx + Math.cos(perpAng) * tinyLen, my + Math.sin(perpAng) * tinyLen);
+                    g.moveTo(mx, my).lineTo(mx - Math.cos(perpAng) * tinyLen, my - Math.sin(perpAng) * tinyLen);
+                }
+            }
+            g.stroke({ color: 0x2ecc71, alpha: 0.8, width: 1.5 });
         } else if (this.evolution === 'artilleria') {
             g.moveTo(this.x - r * 0.4, this.y).lineTo(this.x + r * 0.4, this.y);
             g.moveTo(this.x, this.y - r * 0.4).lineTo(this.x, this.y + r * 0.4);
@@ -145,7 +189,19 @@ export class Node {
             g.stroke({ color: 0xffffff, alpha: 0.3, width: 1 });
         }
 
-        // C. Indicadores de Estado
+        // C. Indicador de Conquista (Anillo)
+        if (this.conquestProgress > 0 && this.conqueringFaction) {
+            const conquestC = Node.COLORS[this.conqueringFaction] || Node.COLORS.neutral;
+            const conquestColor = factionData && this.conqueringFaction === factionData.id ? factionData.color : conquestC.fill;
+            const startAngle = -Math.PI / 2;
+            const endAngle = startAngle + (Math.PI * 2 * this.conquestProgress);
+            
+            g.moveTo(this.x + Math.cos(startAngle) * (r + 4), this.y + Math.sin(startAngle) * (r + 4));
+            g.arc(this.x, this.y, r + 4, startAngle, endAngle);
+            g.stroke({ color: conquestColor, alpha: 0.9, width: 4.5, cap: 'round' });
+        }
+
+        // D. Indicadores de Estado
         if (this.isSelected) {
             g.circle(this.x, this.y, r + 10);
             g.stroke({ color: 0xffffff, alpha: 1, width: 2.5 });
@@ -158,20 +214,41 @@ export class Node {
     }
 
     /** Tooltip al pasar el mouse */
-    drawTooltip(ctx, playerCount, enemyCount, neutralCount) {
+    drawTooltip(ctx) {
         if (!this.hovered) return;
 
-        let total = playerCount + enemyCount + neutralCount;
         let evLabel = this.evolution ? `Evo: ${this.evolution.toUpperCase()}` : 'Sin evolución';
-        let lines = [
-            `[${this.type.toUpperCase()}]`,
-            evLabel,
-            `Dueño:  ${this.owner}`,
-            `Límite: ${total} / ${this.maxUnits}`,
-            `---`,
-            `Azules: ${playerCount}`,
-            `Rojos:  ${enemyCount}`,
-        ];
+        let lines = [];
+
+        let total = 0;
+        const factionLines = [];
+        for (const factionId in this.counts) {
+            const count = this.counts[factionId];
+            total += count;
+            if (count > 0) {
+                const factionName = Node.COLORS[factionId]?.name || factionId;
+                factionLines.push(`${factionName}: ${count}`);
+            }
+        }
+
+        if (this.type === 'tunel') {
+            lines = [
+                `[TÚNEL PROFUNDO]`,
+                `Transito instantáneo`,
+                `Dueño:  ${Node.COLORS[this.owner]?.name || this.owner}`,
+                `---`,
+                ...factionLines
+            ];
+        } else {
+            lines = [
+                `[${this.type.toUpperCase()}]`,
+                evLabel,
+                `Dueño:  ${Node.COLORS[this.owner]?.name || this.owner}`,
+                `Límite: ${total} / ${this.maxUnits}`,
+                `---`,
+                ...factionLines
+            ];
+        }
 
         let px = this.x + this.radius + 12;
         let py = this.y - 55;
@@ -216,8 +293,9 @@ export class Node {
 
         // 1. ESPINOSO: Daño pasivo al enjambre enemigo cercano
         if (this.evolution === 'espinoso') {
+            const espinosoRange = this.radius + (this.artilleryRange * 0.25);
             const neighbors = [];
-            grid.findNear(this.x, this.y, this.radius + 15, neighbors);
+            grid.findNear(this.x, this.y, espinosoRange, neighbors);
 
             // Daño basado en tiempo: 2.4 unidades por segundo aprox (antes 4% en 60fps)
             const killProbability = 2.4 * dt;
@@ -225,7 +303,8 @@ export class Node {
             for (let idx of neighbors) {
                 let u = allUnits[idx];
                 if (u && u.faction !== this.owner && !u.pendingRemoval) {
-                    if (Math.random() < killProbability) {
+                    let distSq = Math.pow(u.x - this.x, 2) + Math.pow(u.y - this.y, 2);
+                    if (distSq < espinosoRange * espinosoRange && distSq > this.radius * this.radius && Math.random() < killProbability) {
                         u.pendingRemoval = true;
                         // Flash rojo sin setTimeout
                         if (this.gfx && !this.gfx.destroyed && this.flashTimer <= 0) {
@@ -250,14 +329,14 @@ export class Node {
                     let u = allUnits[idx];
                     if (u && u.faction !== this.owner && !u.pendingRemoval) {
                         let distSq = Math.pow(u.x - this.x, 2) + Math.pow(u.y - this.y, 2);
-                        if (distSq < this.artilleryRange * this.artilleryRange) {
+                        if (distSq < this.artilleryRange * this.artilleryRange && distSq > this.radius * this.radius) {
                             targets.push(u);
                         }
                     }
                 }
 
                 if (targets.length > 0) {
-                    let toKill = Math.min(targets.length, 8);
+                    let toKill = Math.min(targets.length, 5);
                     for (let i = 0; i < toKill; i++) {
                         let u = targets[i];
                         u.pendingRemoval = true;
@@ -294,6 +373,109 @@ export class Node {
                         }
                     }
                 }
+            }
+        }
+
+        // 3. INDICADOR VISUAL DE COMBATE INTERNO (Micro-chispas persistentes)
+        if (this.gfx && !this.gfx.destroyed) {
+            let activeFactions = Object.keys(this.counts).filter(f => this.counts[f] > 0);
+            let underAttack = false;
+            let attackers = 0;
+            let dominantFaction = null;
+
+            if (activeFactions.length > 1 || (activeFactions.length === 1 && activeFactions[0] !== this.owner)) {
+                underAttack = true;
+                let maxCount = -1;
+                for (let f of activeFactions) {
+                    if (this.counts[f] > maxCount) {
+                        maxCount = this.counts[f];
+                        dominantFaction = f;
+                    }
+                }
+                attackers = maxCount;
+            }
+
+            if (underAttack) {
+                this.battleCooldown = 3.0; // Persistir 3 segundos tras la batalla
+                if (dominantFaction && Node.COLORS[dominantFaction]) {
+                    this.lastDominantColor = Node.COLORS[dominantFaction].fill;
+                }
+                this.lastSparkIntensity = attackers > 100 ? 15 : (attackers > 30 ? 10 : 5);
+            } else {
+                if (this.battleCooldown > 0) {
+                    this.battleCooldown -= dt;
+                } else {
+                    this.lastSparkIntensity = 0;
+                }
+            }
+
+            let desiredSparks = this.battleCooldown > 0 ? this.lastSparkIntensity : 0;
+
+            // Instanciar chispas si faltan
+            while (this.sparks.length < desiredSparks) {
+                const spark = Node.getBullet(layerNodes);
+                if (!spark) break;
+                spark.visible = true;
+                spark._sx = this.x + (Math.random() - 0.5) * this.radius * 0.8;
+                spark._sy = this.y + (Math.random() - 0.5) * this.radius * 0.8;
+                spark._vx = (Math.random() - 0.5) * 200;
+                spark._vy = (Math.random() - 0.5) * 200;
+                this.sparks.push(spark);
+            }
+
+            // Limpiar chispas si ya no hay batalla ni cooldown
+            if (desiredSparks === 0 && this.sparks.length > 0) {
+                for (const spark of this.sparks) {
+                    Node.recycleBullet(spark);
+                }
+                this.sparks = [];
+            }
+
+            // Actualizar físicas y dibujo de chispas vivas
+            for (let i = this.sparks.length - 1; i >= 0; i--) {
+                let spark = this.sparks[i];
+                if (spark.destroyed) {
+                    this.sparks.splice(i, 1);
+                    continue;
+                }
+
+                spark._sx += spark._vx * dt;
+                spark._sy += spark._vy * dt;
+
+                // Rebote circular dentro del nodo
+                let dx = spark._sx - this.x;
+                let dy = spark._sy - this.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist > this.radius * 0.9) {
+                    let nx = dx / dist;
+                    let ny = dy / dist;
+                    let dot = spark._vx * nx + spark._vy * ny;
+                    spark._vx -= 2 * dot * nx;
+                    spark._vy -= 2 * dot * ny;
+                    spark._sx = this.x + nx * this.radius * 0.89;
+                    spark._sy = this.y + ny * this.radius * 0.89;
+                }
+
+                // Movimiento caótico (electricidad)
+                spark._vx += (Math.random() - 0.5) * 800 * dt;
+                spark._vy += (Math.random() - 0.5) * 800 * dt;
+
+                let speed = Math.sqrt(spark._vx * spark._vx + spark._vy * spark._vy);
+                if (speed > 250) {
+                    spark._vx = (spark._vx / speed) * 250;
+                    spark._vy = (spark._vy / speed) * 250;
+                }
+
+                // Fade out el último segundo
+                let alpha = 0.95;
+                if (this.battleCooldown < 1.0) alpha = 0.95 * this.battleCooldown;
+
+                spark.clear();
+                spark.moveTo(spark._sx, spark._sy);
+                spark.lineTo(spark._sx - spark._vx * 0.05, spark._sy - spark._vy * 0.05);
+
+                // Todas adoptan el color ganador instantáneamente
+                spark.stroke({ color: this.lastDominantColor, width: 2.5, alpha: alpha });
             }
         }
     }

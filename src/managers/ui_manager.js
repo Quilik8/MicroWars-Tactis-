@@ -1,6 +1,8 @@
 /**
  * DOM and UI Manager for MicroWars
  */
+import { Node } from '../entities/node.js';
+
 export class UIManager {
     constructor(gameCallbacks) {
         this.callbacks = gameCallbacks;
@@ -134,13 +136,34 @@ export class UIManager {
         const screenX = node.x * world.scale.x + world.position.x;
         const screenY = node.y * world.scale.y + world.position.y;
 
-        // BUGFIX #3: usar || 0 para evitar NaN cuando no hay unidades de una faccion
         const p = node.population || {};
-        const pPlayer = p.player || 0;
-        const pEnemy = p.enemy || 0;
-        const pNeutral = p.neutral || 0;
-        const total = pPlayer + pEnemy + pNeutral;
         const evLabel = node.evolution ? `Evo: ${node.evolution.toUpperCase()}` : 'Sin evolución';
+
+        let total = Math.round(p['neutral'] || 0);
+        let factionHtml = '';
+        
+        let allKeys = Object.keys(p);
+        
+        // Custom Faction sorting so player is first if involved
+        if (allKeys.includes('player')) {
+            allKeys = allKeys.filter(k => k !== 'player');
+            allKeys.unshift('player');
+        }
+        
+        for (let factionId of allKeys) {
+            if (factionId === 'neutral') continue; // Don't list neutral
+            let count = Math.round(p[factionId] || 0);
+            if (count > 0 || factionId === 'player' || factionId === 'enemy') {
+                // Provide fallback name capitalized
+                let factionName = Node.COLORS[factionId]?.name || factionId.charAt(0).toUpperCase() + factionId.slice(1);
+                
+                // Generar CSS en linea seguro extrayendo el color relleno del Node.COLORS
+                let colorHex = Node.COLORS[factionId] ? "#" + Node.COLORS[factionId].fill.toString(16).padStart(6, '0') : "#ffffff";
+                
+                factionHtml += `<div class="tooltip-row"><span>${factionName}:</span> <span style="font-weight: bold; color: ${colorHex}">${count}</span></div>\n`;
+            }
+            total += count;
+        }
 
         this.nodeTooltip.innerHTML = `
             <div class="tooltip-header">[${node.type.toUpperCase()}]</div>
@@ -148,8 +171,7 @@ export class UIManager {
             <div class="tooltip-row"><span>Dueño:</span> <span class="owner-${node.owner}">${node.owner}</span></div>
             <div class="tooltip-row"><span>Límite:</span> <span>${Math.round(total)} / ${node.maxUnits}</span></div>
             <div class="tooltip-divider"></div>
-            <div class="tooltip-row"><span>Azules:</span> <span class="owner-player">${Math.round(pPlayer)}</span></div>
-            <div class="tooltip-row"><span>Rojos:</span> <span class="owner-enemy">${Math.round(pEnemy)}</span></div>
+            ${factionHtml}
         `;
 
         this.nodeTooltip.style.left = `${screenX + node.radius * world.scale.x + 10}px`;

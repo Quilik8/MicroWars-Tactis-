@@ -34,5 +34,27 @@ export const LEVELS = [
             { id: "neutral_top", x: 0.8, y: 0.2, owner: 'neutral', type: 'gigante', startUnits: 60 },
             { id: "neutral_bot", x: 0.2, y: 0.8, owner: 'neutral', type: 'gigante', startUnits: 60 }
         ]
+    },
+    {
+        name: "CONEXIONES SUBTERRÁNEAS",
+        description: "Utiliza los Túneles Profundos para viajar largas distancias. Crea Caminos Logísticos fuertes. Lucha entre tres frentes iguales.",
+        nodes: [
+            // BASES (1 por Facción, totalmente equilibradas)
+            { x: 0.1, y: 0.5, owner: 'player', type: 'gigante', startUnits: 150 },
+            { x: 0.9, y: 0.5, owner: 'enemy', type: 'gigante', startUnits: 150 },
+            { x: 0.5, y: 0.9, owner: 'fuego', type: 'gigante', startUnits: 150 },
+            
+            // VARIEDAD DE NODOS CENTRALES
+            { x: 0.5, y: 0.5, owner: 'neutral', type: 'enjambre' },
+            { x: 0.35, y: 0.5, owner: 'neutral', type: 'normal' },
+            { x: 0.65, y: 0.5, owner: 'neutral', type: 'normal' },
+            { x: 0.35, y: 0.35, owner: 'neutral', type: 'enjambre' },
+            { x: 0.65, y: 0.35, owner: 'neutral', type: 'enjambre' },
+            { x: 0.5, y: 0.2, owner: 'neutral', type: 'gigante' },
+
+            // TÚNELES PROFUNDOS (Teletransporte bi-direccional)
+            { id: 'hole_left', x: 0.15, y: 0.8, owner: 'neutral', type: 'tunel', tunnelTo: 'hole_right', startUnits: 0 },
+            { id: 'hole_right', x: 0.85, y: 0.2, owner: 'neutral', type: 'tunel', tunnelTo: 'hole_left', startUnits: 0 }
+        ]
     }
 ];

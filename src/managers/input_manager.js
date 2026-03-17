@@ -131,10 +131,24 @@ export class InputManager {
         if (clicked) {
             this.dragStartNode = clicked;
             if (clicked === this.lastClickNode && (now - this.lastClickTime) < 300) {
-                if (clicked.owner === 'player' && !clicked.evolution) {
+                if (clicked.owner === 'player' && !clicked.evolution && clicked.type !== 'tunel') {
                     this.showEvolutionMenu(clicked);
                     this.lastClickTime = 0;
                     return;
+                } else if (clicked.type === 'tunel' && clicked.owner === 'player' && clicked.tunnelTo) {
+                     // Teletransportar tropas al hacer doble clic
+                     let dest = clicked.tunnelTo;
+                     for (let u of this.world.allUnits) {
+                        if (u.faction === 'player' && u.targetNode === clicked && u.state === 'idle') {
+                            u.x = dest.x + (Math.random() - 0.5) * dest.radius * 0.5;
+                            u.y = dest.y + (Math.random() - 0.5) * dest.radius * 0.5;
+                            u.targetNode = dest;
+                            u.homeNode = dest;
+                            u.state = 'idle';
+                        }
+                     }
+                     this.lastClickTime = 0;
+                     return;
                 }
             }
             this.lastClickTime = now;
@@ -166,7 +180,7 @@ export class InputManager {
 
         if (this.dragStartNode) {
             if (clicked && clicked !== this.dragStartNode) {
-                if (this.dragStartNode.owner === 'player' && clicked.owner === 'player') {
+                if (this.dragStartNode.owner === 'player' && clicked.owner === 'player' && this.dragStartNode.type !== 'tunel') {
                     if (this.world.countAt(this.dragStartNode, 'player') >= 15) {
                         this.world.killNPower(this.dragStartNode, 'player', 15);
                         this.dragStartNode.tunnelTo = clicked;
@@ -282,7 +296,7 @@ export class InputManager {
         if (this.world.countAt(this.selectedNode, 'player') >= cost) {
             this.world.killNPower(this.selectedNode, 'player', cost);
             this.selectedNode.evolution = type;
-            if (type === 'artilleria') this.selectedNode.artilleryInterval = 0.8;
+            if (type === 'artilleria') this.selectedNode.artilleryInterval = 1.0;
             this.selectedNode.redraw();
             if (this.sfx) this.sfx.evolve();
         }

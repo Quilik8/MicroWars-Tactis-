@@ -56,11 +56,50 @@ export class LevelManager {
             this.world.createNodeGfx(n);
         }
 
+        let minX = Infinity, minY = Infinity;
+        let maxX = -Infinity, maxY = -Infinity;
+
         for (let i = 0; i < this.world.nodes.length; i++) {
             let n = this.world.nodes[i];
             let nData = levelData.nodes[i];
             let cant = (nData.startUnits !== undefined) ? nData.startUnits : Math.floor(n.maxUnits * 0.4);
             this.world.spawnUnitsAt(n, nData.owner, cant);
+
+            if (nData.tunnelTo) {
+                let targetIdx = levelData.nodes.findIndex(nd => nd.id === nData.tunnelTo);
+                if (targetIdx !== -1) {
+                    n.tunnelTo = this.world.nodes[targetIdx];
+                }
+            }
+
+            // Registrar límites físicos de la partida
+            if (n.x < minX) minX = n.x;
+            if (n.x > maxX) maxX = n.x;
+            if (n.y < minY) minY = n.y;
+            if (n.y > maxY) maxY = n.y;
+        }
+
+        // --- ENCUADRE DINÁMICO DE CÁMARA (Dynamic Auto-Zoom) ---
+        if (this.game.world && this.world.nodes.length > 0) {
+            const padding = 150; // Margen en píxeles
+            const mapWidth = (maxX - minX) + padding * 2;
+            const mapHeight = (maxY - minY) + padding * 2;
+            
+            // Calculamos qué escala se requiere para que mapWidth quepa en cx, y lo mismo con cy
+            const scaleX = cx / mapWidth;
+            const scaleY = cy / mapHeight;
+            let idealScale = Math.min(scaleX, scaleY);
+            
+            // Limitamos a la escala máxima/mínima del usuario
+            idealScale = Math.max(0.3, Math.min(1.2, idealScale));
+            
+            this.game.world.scale.set(idealScale);
+            
+            // Centrar el mapa calculado en la pantalla real
+            const mapCenterX = (minX + maxX) / 2;
+            const mapCenterY = (minY + maxY) / 2;
+            this.game.world.position.x = (cx / 2) - (mapCenterX * idealScale);
+            this.game.world.position.y = (cy / 2) - (mapCenterY * idealScale);
         }
 
         const introTitle = document.getElementById('introTitle');

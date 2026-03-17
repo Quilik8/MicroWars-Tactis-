@@ -12,9 +12,9 @@ export const FACTIONS = [
         id: 'negras',
         name: 'Hormigas Negras',
         color: 0x566573,
-        trait: 'Túneles Eficientes',
-        difficulty: 'Fácil',
-        description: 'Reducen un 20% la inversión de tropas para establecer Túneles Logísticos.',
+        trait: 'Caminos Eficientes',
+        icon: '🔥',
+        description: 'Reducen un 20% la inversión de tropas para establecer Caminos Logísticos.',
         isPremium: false
     },
     {
