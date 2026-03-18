@@ -1,5 +1,6 @@
 import { LEVELS } from '../data/levels.js';
 import { Node } from '../entities/node.js';
+import { PIXI } from '../core/engine.js';
 
 export class LevelManager {
     constructor(game, world, ui, sfx, music) {
@@ -26,6 +27,10 @@ export class LevelManager {
                 this.unlockedLevels = JSON.parse(saved).unlockedLevels || 1;
             } catch (e) { console.error("Error loading save:", e); }
         }
+        
+        // TODO: RECORDATORIO - REMOVER ESTA LÍNEA AL HACER EL INSTALADOR FINAL.
+        // Mantiene temporalmente todos los niveles abiertos para pruebas.
+        this.unlockedLevels = LEVELS.length;
     }
 
     saveProgress() {
@@ -49,7 +54,17 @@ export class LevelManager {
         const levelData = LEVELS[index];
 
         this.world.nodes = levelData.nodes.map(nData => {
-            return new Node(nData.x * cx, nData.y * cy, nData.owner, nData.type);
+            let n = new Node(nData.x * cx, nData.y * cy, nData.owner, nData.type);
+            if (nData.isMobile) {
+                n.isMobile = true;
+                n.orbitAnchorX = nData.orbitAnchorX;
+                n.orbitAnchorY = nData.orbitAnchorY;
+                n.orbitRadiusX = nData.orbitRadiusX;
+                n.orbitRadiusY = nData.orbitRadiusY;
+                n.orbitSpeed = nData.orbitSpeed;
+                n.orbitAngle = 0;
+            }
+            return n;
         });
 
         for (let n of this.world.nodes) {
@@ -58,6 +73,27 @@ export class LevelManager {
 
         let minX = Infinity, minY = Infinity;
         let maxX = -Infinity, maxY = -Infinity;
+
+        this.world.hazards = [];
+        if (levelData.hazards) {
+            for (let hz of levelData.hazards) {
+                // Duplicate hazard data into world to be handled by physics
+                this.world.hazards.push({ ...hz });
+                
+                // Draw hazard visually
+                const gfx = new PIXI.Graphics();
+                if (hz.shape === "semicircle") {
+                    // Dibuja un arco cerrado de -90 a 90 grados apuntando al frente derecho
+                    gfx.moveTo(hz.x * cx, hz.y * cy - hz.radius * cx);
+                    gfx.arc(hz.x * cx, hz.y * cy, hz.radius * cx, -Math.PI/2, Math.PI/2);
+                    gfx.closePath();
+                } else {
+                    gfx.circle(hz.x * cx, hz.y * cy, hz.radius * cx);
+                }
+                gfx.fill({ color: hz.color || 0xff0000, alpha: hz.alpha || 0.2 });
+                this.game.layerNodes.addChild(gfx);
+            }
+        }
 
         for (let i = 0; i < this.world.nodes.length; i++) {
             let n = this.world.nodes[i];

@@ -56,5 +56,35 @@ export const LEVELS = [
             { id: 'hole_left', x: 0.15, y: 0.8, owner: 'neutral', type: 'tunel', tunnelTo: 'hole_right', startUnits: 0 },
             { id: 'hole_right', x: 0.85, y: 0.2, owner: 'neutral', type: 'tunel', tunnelTo: 'hole_left', startUnits: 0 }
         ]
+    },
+    {
+        name: "Nivel 5: La Hoja Flotante",
+        description: "El centro está bloqueado por un charco de insecticida letal. Usa la hoja flotante móvil para cruzar de forma segura sin perder tropas.",
+        nodes: [
+            // Jugador (Azul) - Izquierda central
+            { id: "p1", x: 0.1, y: 0.5, owner: 'player', type: 'gigante', startUnits: 150 },
+            { id: "p2", x: 0.1, y: 0.3, owner: 'neutral', type: 'normal', startUnits: 20 },
+            { id: "p3", x: 0.1, y: 0.7, owner: 'neutral', type: 'normal', startUnits: 20 },
+
+            // Enemigo 1 (Rojo) - Esquina superior derecha
+            { id: "e1", x: 0.9, y: 0.1, owner: 'enemy', type: 'gigante', startUnits: 150 },
+            { id: "e2", x: 0.7, y: 0.1, owner: 'neutral', type: 'normal', startUnits: 20 },
+
+            // Enemigo 2 (Naranja) - Esquina inferior derecha
+            { id: "f1", x: 0.9, y: 0.9, owner: 'fuego', type: 'gigante', startUnits: 150 },
+            { id: "f2", x: 0.7, y: 0.9, owner: 'neutral', type: 'normal', startUnits: 20 },
+
+            // Centro y Nodos Estratégicos
+            { id: "center", x: 0.6, y: 0.5, owner: 'neutral', type: 'gigante', startUnits: 100 },
+            { id: "top_mid", x: 0.6, y: 0.2, owner: 'neutral', type: 'enjambre', startUnits: 50 },
+            { id: "bot_mid", x: 0.6, y: 0.8, owner: 'neutral', type: 'enjambre', startUnits: 50 },
+
+            // Hoja Flotante Móvil (El Ferry oscilante)
+            { id: "hoja_movil", x: 0.35, y: 0.5, owner: 'neutral', type: 'enjambre', startUnits: 0, isMobile: true, orbitAnchorX: 0.34, orbitAnchorY: 0.5, orbitRadiusX: 0.17, orbitRadiusY: 0, orbitSpeed: 0.6 }
+        ],
+        hazards: [
+            // Zona que rodea parcialmente la salida del jugador (Semicírculo protector bloqueante)
+            { x: 0.16, y: 0.5, radius: 0.30, dps: 15, color: 0x8e44ad, alpha: 0.25, shape: "semicircle" }
+        ]
     }
 ];

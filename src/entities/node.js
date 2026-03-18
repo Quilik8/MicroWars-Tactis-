@@ -2,6 +2,7 @@
  * Clase Node — Nodo táctico del mapa (PixiJS / WebGL)
  */
 import * as PIXI from 'pixi.js';
+import { NodeRenderer } from './node_renderer.js';
 
 export class Node {
     static bulletPool = [];
@@ -42,6 +43,17 @@ export class Node {
         this.radius = stats.radius;
         this.maxUnits = stats.maxUnits;
         this.regenInterval = stats.regenInterval;
+
+        // Propiedades de movilidad orbital
+        this.isMobile = false; 
+        this.orbitAnchorX = 0;
+        this.orbitAnchorY = 0;
+        this.orbitRadiusX = 0;
+        this.orbitRadiusY = 0;
+        this.orbitSpeed = 0;
+        this.orbitAngle = 0;
+        this.vx = 0;
+        this.vy = 0;
 
         this.isSelected = false;
         this.hovered = false;
@@ -112,165 +124,12 @@ export class Node {
 
     /** Dibuja el nodo en su PIXI.Graphics — se llama cuando cambia estado */
     redraw(factionData = null) {
-        if (!this.gfx || this.gfx.destroyed) return;
-
-        // 1. Determinar esquema de colores
-        const c = Node.COLORS[this.owner] || Node.COLORS.neutral;
-
-        let fill = factionData ? factionData.color : c.fill;
-        let stroke = factionData ? 0xffffff : c.stroke;
-        let alpha = factionData ? 0.45 : c.alpha;
-        let glow = factionData ? factionData.color : (c.glow || fill);
-
-        const r = this.radius;
-        const g = this.gfx;
-        g.clear();
-
-        // ── Capas de Renderizado ──
-
-        // A. Halo exterior (glow reactivo)
-        const ev = this.evolution ? Node.EVOLUTION_COLORS[this.evolution] : null;
-        g.circle(this.x, this.y, r + 6);
-        g.stroke({ color: ev ? ev.accent : glow, alpha: 0.25, width: 8 });
-
-        // B. Cuerpo principal
-        if (this.type === 'tunel') {
-            g.circle(this.x, this.y, r);
-            g.fill({ color: 0x080808, alpha: 0.95 }); // Fondo oscuro (hoyo)
-            g.stroke({ color: stroke, alpha: 0.9, width: 3 });
-            // Anillos internos
-            g.circle(this.x, this.y, r * 0.6);
-            g.stroke({ color: fill, alpha: 0.6, width: 2, dashArray: [4, 4] });
-            g.circle(this.x, this.y, r * 0.2);
-            g.fill({ color: fill, alpha: 0.8 });
-        } else {
-            g.circle(this.x, this.y, r);
-            g.fill({ color: fill, alpha: alpha });
-            g.stroke({ color: stroke, alpha: 0.5, width: 2.5 });
-        }
-
-        // ── Evoluciones Visuales ──
-        if (this.evolution === 'espinoso') {
-            const numSpikes = 20;
-            const spikeMaxDist = this.radius + (this.artilleryRange * 0.25);
-            for (let i = 0; i < numSpikes; i++) {
-                const ang = (i / numSpikes) * Math.PI * 2;
-                const rx = this.x + Math.cos(ang) * (r + 2);
-                const ry = this.y + Math.sin(ang) * (r + 2);
-                const rx2 = this.x + Math.cos(ang) * spikeMaxDist;
-                const ry2 = this.y + Math.sin(ang) * spikeMaxDist;
-                g.moveTo(rx, ry).lineTo(rx2, ry2);
-            }
-            g.stroke({ color: 0x27ae60, alpha: 0.9, width: 3.5 });
-
-            for (let i = 0; i < numSpikes; i++) {
-                const ang = (i / numSpikes) * Math.PI * 2;
-                const perpAng = ang + Math.PI / 2;
-                const tinyLen = 4;
-                for (let j = 1; j <= 2; j++) {
-                    const distAlong = r + 8 + (j * 14);
-                    if (distAlong > spikeMaxDist - 5) continue;
-                    const mx = this.x + Math.cos(ang) * distAlong;
-                    const my = this.y + Math.sin(ang) * distAlong;
-                    g.moveTo(mx, my).lineTo(mx + Math.cos(perpAng) * tinyLen, my + Math.sin(perpAng) * tinyLen);
-                    g.moveTo(mx, my).lineTo(mx - Math.cos(perpAng) * tinyLen, my - Math.sin(perpAng) * tinyLen);
-                }
-            }
-            g.stroke({ color: 0x2ecc71, alpha: 0.8, width: 1.5 });
-        } else if (this.evolution === 'artilleria') {
-            g.moveTo(this.x - r * 0.4, this.y).lineTo(this.x + r * 0.4, this.y);
-            g.moveTo(this.x, this.y - r * 0.4).lineTo(this.x, this.y + r * 0.4);
-            g.stroke({ color: 0xf39c12, alpha: 0.9, width: 4 });
-            g.circle(this.x, this.y, this.artilleryRange);
-            g.stroke({ color: 0xf39c12, alpha: 0.1, width: 1 });
-        } else if (this.evolution === 'tanque') {
-            g.circle(this.x, this.y, r * 0.6);
-            g.fill({ color: 0x8e44ad, alpha: 0.4 });
-            g.stroke({ color: 0xffffff, alpha: 0.3, width: 1 });
-        }
-
-        // C. Indicador de Conquista (Anillo)
-        if (this.conquestProgress > 0 && this.conqueringFaction) {
-            const conquestC = Node.COLORS[this.conqueringFaction] || Node.COLORS.neutral;
-            const conquestColor = factionData && this.conqueringFaction === factionData.id ? factionData.color : conquestC.fill;
-            const startAngle = -Math.PI / 2;
-            const endAngle = startAngle + (Math.PI * 2 * this.conquestProgress);
-            
-            g.moveTo(this.x + Math.cos(startAngle) * (r + 4), this.y + Math.sin(startAngle) * (r + 4));
-            g.arc(this.x, this.y, r + 4, startAngle, endAngle);
-            g.stroke({ color: conquestColor, alpha: 0.9, width: 4.5, cap: 'round' });
-        }
-
-        // D. Indicadores de Estado
-        if (this.isSelected) {
-            g.circle(this.x, this.y, r + 10);
-            g.stroke({ color: 0xffffff, alpha: 1, width: 2.5 });
-        }
-
-        if (!this.evolution && this.owner === 'player') {
-            g.circle(this.x, this.y, r + 2);
-            g.stroke({ color: 0xffffff, alpha: 0.2, width: 1 });
-        }
+        NodeRenderer.redraw(this, factionData);
     }
 
     /** Tooltip al pasar el mouse */
     drawTooltip(ctx) {
-        if (!this.hovered) return;
-
-        let evLabel = this.evolution ? `Evo: ${this.evolution.toUpperCase()}` : 'Sin evolución';
-        let lines = [];
-
-        let total = 0;
-        const factionLines = [];
-        for (const factionId in this.counts) {
-            const count = this.counts[factionId];
-            total += count;
-            if (count > 0) {
-                const factionName = Node.COLORS[factionId]?.name || factionId;
-                factionLines.push(`${factionName}: ${count}`);
-            }
-        }
-
-        if (this.type === 'tunel') {
-            lines = [
-                `[TÚNEL PROFUNDO]`,
-                `Transito instantáneo`,
-                `Dueño:  ${Node.COLORS[this.owner]?.name || this.owner}`,
-                `---`,
-                ...factionLines
-            ];
-        } else {
-            lines = [
-                `[${this.type.toUpperCase()}]`,
-                evLabel,
-                `Dueño:  ${Node.COLORS[this.owner]?.name || this.owner}`,
-                `Límite: ${total} / ${this.maxUnits}`,
-                `---`,
-                ...factionLines
-            ];
-        }
-
-        let px = this.x + this.radius + 12;
-        let py = this.y - 55;
-        let lh = 14;
-        let padX = 8, padY = 6;
-        let width = 150;
-        let height = lines.length * lh + padY * 2;
-
-        ctx.fillStyle = 'rgba(0,0,0,0.75)';
-        ctx.beginPath();
-        ctx.roundRect(px - padX, py - padY, width, height, 4);
-        ctx.fill();
-
-        ctx.fillStyle = '#eee';
-        ctx.font = '11px monospace';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'top';
-        for (let i = 0; i < lines.length; i++) {
-            ctx.fillText(lines[i], px, py + i * lh);
-        }
-        ctx.textAlign = 'start';
-        ctx.textBaseline = 'alphabetic';
+        NodeRenderer.drawTooltip(this, ctx);
     }
 
     containsPoint(mx, my) {

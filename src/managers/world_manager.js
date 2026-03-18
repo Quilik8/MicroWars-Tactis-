@@ -3,6 +3,8 @@ import { Node } from '../entities/node.js';
 import { SpatialHashGrid } from '../core/logic_grid.js';
 import { PIXI } from '../core/engine.js';
 import { FACTIONS } from '../campaign/faction_data.js';
+import { CombatManager } from './combat_manager.js';
+import { PhysicsManager } from './physics_manager.js';
 
 export class WorldManager {
     constructor(game, ui, config) {
@@ -174,8 +176,8 @@ export class WorldManager {
         if (gameState !== 'PLAYING' || isPaused) return;
 
         this.updateNodeCounts();
-        this.updateGrid();
-        this.updatePhysics(dt);
+        PhysicsManager.updateGrid(this);
+        PhysicsManager.updatePhysics(this, dt);
         this.processSimulation(dt, SFX);
         this.cleanupUnits();
     }
@@ -233,74 +235,17 @@ export class WorldManager {
         }
     }
 
-    updateGrid() {
-        if (this.grid.boundsWidth !== this.game.width || this.grid.boundsHeight !== this.game.height) {
-            this.grid = new SpatialHashGrid(this.game.width, this.game.height, this.gridSize, 10000);
-        }
-        this.grid.clear();
-        this.travelingIds.length = 0;
 
-        // Optimization: Only insert units that are traveling or near defensive nodes
-        // For simplicity and to avoid missing interactions, we insert all for now but 
-        // we can pre-filter if performance drops. 
-        // Let's refine travelingIds to be more accurate.
-        for (let i = 0; i < this.allUnits.length; i++) {
-            let u = this.allUnits[i];
-            if (u.pendingRemoval) continue;
-            this.grid.insert(i, u.x | 0, u.y | 0);
-            if (u.state === 'traveling') {
-                this.travelingIds.push(i);
-            }
-        }
-    }
-
-    updatePhysics(dt) {
-        // Traveling units
-        for (let i = 0; i < this.travelingIds.length; i++) {
-            let u = this.allUnits[this.travelingIds[i]];
-            if (!u.targetNode) continue;
-            let targetR = u.targetNode.radius;
-            let dx = u.targetNode.x - u.x;
-            let dy = u.targetNode.y - u.y;
-            if (dx * dx + dy * dy < (targetR * 4) * (targetR * 4)) {
-                this.grid.findNear(u.x, u.y, 30, this.neighbors);
-            } else {
-                this.neighbors.length = 0;
-            }
-            u.updateForces(dt, u.targetNode.x, u.targetNode.y, targetR, this.neighbors, this.allUnits);
-        }
-
-        // Idle units (orbit)
-        for (let u of this.allUnits) {
-            if (u.state !== 'idle' || !u.targetNode) continue;
-            let tn = u.targetNode;
-            u.personalTheta += dt * (0.3 + u.personalR * 0.5) * (u.faction === 'player' ? 1 : -1);
-            let px = tn.x + Math.cos(u.personalTheta) * u.personalR * tn.radius;
-            let py = tn.y + Math.sin(u.personalTheta) * u.personalR * tn.radius;
-            let hDx = px - u.x, hDy = py - u.y;
-            let distH = Math.sqrt(hDx * hDx + hDy * hDy);
-            if (distH > 0.5) {
-                let factor = Math.min(distH / 15, 1.0) * 0.6;
-                u.vx = u.vx * 0.82 + (hDx / distH) * u.speed * factor * 0.15;
-                u.vy = u.vy * 0.82 + (hDy / distH) * u.speed * factor * 0.15;
-            } else {
-                u.vx *= 0.5; u.vy *= 0.5;
-            }
-            if (u.vx !== 0 || u.vy !== 0) u.angle = Math.atan2(u.vy, u.vx);
-        }
-
-        for (let u of this.allUnits) u.updatePosition(dt);
-    }
 
     processSimulation(dt, SFX) {
-        this.processArrivals();
-        this.drawTunnels();
+        PhysicsManager.processArrivals(this);
+        PhysicsManager.drawTunnels(this);
 
         let hoveredNode = null;
         for (let i = 0; i < this.nodes.length; i++) {
-            this.processCombat(i, dt, SFX);
+            CombatManager.processCombat(this, i, dt, SFX);
             this.processRegen(i, dt);
-            this.nodes[i].update(dt, this.grid, this.allUnits, this.game.layerUnits, SFX);
+            this.nodes[i].update(dt, this.grid, this.allUnits, this.game.layerNodes, SFX);
 
             if (this.nodes[i].hovered) hoveredNode = this.nodes[i];
         }
@@ -316,188 +261,9 @@ export class WorldManager {
         if (this.ui) this.ui.showNodeTooltip(node);
     }
 
-    drawTunnels() {
-        if (!this.tunnelGraphics) return;
 
-        this.tunnelGraphics.clear();
 
-        const time = performance.now();
-        for (let n of this.nodes) {
-            if (n.tunnelTo && n.tunnelTo.owner === n.owner && n.type !== 'tunel') {
-                const c = Node.COLORS[n.owner] || Node.COLORS.neutral;
-                const x1 = n.x, y1 = n.y;
-                const x2 = n.tunnelTo.x, y2 = n.tunnelTo.y;
 
-                // 1. EL TÚNEL (Línea base sutil)
-                this.tunnelGraphics.moveTo(x1, y1).lineTo(x2, y2);
-                this.tunnelGraphics.stroke({ color: c.fill, alpha: 0.15, width: 12 });
-
-                // 2. RECTÁNGULOS MÓVILES (Dashed line animado)
-                const scrollSpeed = 0.1;
-                const offset = (time * scrollSpeed) % 30;
-
-                this.tunnelGraphics.moveTo(x1, y1).lineTo(x2, y2);
-                this.tunnelGraphics.stroke({
-                    color: c.stroke,
-                    alpha: 0.8,
-                    width: 6,
-                    dashArray: [10, 20],
-                    dashOffset: -offset
-                });
-            }
-        }
-    }
-
-    processArrivals() {
-        for (let u of this.allUnits) {
-            if (u.state !== 'traveling') continue;
-            let tn = u.targetNode;
-            if (!tn) {
-                if (u.homeNode) { u.targetNode = u.homeNode; }
-                continue;
-            }
-            let dx = u.x - tn.x, dy = u.y - tn.y;
-            let arrivalR = tn.radius * 1.5;
-            if (dx * dx + dy * dy <= arrivalR * arrivalR) {
-                if (tn.type === 'tunel' && tn.tunnelTo && tn.owner === u.faction) {
-                    u.x = tn.tunnelTo.x + (Math.random() - 0.5) * tn.tunnelTo.radius;
-                    u.y = tn.tunnelTo.y + (Math.random() - 0.5) * tn.tunnelTo.radius;
-                    u.targetNode = tn.tunnelTo;
-                    u.homeNode = tn.tunnelTo;
-                    u.state = 'idle';
-                } else {
-                    u.state = 'idle';
-                    u.homeNode = tn;
-                    u.speedMult = 1.0;
-                }
-            }
-        }
-    }
-
-    processCombat(nodeIdx, dt, SFX) {
-        let node = this.nodes[nodeIdx];
-        let prevOwner = node.owner;
-        let p = node.power;
-
-        const factionIds = Object.keys(node.counts).filter(f => node.counts[f] > 0);
-
-        if (factionIds.length > 1) {
-            node.combatTimer += dt;
-            if (node.combatTimer >= this.combatInterval) {
-                node.combatTimer = 0;
-
-                // Daño recíproco y Trade 1v1
-                for (let f of factionIds) {
-                    let totalDamage = 0;
-                    for (let otherF of factionIds) {
-                        if (f === otherF) continue;
-                        
-                        let nAttacker = p[otherF] || 0;
-                        let nDefender = p[f] || 0;
-                        
-                        // Sistema 1vs1: Cada par de unidades lucha causando daño equitativo
-                        let pairings = Math.min(nAttacker, nDefender);
-                        
-                        // Ventaja abrumadora: Solo se activa cuando se tiene más del doble de tropas
-                        let overwhelm = Math.max(0, nAttacker - 2 * nDefender);
-                        
-                        let baseRate = 0.12; 
-                        let bonusRate = 0.08;
-                        
-                        totalDamage += (pairings * baseRate) + (overwhelm * bonusRate);
-                    }
-                    this.killNPower(node, f, totalDamage);
-                }
-            }
-        } else {
-            node.combatTimer = 0;
-        }
-
-        // Control de Conquista por tiempos (El Anillo)
-        let mainAttacker = null;
-        let attackerCount = 0;
-        
-        if (factionIds.length === 1 && factionIds[0] !== node.owner) {
-            mainAttacker = factionIds[0];
-            attackerCount = node.counts[mainAttacker];
-        } else if (factionIds.length > 1) {
-            // Find strongest attacker that isn't the owner
-            for (let f of factionIds) {
-                if (f !== node.owner && node.counts[f] > attackerCount) {
-                    mainAttacker = f;
-                    attackerCount = node.counts[f];
-                }
-            }
-        }
-
-        if (mainAttacker) {
-            // Check if another faction already started a conquest
-            if (node.conqueringFaction && node.conqueringFaction !== mainAttacker) {
-                // Decay previous conqueror's progress before starting our own
-                node.conquestProgress -= 0.5 * dt;
-                if (node.conquestProgress <= 0) {
-                    node.conquestProgress = 0;
-                    node.conqueringFaction = null; // Next frame, mainAttacker will start theirs
-                }
-            } else {
-                // Determinar la cantidad de tropas enemigas en el nodo
-                let enemiesCount = 0;
-                for (let f in node.counts) {
-                    if (f !== mainAttacker) {
-                        enemiesCount += node.counts[f];
-                    }
-                }
-
-                if (enemiesCount > 3) {
-                    // Si quedan más de 3 hormigas enemigas, el progreso de conquista se pausa
-                    if (node.conquestProgress > 0) {
-                        node.conqueringFaction = mainAttacker;
-                    }
-                } else {
-                    // Determinar velocidad de conquista (3 niveles según número de tropas)
-                    let conquestSpeed = 0.15; // Tropas normales (100-)
-                    if (attackerCount < 50) conquestSpeed = 0.05; // Pocas tropas
-                    if (attackerCount > 250) conquestSpeed = 0.35; // Muchas tropas
-
-                    node.conqueringFaction = mainAttacker;
-                    node.conquestProgress += conquestSpeed * dt;
-                    
-                    // Si supera 1.0, el nodo cambia de dueño
-                    if (node.conquestProgress >= 1.0) {
-                        node.owner = mainAttacker;
-                        node.conquestProgress = 0;
-                        node.conqueringFaction = null;
-                        node.evolution = null; // Pierde evoluciones al ser conquistado
-                    }
-                }
-            }
-        } else {
-            // Decaer progreso de conquista si pierdes las tropas / no hay atacantes dominantes
-            if (node.conquestProgress > 0) {
-                node.conquestProgress -= 0.5 * dt;
-                if (node.conquestProgress <= 0) {
-                    node.conquestProgress = 0;
-                    node.conqueringFaction = null;
-                }
-            }
-        }
-
-        // Redraw to ensure ring/color updates reflect
-        const currentFactionData = FACTIONS.find(f => f.id === node.owner);
-        node.redraw(currentFactionData);
-
-        if (node.owner !== prevOwner) {
-            if (SFX) {
-                if (node.owner === 'player' || node.owner === 'carpinteras') SFX.capture();
-                else if (prevOwner === 'player' || prevOwner === 'carpinteras') SFX.lost();
-            }
-            for (let n of this.nodes) {
-                if (n.tunnelTo === node || n === node) {
-                    if (n.type !== 'tunel') n.tunnelTo = null; // Only break logistical tunnels
-                }
-            }
-        }
-    }
 
     processRegen(nodeIdx, dt) {
         let node = this.nodes[nodeIdx];
@@ -533,26 +299,7 @@ export class WorldManager {
         }
     }
 
-    killNPower(node, faction, damage) {
-        if (damage <= 0) return;
-        // Matamos unidades que tengan este nodo como objetivo Y estén cerca o idle
-        for (let i = this.allUnits.length - 1; i >= 0 && damage > 0; i--) {
-            let u = this.allUnits[i];
-            if (u.faction === faction && u.targetNode === node && !u.pendingRemoval) {
-                const dx = u.x - node.x;
-                const dy = u.y - node.y;
-                if (u.state === 'idle' || (dx * dx + dy * dy < node.radius * node.radius * 6.25)) {
-                    let hp = u.power || 1;
-                    if (damage >= hp) {
-                        damage -= hp; u.pendingRemoval = true;
-                    } else {
-                        if (Math.random() < damage / hp) u.pendingRemoval = true;
-                        damage = 0;
-                    }
-                }
-            }
-        }
-    }
+
 
     cleanupUnits() {
         // BUGFIX #6: Array.splice() es O(n) por elemento → O(n²) total.

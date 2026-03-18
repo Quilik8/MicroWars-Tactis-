@@ -1,6 +1,7 @@
 import { PIXI } from '../core/engine.js';
 import { Node } from '../entities/node.js';
 import { FACTIONS } from '../campaign/faction_data.js';
+import { CombatManager } from './combat_manager.js';
 
 export class InputManager {
     constructor(game, world, ui, sfx) {
@@ -182,7 +183,7 @@ export class InputManager {
             if (clicked && clicked !== this.dragStartNode) {
                 if (this.dragStartNode.owner === 'player' && clicked.owner === 'player' && this.dragStartNode.type !== 'tunel') {
                     if (this.world.countAt(this.dragStartNode, 'player') >= 15) {
-                        this.world.killNPower(this.dragStartNode, 'player', 15);
+                        CombatManager.killNPower(this.world, this.dragStartNode, 'player', 15);
                         this.dragStartNode.tunnelTo = clicked;
                     }
                 } else if (this.dragStartNode.owner === 'player') {
@@ -294,7 +295,7 @@ export class InputManager {
         if (type === 'cancel' || !this.selectedNode) return;
         const cost = Node.EVOLUTION_COSTS[type];
         if (this.world.countAt(this.selectedNode, 'player') >= cost) {
-            this.world.killNPower(this.selectedNode, 'player', cost);
+            CombatManager.killNPower(this.world, this.selectedNode, 'player', cost);
             this.selectedNode.evolution = type;
             if (type === 'artilleria') this.selectedNode.artilleryInterval = 1.0;
             this.selectedNode.redraw();

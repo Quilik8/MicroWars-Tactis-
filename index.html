@@ -20,7 +20,7 @@
 </head>
 
 <body>
-    <button id="pauseBtn">⏸ Pausa</button>
+    <button id="pauseBtn" class="hidden">⏸ Pausa</button>
 
     <!-- UI Overlay (Menús Fijos) -->
     <div id="uiLayer">
@@ -92,13 +92,13 @@
         </div>
     </div>
     <!-- HUD de diagnóstico -->
-    <div id="hud">
+    <div id="hud" class="hidden">
         <span id="hudFPS">FPS: --</span>
         <span id="hudUnits">Unidades: 0</span>
     </div>
 
     <!-- Barra de porcentaje inferior -->
-    <div id="sendBar">
+    <div id="sendBar" class="hidden">
         <span id="sendLabel">Enviar: <strong id="sendPct">50%</strong></span>
         <input type="range" id="sendSlider" min="10" max="100" step="10" value="50">
         <button id="btnZoomOut" class="hud-btn">- Zoom</button>
