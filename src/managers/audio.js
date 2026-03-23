@@ -66,7 +66,22 @@ export const SFX = {
         setTimeout(() => playTone(800, 'sine', 0.3, 0.2), 200);
     },
     lost: () => playTone(200, 'sawtooth', 0.5, 0.2, 50),
-    shoot: () => playTone(600, 'sawtooth', 0.05, 0.1, 100), // Sonido seco de disparo
+    // Lanzamiento de proyectil ácido: thump grave + silbido ascendente
+    shoot: () => {
+        // Thump de cañón (impacto grave)
+        playTone(120, 'sawtooth', 0.08, 0.12, 55);
+        // Silbido del proyectil en vuelo
+        setTimeout(() => playTone(300, 'sine', 0.22, 0.05, 900), 30);
+    },
+    // Explosión de ácido al impactar
+    acidExplode: () => {
+        // Golpe de impacto (bajo y sucio)
+        playTone(80, 'sawtooth', 0.12, 0.15, 35);
+        // Salpicadura química
+        setTimeout(() => playTone(400, 'triangle', 0.18, 0.06, 150), 40);
+        // Burbujeo ácido final
+        setTimeout(() => playTone(200, 'sine', 0.25, 0.04, 80), 100);
+    },
     evolve: () => {
         playTone(300, 'triangle', 0.1, 0.2, 600);
         setTimeout(() => playTone(450, 'triangle', 0.1, 0.2, 900), 80);

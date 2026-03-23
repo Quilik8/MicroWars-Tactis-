@@ -95,6 +95,11 @@ export class LevelManager {
             }
         }
 
+        if (levelData.zones) {
+            this.world.zones = [...levelData.zones];
+            this.world.drawZones();
+        }
+
         for (let i = 0; i < this.world.nodes.length; i++) {
             let n = this.world.nodes[i];
             let nData = levelData.nodes[i];

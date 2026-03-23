@@ -125,6 +125,29 @@ export class PhysicsManager {
                 }
             }
         }
+
+        // Apply Zone Multipliers
+        if (world.zones && world.zones.length > 0) {
+            for (let u of world.allUnits) {
+                if (u.pendingRemoval) continue;
+                u.currentZoneMult = 1.0; // Reset every frame
+                
+                const uxPercent = u.x / world.game.width;
+                const uyPercent = u.y / world.game.height;
+
+                for (let z of world.zones) {
+                    if (uxPercent >= z.x && uxPercent <= z.x + z.width &&
+                        uyPercent >= z.y && uyPercent <= z.y + z.height) {
+                        u.currentZoneMult = z.speedMult;
+                        break; // Top-most zone takes precedence (if they overlap)
+                    }
+                }
+            }
+        } else {
+            for (let u of world.allUnits) {
+                if (!u.pendingRemoval) u.currentZoneMult = 1.0;
+            }
+        }
     }
 
     static processArrivals(world) {

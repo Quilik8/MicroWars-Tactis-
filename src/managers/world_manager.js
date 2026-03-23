@@ -15,6 +15,7 @@ export class WorldManager {
 
         this.allUnits = [];
         this.nodes = [];
+        this.zones = [];
         this.travelingIds = [];
         this.neighbors = [];
         this.menuAnts = [];
@@ -37,8 +38,19 @@ export class WorldManager {
         this.textures.enemy = this.makeTexture(app, 0xe74c3c);
         this.textures.neutral = this.makeTexture(app, 0x95a5a6);
 
+        this.zoneGraphics = new PIXI.Graphics();
+        this.game.layerNodes.addChild(this.zoneGraphics);
+
         this.tunnelGraphics = new PIXI.Graphics();
         this.game.layerNodes.addChild(this.tunnelGraphics);
+
+        // VFX: un único Graphics estático para artillería (dibujado cada frame desde layerVFX)
+        this.vfxGraphics = new PIXI.Graphics();
+        this.game.layerVFX.addChild(this.vfxGraphics);
+
+        // Sparks: un único Graphics estático para chispas de batalla
+        this.sparksGraphics = new PIXI.Graphics();
+        this.game.layerVFX.addChild(this.sparksGraphics);
     }
 
     makeTexture(app, color) {
@@ -146,6 +158,7 @@ export class WorldManager {
         this.allUnits.length = 0;
         this.travelingIds.length = 0;
         this.nodes.length = 0;
+        this.zones.length = 0;
         this.grid.clear();
 
         // Clear Pixi layers safely
@@ -154,17 +167,47 @@ export class WorldManager {
             for (let c of children) c.destroy({ children: true });
         }
 
+        if (this.game.layerVFX) {
+            const children = this.game.layerVFX.removeChildren();
+            for (let c of children) c.destroy({ children: true });
+        }
+
         if (this.game.layerNodes) {
             const children = this.game.layerNodes.removeChildren();
             for (let c of children) c.destroy({ children: true });
 
-            // Re-create/Re-add tunnel graphics since it was a child of layerNodes
+            // Re-create/Re-add graphics since they were children of layerNodes
+            this.zoneGraphics = new PIXI.Graphics();
+            this.game.layerNodes.addChild(this.zoneGraphics);
+            
             this.tunnelGraphics = new PIXI.Graphics();
             this.game.layerNodes.addChild(this.tunnelGraphics);
         }
 
+        // Re-crear VFX graphics tras limpiar layerVFX
+        this.vfxGraphics = new PIXI.Graphics();
+        if (this.game.layerVFX) this.game.layerVFX.addChild(this.vfxGraphics);
+
+        this.sparksGraphics = new PIXI.Graphics();
+        if (this.game.layerVFX) this.game.layerVFX.addChild(this.sparksGraphics);
+
         if (this.ui) this.ui.hideNodeTooltip();
         Node.clearPool();
+    }
+
+    drawZones() {
+        if (!this.zoneGraphics) return;
+        this.zoneGraphics.clear();
+        
+        for (let z of this.zones) {
+            this.zoneGraphics.rect(
+                z.x * this.game.width, 
+                z.y * this.game.height, 
+                z.width * this.game.width, 
+                z.height * this.game.height
+            );
+            this.zoneGraphics.fill({ color: z.color, alpha: z.alpha || 0.3 });
+        }
     }
 
     update(dt, gameState, isPaused, SFX) {
@@ -202,15 +245,20 @@ export class WorldManager {
     }
 
     updateNodeCounts() {
+        // Reset selectivo: reutilizar los mismos objetos en vez de recrearlos cada frame.
+        // Nota: Node.constructor solo inicializa `counts`. population y power se crean aquí
+        // la primera vez (primer frame tras nivel cargado).
         for (let n of this.nodes) {
-            n.counts = { neutral: 0 };
-            n.population = { neutral: 0 };
-            n.power = { neutral: 0 };
-            for (let fId in Node.COLORS) {
-                n.counts[fId] = 0;
-                n.population[fId] = 0;
-                n.power[fId] = 0;
-            }
+            // Garantizar que existen antes de iterar
+            if (!n.population) n.population = {};
+            if (!n.power)      n.power      = {};
+
+            const c   = n.counts;
+            const pop = n.population;
+            const pw  = n.power;
+            for (const k in c)   c[k]   = 0;
+            for (const k in pop) pop[k] = 0;
+            for (const k in pw)  pw[k]  = 0;
         }
 
         const CAPTURE_DIST_MULT = 2.5;
@@ -219,18 +267,24 @@ export class WorldManager {
             if (u.pendingRemoval || !u.targetNode) continue;
 
             const node = u.targetNode;
-            const p = u.power || 1;
-            const f = u.faction;
+            const p    = u.power || 1;
+            const f    = u.faction;
 
-            const dx = u.x - node.x;
-            const dy = u.y - node.y;
+            const dx     = u.x - node.x;
+            const dy     = u.y - node.y;
             const distSq = dx * dx + dy * dy;
-            const captureRangeSq = (node.radius * CAPTURE_DIST_MULT) * (node.radius * CAPTURE_DIST_MULT);
+            const capSq  = (node.radius * CAPTURE_DIST_MULT) * (node.radius * CAPTURE_DIST_MULT);
 
-            if (u.state === 'idle' || distSq < captureRangeSq) {
-                node.counts[f] = (node.counts[f] || 0) + 1;
-                node.population[f] = (node.population[f] || 0) + p;
-                node.power[f] = (node.power[f] || 0) + p;
+            if (u.state === 'idle' || distSq < capSq) {
+                // Inicializar la clave solo la primera vez que aparece en este nodo
+                if (node.counts[f] === undefined) {
+                    node.counts[f]     = 0;
+                    node.population[f] = 0;
+                    node.power[f]      = 0;
+                }
+                node.counts[f]++;
+                node.population[f] += p;
+                node.power[f]      += p;
             }
         }
     }
@@ -241,11 +295,16 @@ export class WorldManager {
         PhysicsManager.processArrivals(this);
         PhysicsManager.drawTunnels(this);
 
+        // Limpiar VFX graphics al inicio de cada frame (se redibujarán en node.update)
+        if (this.vfxGraphics) this.vfxGraphics.clear();
+        if (this.sparksGraphics) this.sparksGraphics.clear();
+
         let hoveredNode = null;
         for (let i = 0; i < this.nodes.length; i++) {
             CombatManager.processCombat(this, i, dt, SFX);
             this.processRegen(i, dt);
-            this.nodes[i].update(dt, this.grid, this.allUnits, this.game.layerNodes, SFX);
+            // Pasar los Graphics estáticos a node.update para que acumule sus dibujos
+            this.nodes[i].update(dt, this.grid, this.allUnits, this.vfxGraphics, this.sparksGraphics, SFX);
 
             if (this.nodes[i].hovered) hoveredNode = this.nodes[i];
         }
@@ -325,20 +384,27 @@ export class WorldManager {
     powerAt(node, faction) { return node.power ? (node.power[faction] || 0) : 0; }
 
     sendTroops(fromNode, toNode, percent, faction = 'player') {
-        let eligible = this.allUnits.filter(u => {
-            if (u.faction !== faction || u.pendingRemoval) return false;
-            // Bugfix: Solo enviar tropas que ya estén fìsicamente estacionadas en el nodo de origen.
-            if (u.targetNode === fromNode && u.state === 'idle') return true;
-            return false;
-        });
+        // Loop directo sin filter() para evitar allocations en cada interacción
+        let eligible = 0;
+        for (let u of this.allUnits) {
+            if (u.faction === faction && !u.pendingRemoval &&
+                u.targetNode === fromNode && u.state === 'idle') eligible++;
+        }
 
-        let count = (percent >= 0.99) ? eligible.length : Math.floor(eligible.length * percent);
-        if (count < 1 && eligible.length > 0 && percent > 0) count = 1;
+        let count = (percent >= 0.99) ? eligible : Math.floor(eligible * percent);
+        if (count < 1 && eligible > 0 && percent > 0) count = 1;
+        if (count === 0) return;
 
-        for (let i = 0; i < count; i++) {
-            eligible[i].targetNode = toNode;
-            eligible[i].state = 'traveling';
-            eligible[i].speedMult = 1.0;
+        let sent = 0;
+        for (let u of this.allUnits) {
+            if (sent >= count) break;
+            if (u.faction === faction && !u.pendingRemoval &&
+                u.targetNode === fromNode && u.state === 'idle') {
+                u.targetNode = toNode;
+                u.state      = 'traveling';
+                u.speedMult  = 1.0;
+                sent++;
+            }
         }
     }
 

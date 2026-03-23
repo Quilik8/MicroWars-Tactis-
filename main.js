@@ -15,7 +15,7 @@ import { LEVELS } from './src/data/levels.js';
 const CONFIG = {
     gridCellSize: 30,
     combatInterval: 0.7,
-    aiAttackInterval: 6
+    aiAttackInterval: 3
 };
 
 const game = new Engine();

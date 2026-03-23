@@ -15,7 +15,8 @@ export class Engine {
 
         // Capas del escenario (zIndex)
         this.layerNodes = null;   // Fondo: túneles y nodos
-        this.layerUnits = null;   // Frente: las hormigas
+        this.layerUnits = null;   // Medio: las hormigas
+        this.layerVFX = null;     // Frente: lásers y chispas
         this.layerMenu = null;    // UI/Menú Pixi
 
         // Callbacks insertables desde main.js
@@ -61,15 +62,18 @@ export class Engine {
         this.world = new PIXI.Container();
         this.layerNodes = new PIXI.Container();
         this.layerUnits = new PIXI.Container();
+        this.layerVFX = new PIXI.Container();
         this.layerMenu = new PIXI.Container();
 
         this.world.addChild(this.layerNodes);
         this.world.addChild(this.layerUnits);
+        this.world.addChild(this.layerVFX);
         this.app.stage.addChild(this.world);
         this.app.stage.addChild(this.layerMenu);
 
         this.isReady = true;
-        window.addEventListener('resize', () => this._resize());
+        this._resizeHandler = () => this._resize();
+        window.addEventListener('resize', this._resizeHandler);
 
         this.app.ticker.add((ticker) => {
             const dt = ticker.deltaMS / 1000;
@@ -82,14 +86,42 @@ export class Engine {
     }
 
     _resize() {
-        this.width = window.innerWidth;
+        const prevW = this.width;
+        const prevH = this.height;
+
+        this.width  = window.innerWidth;
         this.height = window.innerHeight;
+
         if (this.app && this.app.renderer) {
             this.app.renderer.resize(this.width, this.height);
         }
         if (this.uiCanvas) {
-            this.uiCanvas.width = this.width;
+            this.uiCanvas.width  = this.width;
             this.uiCanvas.height = this.height;
         }
+
+        // Escalar y recentrar el world container proporcionalmente al nuevo tamaño
+        if (this.world && prevW > 0 && prevH > 0) {
+            const scaleX = this.width  / prevW;
+            const scaleY = this.height / prevH;
+            // Ajustar posición del mundo para que no se desplace al cambiar resolución
+            this.world.position.x *= scaleX;
+            this.world.position.y *= scaleY;
+        }
+    }
+
+    /** Limpia recursos y desregistra listeners */
+    destroy() {
+        if (this._resizeHandler) {
+            window.removeEventListener('resize', this._resizeHandler);
+        }
+        if (this.app) {
+            this.app.destroy(true, { children: true });
+            this.app = null;
+        }
+        if (this.uiCanvas && this.uiCanvas.parentNode) {
+            this.uiCanvas.parentNode.removeChild(this.uiCanvas);
+        }
+        this.isReady = false;
     }
 }

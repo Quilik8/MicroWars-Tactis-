@@ -12,6 +12,9 @@ export class AIManager {
         this._targetNodes = [];
         this._playerNodes = [];
         this._frontlines = [];
+        
+        // Costos conocidos de evolución (duplicado temporal para uso rápido sin depender de Entity)
+        this.evoCosts = { espinoso: 30, artilleria: 40, tanque: 35 };
     }
 
     update(dt, nodes, allUnits, aiFaction = 'enemy', playerFaction = 'player') {
@@ -34,28 +37,62 @@ export class AIManager {
 
         const countAt = (node, faction) => node.counts ? (node.counts[faction] || 0) : 0;
 
-        // 1. TÚNELES LOGÍSTICOS IA
+        // 1. GESTIÓN DE NODOS PROPIOS (Logística y Evolución)
         for (let en of this._aiNodes) {
             let count = countAt(en, aiFaction);
-            if (count > en.maxUnits * 0.6 && !en.tunnelTo) {
-                // Buscar el nodo IA más cercano al frente del jugador con espacio disponible
-                let bestFront = null;
-                let bestDist = Infinity;
 
-                for (let fn of this._aiNodes) {
-                    if (fn === en || countAt(fn, aiFaction) >= fn.maxUnits * 0.85) continue;
-                    // Distancia al nodo del jugador más cercano
-                    let minDistToPlayer = Infinity;
-                    for (let pn of this._playerNodes) {
-                        const d = Math.hypot(pn.x - fn.x, pn.y - fn.y);
-                        if (d < minDistToPlayer) minDistToPlayer = d;
+            // A) Adquirir Evoluciones
+            if (!en.evolution && en.type !== 'tunel' && count > 60) {
+                // Determinar si es nodo "Frontline" (cerca de enemigos) o "Backline" (lejos)
+                let minDistToEnemy = Infinity;
+                for (let pn of this._playerNodes) {
+                    const d = Math.hypot(pn.x - en.x, pn.y - en.y);
+                    if (d < minDistToEnemy) minDistToEnemy = d;
+                }
+
+                if (minDistToEnemy < 400) {
+                    // Cerca del frente -> Defensivo
+                    if (count >= this.evoCosts.artilleria && Math.random() < 0.5) {
+                        this.buyEvolution(en, 'artilleria', this.evoCosts.artilleria, aiFaction, allUnits);
+                    } else if (count >= this.evoCosts.espinoso) {
+                        this.buyEvolution(en, 'espinoso', this.evoCosts.espinoso, aiFaction, allUnits);
                     }
-                    if (minDistToPlayer < bestDist) {
-                        bestDist = minDistToPlayer;
-                        bestFront = fn;
+                } else {
+                    // Lejos del frente -> Producción de vida/daño pesado
+                    if (count >= this.evoCosts.tanque) {
+                        this.buyEvolution(en, 'tanque', this.evoCosts.tanque, aiFaction, allUnits);
                     }
                 }
-                if (bestFront) en.tunnelTo = bestFront;
+            }
+
+            // B) Logística de Túneles
+            if (en.type !== 'tunel') {
+                if (en.tunnelTo) {
+                    // Cancelar túnel si el destino está lleno
+                    if (countAt(en.tunnelTo, aiFaction) >= en.tunnelTo.maxUnits * 0.90) {
+                        en.tunnelTo = null;
+                    }
+                }
+
+                // Crear nuevo túnel si tenemos exceso de tropas
+                if (count > en.maxUnits * 0.6 && !en.tunnelTo) {
+                    let bestFront = null;
+                    let bestDist = Infinity;
+
+                    for (let fn of this._aiNodes) {
+                        if (fn === en || countAt(fn, aiFaction) >= fn.maxUnits * 0.85) continue;
+                        let minDistToPlayer = Infinity;
+                        for (let pn of this._playerNodes) {
+                            const d = Math.hypot(pn.x - fn.x, pn.y - fn.y);
+                            if (d < minDistToPlayer) minDistToPlayer = d;
+                        }
+                        if (minDistToPlayer < bestDist) {
+                            bestDist = minDistToPlayer;
+                            bestFront = fn;
+                        }
+                    }
+                    if (bestFront) en.tunnelTo = bestFront;
+                }
             }
         }
 
@@ -80,7 +117,15 @@ export class AIManager {
                 if (target.type === 'enjambre') score += 150;
                 if (target.type === 'gigante') score += 80;
 
-                if (count * 0.6 > defenders || target.owner === 'neutral' || needsToDump) {
+                // Expansión Agresiva Temprana: Extra bonificación si es neutral y está casi vacío
+                if (target.owner === 'neutral') {
+                    score += 500;
+                    if (defenders < 10) score += 800;
+                }
+
+                // Evaluar la ventaja matemática (solo atacamos si tenemos al menos el 70% de la fuerza enemiga, 
+                // o si estamos al máximo de capacidad y necesitamos escupir tropas)
+                if ((count * 0.7 > defenders) || target.owner === 'neutral' || needsToDump) {
                     if (score > bestScore) {
                         bestScore = score;
                         bestTarget = target;
@@ -99,6 +144,21 @@ export class AIManager {
                         sent++;
                     }
                 }
+            }
+        }
+    }
+
+    buyEvolution(node, type, cost, faction, allUnits) {
+        node.evolution = type;
+        if (type === 'artilleria') node.artilleryInterval = 1.0;
+        node.redraw();
+        
+        let killed = 0;
+        for (let u of allUnits) {
+            if (killed >= cost) break;
+            if (!u.pendingRemoval && u.faction === faction && u.targetNode === node && u.state === 'idle') {
+                u.pendingRemoval = true;
+                killed++;
             }
         }
     }

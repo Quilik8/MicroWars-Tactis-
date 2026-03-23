@@ -69,7 +69,7 @@ export class Unit {
         let distToCenter = Math.sqrt(dx * dx + dy * dy);
 
         let desiredVx = 0, desiredVy = 0;
-        let actualSpeed = this.speed * this.speedMult;
+        let actualSpeed = this.speed * this.speedMult * (this.currentZoneMult || 1.0);
 
         if (distToCenter > 0.01) {
             if (distToCenter > APPROACH_ZONE) {

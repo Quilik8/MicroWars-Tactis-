@@ -8,10 +8,10 @@ export class NodeRenderer {
         // 1. Determinar esquema de colores
         const c = Node.COLORS[node.owner] || Node.COLORS.neutral;
 
-        let fill = factionData ? factionData.color : c.fill;
+        let fill = node.flashTargetColor ? node.flashTargetColor : (factionData ? factionData.color : c.fill);
         let stroke = factionData ? 0xffffff : c.stroke;
         let alpha = factionData ? 0.45 : c.alpha;
-        let glow = factionData ? factionData.color : (c.glow || fill);
+        let glow = node.flashTargetColor ? node.flashTargetColor : (factionData ? factionData.color : (c.glow || fill));
 
         const r = node.radius;
         const g = node.gfx;
@@ -69,11 +69,50 @@ export class NodeRenderer {
             }
             g.stroke({ color: 0x2ecc71, alpha: 0.8, width: 1.5 });
         } else if (node.evolution === 'artilleria') {
-            g.moveTo(node.x - r * 0.4, node.y).lineTo(node.x + r * 0.4, node.y);
-            g.moveTo(node.x, node.y - r * 0.4).lineTo(node.x, node.y + r * 0.4);
-            g.stroke({ color: 0xf39c12, alpha: 0.9, width: 4 });
+            // ── Cañón de artillería química ──────────────────────────
+            // Cuatro cañones en diagonal apuntando hacia afuera
+            const cannonAngles = [Math.PI * 0.25, Math.PI * 0.75, Math.PI * 1.25, Math.PI * 1.75];
+            const barrelLen    = r * 1.05;
+            const barrelW      = 4.5;
+
+            for (const ang of cannonAngles) {
+                const bx1 = node.x + Math.cos(ang) * (r * 0.3);
+                const by1 = node.y + Math.sin(ang) * (r * 0.3);
+                const bx2 = node.x + Math.cos(ang) * barrelLen;
+                const by2 = node.y + Math.sin(ang) * barrelLen;
+
+                // Cuerpo del cañón (relleno oscuro)
+                g.moveTo(bx1, by1).lineTo(bx2, by2);
+                g.stroke({ color: 0x222222, alpha: 0.95, width: barrelW + 3 });
+
+                // Brillo del cañón (naranja ácido)
+                g.moveTo(bx1, by1).lineTo(bx2, by2);
+                g.stroke({ color: 0xf39c12, alpha: 0.95, width: barrelW });
+
+                // Boca del cañón: semicírculo
+                g.circle(bx2, by2, barrelW * 0.6);
+                g.fill({ color: 0xf39c12, alpha: 0.9 });
+            }
+
+            // Base central (soporte del cañón, encima del cuerpo del nodo)
+            g.circle(node.x, node.y, r * 0.38);
+            g.fill({ color: 0x1a1a1a, alpha: 0.85 });
+            g.circle(node.x, node.y, r * 0.28);
+            g.fill({ color: 0xf39c12, alpha: 0.75 });
+
+            // ── Indicador de recarga (arco de progreso) ──
+            if (node.artilleryTimer !== undefined && node.artilleryInterval) {
+                const reloadProgress = Math.min(1, node.artilleryTimer / node.artilleryInterval);
+                const startA = -Math.PI / 2;
+                const endA   = startA + Math.PI * 2 * reloadProgress;
+                g.moveTo(node.x + Math.cos(startA) * (r + 7), node.y + Math.sin(startA) * (r + 7));
+                g.arc(node.x, node.y, r + 7, startA, endA);
+                g.stroke({ color: 0xf39c12, alpha: reloadProgress * 0.9, width: 2.5, cap: 'round' });
+            }
+
+            // ── Anillo de rango punteado ──
             g.circle(node.x, node.y, node.artilleryRange);
-            g.stroke({ color: 0xf39c12, alpha: 0.1, width: 1 });
+            g.stroke({ color: 0xf39c12, alpha: 0.08, width: 1, dashArray: [6, 8] });
         } else if (node.evolution === 'tanque') {
             g.circle(node.x, node.y, r * 0.6);
             g.fill({ color: 0x8e44ad, alpha: 0.4 });
