@@ -26,8 +26,10 @@ export class UIManager {
         this.sendSlider = document.getElementById('sendSlider');
         this.sendPct = document.getElementById('sendPct');
         this.pauseBtn = document.getElementById('pauseBtn');
+        this.topControls = document.getElementById('topControls');
         this.hud = document.getElementById('hud');
         this.sendBar = document.getElementById('sendBar');
+        this.speedBtns = document.querySelectorAll('.speed-btn');
 
         // Tooltip DOM element
         let existingTooltip = document.getElementById('nodeTooltip');
@@ -57,6 +59,16 @@ export class UIManager {
         if (this.pauseBtn) {
             this.pauseBtn.addEventListener('click', () => {
                 this.callbacks.onTogglePause();
+            });
+        }
+
+        // Botones de velocidad (1×, 2×, 4×)
+        if (this.speedBtns) {
+            this.speedBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const speed = parseInt(btn.dataset.speed);
+                    if (this.callbacks.onSetSpeed) this.callbacks.onSetSpeed(speed);
+                });
             });
         }
 
@@ -125,6 +137,14 @@ export class UIManager {
     updateHUD(fps, units, power) {
         if (this.hudFPS) this.hudFPS.textContent = `FPS: ${fps}`;
         if (this.hudUnits) this.hudUnits.textContent = `Hormigas: ${units} (Fuerza: ${power})`;
+    }
+
+    updateSpeedButtons(activeSpeed) {
+        if (!this.speedBtns) return;
+        this.speedBtns.forEach(btn => {
+            const speed = parseInt(btn.dataset.speed);
+            btn.classList.toggle('active-speed', speed === activeSpeed);
+        });
     }
 
     showNodeTooltip(node) {
@@ -228,7 +248,7 @@ export class UIManager {
 
         if (this.hud) this.hud.classList.toggle('hidden', !isIngame);
         if (this.sendBar) this.sendBar.classList.toggle('hidden', !isIngame);
-        if (this.pauseBtn) this.pauseBtn.classList.toggle('hidden', !isIngame);
+        if (this.topControls) this.topControls.classList.toggle('hidden', !isIngame);
 
         if (state === 'MENU') {
             this.showScreen('mainMenu');
@@ -260,11 +280,15 @@ export class UIManager {
                 if (s) { s.classList.remove('active'); s.classList.add('hidden'); }
             });
             if (this.callbacks.onClearMenuAnts) this.callbacks.onClearMenuAnts();
+            // Siempre arrancar en velocidad normal al iniciar un nivel
+            if (this.callbacks.onSetSpeed) this.callbacks.onSetSpeed(1);
         } else if (state === 'VICTORY') {
+            if (this.callbacks.onSetSpeed) this.callbacks.onSetSpeed(1);
             if (this.callbacks.onVictory) this.callbacks.onVictory();
             this.showScreen('levelComplete');
             if (this.callbacks.onStopMusic) this.callbacks.onStopMusic();
         } else if (state === 'GAMEOVER') {
+            if (this.callbacks.onSetSpeed) this.callbacks.onSetSpeed(1);
             if (this.callbacks.onGameOver) this.callbacks.onGameOver();
             this.showScreen('gameOver');
             if (this.callbacks.onStopMusic) this.callbacks.onStopMusic();

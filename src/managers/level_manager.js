@@ -1,6 +1,7 @@
 import { LEVELS } from '../data/levels.js';
 import { Node } from '../entities/node.js';
 import { PIXI } from '../core/engine.js';
+import { WaterSweep } from '../systems/water_sweep.js';
 
 export class LevelManager {
     constructor(game, world, ui, sfx, music) {
@@ -13,9 +14,8 @@ export class LevelManager {
         this.currentLevelIndex = 0;
         this.unlockedLevels = 1;
 
-        // FIX #18: gracia para evitar race condition de victoria/derrota al cargar nivel
         this._levelStartGrace = 0;
-        this._GRACE_DURATION = 1.5; // segundos hasta que se comprueba victoria
+        this._GRACE_DURATION = 1.5;
 
         this.loadProgress();
     }
@@ -27,9 +27,7 @@ export class LevelManager {
                 this.unlockedLevels = JSON.parse(saved).unlockedLevels || 1;
             } catch (e) { console.error("Error loading save:", e); }
         }
-        
-        // TODO: RECORDATORIO - REMOVER ESTA LÍNEA AL HACER EL INSTALADOR FINAL.
-        // Mantiene temporalmente todos los niveles abiertos para pruebas.
+        // TODO: RECORDATORIO - REMOVER EN PRODUCCIÓN
         this.unlockedLevels = LEVELS.length;
     }
 
@@ -40,7 +38,6 @@ export class LevelManager {
     loadLevel(index) {
         if (index >= LEVELS.length) index = 0;
         this.currentLevelIndex = index;
-        // FIX #18: reiniciar el contador de gracia al cargar nivel
         this._levelStartGrace = 0;
 
         this.ui.setGameState('PLAYING');
@@ -49,20 +46,20 @@ export class LevelManager {
             this.ui.callbacks.onResetCamera();
         }
 
-        const cx = this.game.width || window.innerWidth;
+        const cx = this.game.width  || window.innerWidth;
         const cy = this.game.height || window.innerHeight;
         const levelData = LEVELS[index];
 
         this.world.nodes = levelData.nodes.map(nData => {
             let n = new Node(nData.x * cx, nData.y * cy, nData.owner, nData.type);
             if (nData.isMobile) {
-                n.isMobile = true;
+                n.isMobile     = true;
                 n.orbitAnchorX = nData.orbitAnchorX;
                 n.orbitAnchorY = nData.orbitAnchorY;
                 n.orbitRadiusX = nData.orbitRadiusX;
                 n.orbitRadiusY = nData.orbitRadiusY;
-                n.orbitSpeed = nData.orbitSpeed;
-                n.orbitAngle = 0;
+                n.orbitSpeed   = nData.orbitSpeed;
+                n.orbitAngle   = 0;
             }
             return n;
         });
@@ -74,18 +71,15 @@ export class LevelManager {
         let minX = Infinity, minY = Infinity;
         let maxX = -Infinity, maxY = -Infinity;
 
+        // ── Hazards físicos ──────────────────────────────────────────
         this.world.hazards = [];
         if (levelData.hazards) {
             for (let hz of levelData.hazards) {
-                // Duplicate hazard data into world to be handled by physics
                 this.world.hazards.push({ ...hz });
-                
-                // Draw hazard visually
                 const gfx = new PIXI.Graphics();
                 if (hz.shape === "semicircle") {
-                    // Dibuja un arco cerrado de -90 a 90 grados apuntando al frente derecho
                     gfx.moveTo(hz.x * cx, hz.y * cy - hz.radius * cx);
-                    gfx.arc(hz.x * cx, hz.y * cy, hz.radius * cx, -Math.PI/2, Math.PI/2);
+                    gfx.arc(hz.x * cx, hz.y * cy, hz.radius * cx, -Math.PI / 2, Math.PI / 2);
                     gfx.closePath();
                 } else {
                     gfx.circle(hz.x * cx, hz.y * cy, hz.radius * cx);
@@ -95,65 +89,66 @@ export class LevelManager {
             }
         }
 
+        // ── Marea Barriente (WaterSweep) ─────────────────────────────
+        // Cada WaterSweep recibe un PIXI.Graphics del layerVFX para que
+        // la barra viva en espacio de mundo y se mueva con el mapa.
+        this.world.waterSweeps = [];
+        if (levelData.waterSweeps) {
+            for (let swCfg of levelData.waterSweeps) {
+                const sweep = new WaterSweep(swCfg);
+                sweep.initGraphics(PIXI, this.game.layerVFX);
+                this.world.waterSweeps.push(sweep);
+            }
+        }
+
         if (levelData.zones) {
             this.world.zones = [...levelData.zones];
             this.world.drawZones();
         }
 
         for (let i = 0; i < this.world.nodes.length; i++) {
-            let n = this.world.nodes[i];
+            let n     = this.world.nodes[i];
             let nData = levelData.nodes[i];
-            let cant = (nData.startUnits !== undefined) ? nData.startUnits : Math.floor(n.maxUnits * 0.4);
+            let cant  = (nData.startUnits !== undefined)
+                ? nData.startUnits
+                : Math.floor(n.maxUnits * 0.4);
             this.world.spawnUnitsAt(n, nData.owner, cant);
 
             if (nData.tunnelTo) {
                 let targetIdx = levelData.nodes.findIndex(nd => nd.id === nData.tunnelTo);
-                if (targetIdx !== -1) {
-                    n.tunnelTo = this.world.nodes[targetIdx];
-                }
+                if (targetIdx !== -1) n.tunnelTo = this.world.nodes[targetIdx];
             }
 
-            // Registrar límites físicos de la partida
             if (n.x < minX) minX = n.x;
             if (n.x > maxX) maxX = n.x;
             if (n.y < minY) minY = n.y;
             if (n.y > maxY) maxY = n.y;
         }
 
-        // --- ENCUADRE DINÁMICO DE CÁMARA (Dynamic Auto-Zoom) ---
+        // ── Encuadre dinámico de cámara ──────────────────────────────
         if (this.game.world && this.world.nodes.length > 0) {
-            const padding = 150; // Margen en píxeles
-            const mapWidth = (maxX - minX) + padding * 2;
+            const padding   = 150;
+            const mapWidth  = (maxX - minX) + padding * 2;
             const mapHeight = (maxY - minY) + padding * 2;
-            
-            // Calculamos qué escala se requiere para que mapWidth quepa en cx, y lo mismo con cy
-            const scaleX = cx / mapWidth;
-            const scaleY = cy / mapHeight;
-            let idealScale = Math.min(scaleX, scaleY);
-            
-            // Limitamos a la escala máxima/mínima del usuario
+            let idealScale  = Math.min(cx / mapWidth, cy / mapHeight);
             idealScale = Math.max(0.3, Math.min(1.2, idealScale));
-            
+
             this.game.world.scale.set(idealScale);
-            
-            // Centrar el mapa calculado en la pantalla real
             const mapCenterX = (minX + maxX) / 2;
             const mapCenterY = (minY + maxY) / 2;
             this.game.world.position.x = (cx / 2) - (mapCenterX * idealScale);
             this.game.world.position.y = (cy / 2) - (mapCenterY * idealScale);
         }
 
-        const introTitle = document.getElementById('introTitle');
-        const introDesc = document.getElementById('introDesc');
+        const introTitle  = document.getElementById('introTitle');
+        const introDesc   = document.getElementById('introDesc');
         const introScreen = document.getElementById('levelIntro');
-
-        if (introTitle) introTitle.innerText = levelData.name || `NIVEL ${index + 1}`;
-        if (introDesc) introDesc.innerText = levelData.description || "Acaba con el nido enemigo.";
+        if (introTitle) introTitle.innerText = levelData.name        || `NIVEL ${index + 1}`;
+        if (introDesc)  introDesc.innerText  = levelData.description || "Acaba con el nido enemigo.";
         if (introScreen) {
             introScreen.classList.remove('hidden');
             introScreen.classList.add('active');
             this.ui.setPauseState(true);
-
             const onIntroClick = () => {
                 introScreen.classList.remove('active');
                 introScreen.classList.add('hidden');
@@ -166,24 +161,40 @@ export class LevelManager {
         if (this.startMusic) this.startMusic('LEVEL', index);
     }
 
+    // ─────────────────────────────────────────────────────────────────
+    // CONDICIÓN DE VICTORIA
+    // ─────────────────────────────────────────────────────────────────
     checkVictory(dt, playerNodes, enemyNodes, playerUnits, enemyUnits) {
-        // FIX #18: no evaluar condiciones de victoria durante el período de gracia inicial
         this._levelStartGrace += dt;
         if (this._levelStartGrace < this._GRACE_DURATION) return null;
 
+        // Derrota
         if (playerNodes === 0 && playerUnits === 0) {
             this.ui.setGameState('GAMEOVER');
             return false;
-        } else if (enemyNodes === 0 && enemyUnits === 0) {
+        }
+
+        // Victoria clásica
+        if (enemyNodes === 0 && enemyUnits === 0) {
             this.ui.setGameState('VICTORY');
             this.onLevelComplete();
             return true;
         }
+
+        // Victoria anticipada (anti-climax):
+        // enemigo sin unidades, acorralado en ≤1 nodo, jugador con masa crítica
+        if (enemyUnits === 0 && enemyNodes <= 1 && playerUnits >= 30) {
+            this.ui.setGameState('VICTORY');
+            this.onLevelComplete();
+            return true;
+        }
+
         return null;
     }
 
     onLevelComplete() {
-        if (this.currentLevelIndex + 2 > this.unlockedLevels && this.currentLevelIndex + 1 < LEVELS.length) {
+        if (this.currentLevelIndex + 2 > this.unlockedLevels &&
+            this.currentLevelIndex + 1 < LEVELS.length) {
             this.unlockedLevels = this.currentLevelIndex + 2;
             this.saveProgress();
             this.ui.renderLevelGrid(LEVELS, this.unlockedLevels, (idx) => this.loadLevel(idx));

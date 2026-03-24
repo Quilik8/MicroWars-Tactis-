@@ -163,12 +163,17 @@ export class InputManager {
         return null;
     }
 
+    // FIX: Se añade #evolutionMenu a la lista de elementos UI.
+    // Sin esto, al hacer clic en un botón de evolución, pointerdown disparaba
+    // _deselect() porque el botón no estaba sobre un nodo, borrando selectedNode
+    // antes de que onEvoButtonClick pudiera usarlo.
     _isOnUI(e) {
         return !!(
-            e.target.closest('#sendBar') ||
-            e.target.closest('#hud')     ||
-            e.target.id === 'pauseBtn'   ||
-            e.target.closest('#uiLayer')
+            e.target.closest('#sendBar')       ||
+            e.target.closest('#hud')           ||
+            e.target.id === 'pauseBtn'         ||
+            e.target.closest('#uiLayer')       ||
+            e.target.closest('#evolutionMenu')
         );
     }
 
@@ -297,8 +302,6 @@ export class InputManager {
                 this._longPressNode  = clicked;
                 this._longPressTimer = setTimeout(() => {
                     if (!this.isDragging && this._longPressNode === clicked) {
-                        // Activar modo túnel: deseleccionar cualquier nodo previo
-                        // y usar este como fuente del túnel
                         if (this.selectedNode) {
                             this.selectedNode.isSelected = false;
                             this.selectedNode.redraw();
@@ -685,7 +688,7 @@ export class InputManager {
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // DRAW — llamado cada frame desde game.onDraw
+    // DRAW — llamado cada frame desde game.onDraw (uiCanvas 2D)
     // ═══════════════════════════════════════════════════════════════
     draw(ctx) {
         if (this.ui.gameState !== 'PLAYING' || this.ui.isPaused) return;

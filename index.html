@@ -20,7 +20,15 @@
 </head>
 
 <body>
-    <button id="pauseBtn" class="hidden">⏸ Pausa</button>
+    <!-- Controles superiores: velocidad + pausa (top-right) -->
+    <div id="topControls" class="hidden">
+        <div class="speed-controls">
+            <button id="btnSpeed1" class="hud-btn speed-btn active-speed" data-speed="1">▶ 1×</button>
+            <button id="btnSpeed2" class="hud-btn speed-btn" data-speed="2">▶▶ 2×</button>
+            <button id="btnSpeed4" class="hud-btn speed-btn" data-speed="4">▶▶▶ 4×</button>
+        </div>
+        <button id="pauseBtn">⏸ Pausa</button>
+    </div>
 
     <!-- UI Overlay (Menús Fijos) -->
     <div id="uiLayer">

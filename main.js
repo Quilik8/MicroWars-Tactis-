@@ -18,6 +18,9 @@ const CONFIG = {
     aiAttackInterval: 3
 };
 
+// Velocidad actual del juego: 1 = normal, 2 = x2, 4 = x4
+let gameSpeed = 1;
+
 const game = new Engine();
 const ui = new UIManager({
     onTogglePause: (p) => togglePause(p),
@@ -42,6 +45,7 @@ const ui = new UIManager({
     onStartCampaign: () => campaign.start(),
     onStopCampaign: () => campaign.stop(),
     onPlayIntro: () => SFX.intro(),
+    onSetSpeed: (speed) => setGameSpeed(speed),
     onRenderFactions: () => {
         ui.renderFactionSelection(FACTIONS, (selectedFaction) => {
             campaign.setPlayerFaction(selectedFaction);
@@ -64,12 +68,21 @@ window.campaign = campaign;
 // ══════════════════════════════════════════════════════════════
 function togglePause(forcedState) {
     const newState = (forcedState !== undefined) ? forcedState : !ui.isPaused;
-    ui.setPauseState(newState, true); // Update UI
+    ui.setPauseState(newState, true);
     if (game.app) {
-        game.app.ticker.speed = newState ? 0 : 1;
-        // Si estamos reanudando, asegurar que el ticker esté corriendo
+        // Al pausar: ticker a 0. Al reanudar: restaurar la velocidad guardada.
+        game.app.ticker.speed = newState ? 0 : gameSpeed;
         if (!newState) game.app.ticker.start();
     }
+}
+
+function setGameSpeed(speed) {
+    gameSpeed = speed;
+    // Solo aplicar si no estamos pausados
+    if (game.app && !ui.isPaused) {
+        game.app.ticker.speed = gameSpeed;
+    }
+    ui.updateSpeedButtons(gameSpeed);
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -115,7 +128,13 @@ game.onUpdate = (dt) => {
 };
 
 game.onDraw = (ctx) => {
+    // Flechas de arrastre y previsualización de rutas (input_manager)
     input.draw(ctx);
+
+    // Marea Barriente — se dibuja en el uiCanvas 2D (ctx), que es un canvas DOM
+    // con position:absolute top:0 left:0, completamente independiente del
+    // árbol de PixiJS. El pan/zoom del world container no lo afecta en absoluto.
+    world.drawSweep(ctx, ui.gameState, ui.isPaused);
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -131,7 +150,16 @@ window.addEventListener('load', async () => {
     ui.setGameState('MENU');
 });
 
-// Desbloquear audio
+// Gather point en menú principal: clic en pantalla agrupa hormigas cercanas
+window.addEventListener('pointerdown', (e) => {
+    if (ui.gameState !== 'MENU') return;
+    // Solo ignorar clics en elementos interactivos reales (botones, inputs, links).
+    // NO filtrar por #uiLayer porque #mainMenu lo cubre todo y bloquearía siempre.
+    if (e.target.closest('button') || e.target.closest('input') || e.target.closest('a')) return;
+    world.setMenuGather(e.clientX, e.clientY);
+});
+
+// Desbloquear audio en primer gesto del usuario
 window.addEventListener('pointerdown', () => {
     resumeAudio();
 }, { once: true });
@@ -141,7 +169,7 @@ window.addEventListener('pointerdown', () => {
 // PUENTES GLOBALES (Legacy Compatibility / HTML Buttons)
 // ══════════════════════════════════════════════════════════════
 window.togglePause = () => togglePause();
-window.restartLevel = () => level.loadLevel(level.currentLevelIndex);
-window.backToMenu = () => { togglePause(false); ui.setGameState('MENU'); };
-window.surrender = () => { if (ui.callbacks.onClearLevel) ui.callbacks.onClearLevel(); togglePause(false); ui.setGameState('MENU'); };
+window.restartLevel = () => { setGameSpeed(1); level.loadLevel(level.currentLevelIndex); };
+window.backToMenu = () => { setGameSpeed(1); togglePause(false); ui.setGameState('MENU'); };
+window.surrender = () => { setGameSpeed(1); if (ui.callbacks.onClearLevel) ui.callbacks.onClearLevel(); togglePause(false); ui.setGameState('MENU'); };
 window.startLevel = (idx) => level.loadLevel(idx);

@@ -50,11 +50,18 @@ html {
     pointer-events: none;
 }
 
-/* ── Botón Pausa ── */
-#pauseBtn {
+/* ── Controles superiores (velocidad + pausa) — top-right ── */
+#topControls {
     position: absolute;
     top: 16px;
     right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 20;
+}
+
+#pauseBtn {
     padding: 8px 18px;
     background-color: rgba(255, 255, 255, 0.08);
     color: white;
@@ -63,7 +70,6 @@ html {
     font-family: monospace;
     font-size: 14px;
     cursor: pointer;
-    z-index: 20;
     backdrop-filter: blur(6px);
     transition: background-color 0.15s;
 }
@@ -141,6 +147,28 @@ html {
     color: rgba(255, 255, 255, 0.35);
     font-size: 11px;
     white-space: nowrap;
+}
+
+/* ── Controles de velocidad ── */
+.speed-controls {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.speed-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    min-width: 52px;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.speed-btn.active-speed {
+    background-color: rgba(93, 173, 226, 0.25);
+    border-color: #5dade2;
+    color: #5dade2;
+    box-shadow: 0 0 8px rgba(93, 173, 226, 0.3);
 }
 
 .recall-hint strong {
