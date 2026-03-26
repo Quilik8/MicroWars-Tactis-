@@ -20,7 +20,7 @@ export class AIManager {
         this._targetNodes = [];
         this._playerNodes = [];
         this._frontlines = [];
-        
+
         // Costos conocidos de evolución (duplicado temporal para uso rápido sin depender de Entity)
         this.evoCosts = { espinoso: 30, artilleria: 40, tanque: 35 };
     }
@@ -49,7 +49,7 @@ export class AIManager {
 
         if (this._aiNodes.length === 0) return;
 
-        const countAt = (node, faction) => node.counts ? (node.counts[faction] || 0) : 0;
+        const countAt = (node, faction) => node.population ? (node.population[faction] || 0) : 0;
 
         // 1. GESTIÓN DE NODOS PROPIOS (Logística y Evolución)
         for (let en of this._aiNodes) {
@@ -166,7 +166,7 @@ export class AIManager {
         node.evolution = type;
         if (type === 'artilleria') node.artilleryInterval = 1.0;
         node.redraw();
-        
+
         let killed = 0;
         for (let u of allUnits) {
             if (killed >= cost) break;

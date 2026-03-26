@@ -30,24 +30,24 @@
  */
 export class WaterSweep {
     constructor(config) {
-        this.speed         = config.speed        || 20;    // unidades-de-mundo / s
-        this.widthFrac     = config.width        || 0.032; // fracción del ancho del mundo
-        this.cooldown      = config.cooldown     || 32;    // s entre spawns
-        this.initialDelay  = config.initialDelay || 8;     // s antes del primer spawn
+        this.speed = config.speed || 20;    // unidades-de-mundo / s
+        this.widthFrac = config.width || 0.032; // fracción del ancho del mundo
+        this.cooldown = config.cooldown || 32;    // s entre spawns
+        this.initialDelay = config.initialDelay || 8;     // s antes del primer spawn
         this.alertDuration = 3;                            // s de aviso visual previo
 
-        const rawColor    = config.color || 0x0097a7;
-        this.color        = rawColor;
-        this.colorCss     = '#' + rawColor.toString(16).padStart(6, '0');
-        this.alpha        = config.alpha || 0.42;
+        const rawColor = config.color || 0x0097a7;
+        this.color = rawColor;
+        this.colorCss = '#' + rawColor.toString(16).padStart(6, '0');
+        this.alpha = config.alpha || 0.42;
 
         // Timer de spawn — corre independientemente de las barras activas
-        this._spawnTimer  = this.initialDelay;
-        this._isAlerting  = false;
-        this._alertTimer  = 0;
+        this._spawnTimer = this.initialDelay;
+        this._isAlerting = false;
+        this._alertTimer = 0;
 
         // Barras activas — cada elemento es { worldX: number }
-        this._activeBars  = [];
+        this._activeBars = [];
 
         // PIXI.Graphics compartido para todas las barras
         this._gfx = null;
@@ -89,8 +89,8 @@ export class WaterSweep {
             this._alertTimer -= dt;
             if (this._alertTimer <= 0) {
                 this._isAlerting = false;
-                // Spawn justo fuera del borde izquierdo del mundo
-                this._activeBars.push({ worldX: -barW });
+                // Spawn empujado hacia atrás (4s de recorrido extra antes de tocar el mundo)
+                this._activeBars.push({ worldX: -barW - (this.speed * 4) });
                 // El cooldown empieza a contar DESDE el spawn — periodicidad estricta
                 this._spawnTimer = this.cooldown;
             }
@@ -172,15 +172,15 @@ export class WaterSweep {
     draw(ctx, game) {
         if (!ctx || !this._isAlerting) return;
 
-        const H        = game.height;
+        const H = game.height;
         const progress = 1 - (this._alertTimer / this.alertDuration); // 0 → 1
-        const pulse    = 0.35 + 0.65 * Math.abs(Math.sin(Date.now() * 0.007));
+        const pulse = 0.35 + 0.65 * Math.abs(Math.sin(Date.now() * 0.007));
 
         ctx.save();
 
         // Franja fija pulsante en el borde izquierdo (7 px)
         ctx.globalAlpha = pulse * 0.9;
-        ctx.fillStyle   = this.colorCss;
+        ctx.fillStyle = this.colorCss;
         ctx.fillRect(0, 0, 7, H);
 
         // Segunda línea que crece indicando proximidad
@@ -191,9 +191,9 @@ export class WaterSweep {
     }
 
     // Getters de solo lectura
-    get isSweeping()  { return this._activeBars.length > 0; }
-    get isAlerting()  { return this._isAlerting; }
-    get timeToNext()  { return this._isAlerting ? 0 : this._spawnTimer; }
+    get isSweeping() { return this._activeBars.length > 0; }
+    get isAlerting() { return this._isAlerting; }
+    get timeToNext() { return this._isAlerting ? 0 : this._spawnTimer; }
     get alertProgress() {
         return this._isAlerting
             ? 1 - this._alertTimer / this.alertDuration

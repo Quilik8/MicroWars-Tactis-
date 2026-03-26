@@ -36,22 +36,22 @@ import { Node } from '../entities/node.js';
 import { CombatManager } from './combat_manager.js';
 
 // ── Constantes de interacción ────────────────────────────────────
-const DRAG_THRESHOLD  = 8;    // px mínimos para distinguir click de drag
-const LONG_PRESS_MS   = 480;  // ms para activar modo túnel en mobile
-const DBL_CLICK_MS    = 300;  // ventana de doble clic/tap
-const TUNNEL_COST     = 15;   // tropas que cuesta crear una línea de suministro
+const DRAG_THRESHOLD = 8;    // px mínimos para distinguir click de drag
+const LONG_PRESS_MS = 480;  // ms para activar modo túnel en mobile
+const DBL_CLICK_MS = 300;  // ventana de doble clic/tap
+const TUNNEL_COST = 15;   // tropas que cuesta crear una línea de suministro
 
 export class InputManager {
     constructor(game, world, ui, sfx, campaign = null) {
-        this.game     = game;
-        this.world    = world;
-        this.ui       = ui;
-        this.sfx      = sfx;
+        this.game = game;
+        this.world = world;
+        this.ui = ui;
+        this.sfx = sfx;
         this.campaign = campaign;
 
         // Posición del puntero en pantalla y en espacio de mundo
-        this.mouseX      = 0;
-        this.mouseY      = 0;
+        this.mouseX = 0;
+        this.mouseY = 0;
         this.worldMouseX = 0;
         this.worldMouseY = 0;
 
@@ -60,25 +60,25 @@ export class InputManager {
 
         // ── Drag ──────────────────────────────────────────────────
         this.dragStartNode = null;
-        this.dragStartX    = 0;
-        this.dragStartY    = 0;
-        this.isDragging    = false;   // true cuando supera DRAG_THRESHOLD
-        this.dragButton    = 0;       // 0 = LMB, 2 = RMB
-        this.dragMode      = null;    // 'attack' | 'tunnel'
+        this.dragStartX = 0;
+        this.dragStartY = 0;
+        this.isDragging = false;   // true cuando supera DRAG_THRESHOLD
+        this.dragButton = 0;       // 0 = LMB, 2 = RMB
+        this.dragMode = null;    // 'attack' | 'tunnel'
 
         // ── Modo túnel mobile (long press → espera destino) ───────
         this.tunnelSourceNode = null;
-        this._longPressTimer  = null;
-        this._longPressNode   = null;
+        this._longPressTimer = null;
+        this._longPressNode = null;
 
         // ── Pinch zoom (mobile, dos dedos) ────────────────────────
-        this._pinchActive    = false;
-        this._pinchDist      = 0;
-        this._activeTouches  = {};    // pointerId → {x, y}
+        this._pinchActive = false;
+        this._pinchDist = 0;
+        this._activeTouches = {};    // pointerId → {x, y}
 
         // ── Pan de cámara ─────────────────────────────────────────
-        this.isPanning  = false;
-        this.panStart   = { x: 0, y: 0 };
+        this.isPanning = false;
+        this.panStart = { x: 0, y: 0 };
         this.worldStart = { x: 0, y: 0 };
 
         // ── Doble clic / doble tap ────────────────────────────────
@@ -86,7 +86,7 @@ export class InputManager {
         this.lastClickNode = null;
 
         this.sendPercent = 0.5;
-        this.evoMenu     = null;
+        this.evoMenu = null;
     }
 
     // ─── API pública ──────────────────────────────────────────────
@@ -110,7 +110,7 @@ export class InputManager {
     validateState() {
         if (!this.selectedNode) return;
         if (this.selectedNode.owner !== 'player' &&
-            this.world.countAt(this.selectedNode, 'player') === 0) {
+            this.world.popAt(this.selectedNode, 'player') === 0) {
             if (this.evoMenu) this.evoMenu.classList.add('hidden');
             this._deselect();
         }
@@ -126,22 +126,22 @@ export class InputManager {
     // ═══════════════════════════════════════════════════════════════
     setupListeners() {
         this._handlers = {
-            move:    (e) => this.onPointerMove(e),
-            down:    (e) => this.onPointerDown(e),
-            up:      (e) => this.onPointerUp(e),
-            cancel:  (e) => this._onPointerCancel(e),
-            wheel:   (e) => this.onWheel(e),
+            move: (e) => this.onPointerMove(e),
+            down: (e) => this.onPointerDown(e),
+            up: (e) => this.onPointerUp(e),
+            cancel: (e) => this._onPointerCancel(e),
+            wheel: (e) => this.onWheel(e),
             context: (e) => e.preventDefault(),   // solo suprime menú del navegador
             keydown: (e) => this._onKeyDown(e),
         };
 
-        window.addEventListener('pointermove',  this._handlers.move);
-        window.addEventListener('pointerdown',  this._handlers.down);
-        window.addEventListener('pointerup',    this._handlers.up);
-        window.addEventListener('pointercancel',this._handlers.cancel);
-        window.addEventListener('wheel',        this._handlers.wheel, { passive: true });
-        window.addEventListener('contextmenu',  this._handlers.context);
-        window.addEventListener('keydown',      this._handlers.keydown);
+        window.addEventListener('pointermove', this._handlers.move);
+        window.addEventListener('pointerdown', this._handlers.down);
+        window.addEventListener('pointerup', this._handlers.up);
+        window.addEventListener('pointercancel', this._handlers.cancel);
+        window.addEventListener('wheel', this._handlers.wheel, { passive: true });
+        window.addEventListener('contextmenu', this._handlers.context);
+        window.addEventListener('keydown', this._handlers.keydown);
 
         if (this.evoMenu) {
             this.evoMenu.addEventListener('click', (e) => {
@@ -152,13 +152,13 @@ export class InputManager {
     }
 
     destroy() {
-        window.removeEventListener('pointermove',   this._handlers.move);
-        window.removeEventListener('pointerdown',   this._handlers.down);
-        window.removeEventListener('pointerup',     this._handlers.up);
+        window.removeEventListener('pointermove', this._handlers.move);
+        window.removeEventListener('pointerdown', this._handlers.down);
+        window.removeEventListener('pointerup', this._handlers.up);
         window.removeEventListener('pointercancel', this._handlers.cancel);
-        window.removeEventListener('wheel',         this._handlers.wheel);
-        window.removeEventListener('contextmenu',   this._handlers.context);
-        window.removeEventListener('keydown',       this._handlers.keydown);
+        window.removeEventListener('wheel', this._handlers.wheel);
+        window.removeEventListener('contextmenu', this._handlers.context);
+        window.removeEventListener('keydown', this._handlers.keydown);
         this._cancelLongPress();
     }
 
@@ -191,10 +191,10 @@ export class InputManager {
     // antes de que onEvoButtonClick pudiera usarlo.
     _isOnUI(e) {
         return !!(
-            e.target.closest('#sendBar')       ||
-            e.target.closest('#hud')           ||
-            e.target.id === 'pauseBtn'         ||
-            e.target.closest('#uiLayer')       ||
+            e.target.closest('#sendBar') ||
+            e.target.closest('#hud') ||
+            e.target.id === 'pauseBtn' ||
+            e.target.closest('#uiLayer') ||
             e.target.closest('#evolutionMenu')
         );
     }
@@ -205,8 +205,8 @@ export class InputManager {
             this.selectedNode.isSelected = false;
             this.selectedNode.redraw();
         }
-        this.selectedNode    = node;
-        node.isSelected      = true;
+        this.selectedNode = node;
+        node.isSelected = true;
         node.redraw();
         if (this.sfx) this.sfx.click();
     }
@@ -243,7 +243,7 @@ export class InputManager {
             return true;
         }
 
-        if (this.world.countAt(src, 'player') < TUNNEL_COST) return false;
+        if (this.world.popAt(src, 'player') < TUNNEL_COST) return false;
 
         CombatManager.killNPower(this.world, src, 'player', TUNNEL_COST);
         src.tunnelTo = dst;
@@ -265,17 +265,17 @@ export class InputManager {
             if (ids.length === 2) {
                 const a = this._activeTouches[ids[0]];
                 const b = this._activeTouches[ids[1]];
-                this._pinchDist   = Math.hypot(b.x - a.x, b.y - a.y);
+                this._pinchDist = Math.hypot(b.x - a.x, b.y - a.y);
                 this._pinchActive = true;
                 this._cancelLongPress();
                 this.dragStartNode = null;
-                this.isPanning     = false;
+                this.isPanning = false;
                 return;
             }
         }
 
         const canInteract = (this.ui.gameState === 'PLAYING' && !this.ui.isPaused) ||
-                             this.ui.gameState === 'CAMPAIGN';
+            this.ui.gameState === 'CAMPAIGN';
         if (!canInteract) return;
         if (!this.isPanning && this._isOnUI(e)) return;
 
@@ -298,11 +298,11 @@ export class InputManager {
         if (e.button === 2) {
             if (clicked) {
                 this.dragStartNode = clicked;
-                this.dragStartX    = e.clientX;
-                this.dragStartY    = e.clientY;
-                this.isDragging    = false;
-                this.dragButton    = 2;
-                this.dragMode      = 'tunnel';
+                this.dragStartX = e.clientX;
+                this.dragStartY = e.clientY;
+                this.isDragging = false;
+                this.dragButton = 2;
+                this.dragMode = 'tunnel';
             }
             return; // la acción se completa en pointerUp
         }
@@ -312,16 +312,16 @@ export class InputManager {
 
         if (clicked) {
             this.dragStartNode = clicked;
-            this.dragStartX    = e.clientX;
-            this.dragStartY    = e.clientY;
-            this.isDragging    = false;
-            this.dragButton    = 0;
-            this.dragMode      = 'attack';
+            this.dragStartX = e.clientX;
+            this.dragStartY = e.clientY;
+            this.isDragging = false;
+            this.dragButton = 0;
+            this.dragMode = 'attack';
 
             // Mobile: iniciar long press para modo túnel
             if (isTouch && clicked.owner === 'player' && clicked.type !== 'tunel') {
                 this._cancelLongPress();
-                this._longPressNode  = clicked;
+                this._longPressNode = clicked;
                 this._longPressTimer = setTimeout(() => {
                     if (!this.isDragging && this._longPressNode === clicked) {
                         if (this.selectedNode) {
@@ -330,7 +330,7 @@ export class InputManager {
                             this.selectedNode = null;
                         }
                         this.tunnelSourceNode = clicked;
-                        this._longPressNode   = null;
+                        this._longPressNode = null;
                         if (this.sfx) this.sfx.click();
                     }
                 }, LONG_PRESS_MS);
@@ -352,8 +352,8 @@ export class InputManager {
             // Iniciar pan de cámara
             const w = this.game.world;
             if (w) {
-                this.isPanning  = true;
-                this.panStart   = { x: this.mouseX, y: this.mouseY };
+                this.isPanning = true;
+                this.panStart = { x: this.mouseX, y: this.mouseY };
                 this.worldStart = { x: w.position.x, y: w.position.y };
             }
         }
@@ -372,9 +372,9 @@ export class InputManager {
                 const b = this._activeTouches[ids[1]];
                 const newDist = Math.hypot(b.x - a.x, b.y - a.y);
                 if (this._pinchDist > 0) {
-                    const factor   = newDist / this._pinchDist;
-                    const midX     = (a.x + b.x) / 2;
-                    const midY     = (a.y + b.y) / 2;
+                    const factor = newDist / this._pinchDist;
+                    const midX = (a.x + b.x) / 2;
+                    const midY = (a.y + b.y) / 2;
                     this._applyZoom(factor, midX, midY);
                 }
                 this._pinchDist = newDist;
@@ -424,7 +424,7 @@ export class InputManager {
             delete this._activeTouches[e.pointerId];
             if (Object.keys(this._activeTouches).length < 2) {
                 this._pinchActive = false;
-                this._pinchDist   = 0;
+                this._pinchDist = 0;
             }
             if (this._pinchActive) {
                 // Aún quedan dos dedos: no procesar como click
@@ -442,16 +442,16 @@ export class InputManager {
         this.isPanning = false;
         this._cancelLongPress();
 
-        const clicked     = this._nodeAt(this.worldMouseX, this.worldMouseY);
+        const clicked = this._nodeAt(this.worldMouseX, this.worldMouseY);
         const wasDragging = this.isDragging;
-        const src         = this.dragStartNode;
-        const btn         = this.dragButton;
+        const src = this.dragStartNode;
+        const btn = this.dragButton;
 
         // Limpiar estado de drag
         this.dragStartNode = null;
-        this.isDragging    = false;
-        this.dragButton    = 0;
-        this.dragMode      = null;
+        this.isDragging = false;
+        this.dragButton = 0;
+        this.dragMode = null;
 
         // ════ RMB UP ════════════════════════════════════════════════
         if (e.button === 2 || btn === 2) {
@@ -466,7 +466,7 @@ export class InputManager {
         if (wasDragging) {
             // Drag LMB: envío de tropas (nunca crea túnel).
             // Condición: player tiene tropas en src (puede estar conquistando el nodo).
-            if (clicked && clicked !== src && this.world.countAt(src, 'player') > 0) {
+            if (clicked && clicked !== src && this.world.popAt(src, 'player') > 0) {
                 this.world.sendTroops(src, clicked, this.sendPercent);
                 if (this.sfx) this.sfx.move();
             }
@@ -506,11 +506,11 @@ export class InputManager {
                 const dest = clicked.tunnelTo;
                 for (let u of this.world.allUnits) {
                     if (u.faction === 'player' && u.targetNode === clicked && u.state === 'idle') {
-                        u.x          = dest.x + (Math.random() - 0.5) * dest.radius * 0.5;
-                        u.y          = dest.y + (Math.random() - 0.5) * dest.radius * 0.5;
+                        u.x = dest.x + (Math.random() - 0.5) * dest.radius * 0.5;
+                        u.y = dest.y + (Math.random() - 0.5) * dest.radius * 0.5;
                         u.targetNode = dest;
-                        u.homeNode   = dest;
-                        u.state      = 'idle';
+                        u.homeNode = dest;
+                        u.state = 'idle';
                     }
                 }
                 return;
@@ -530,7 +530,7 @@ export class InputManager {
         // ── Hay selección + clic en nodo distinto → enviar tropas ─
         if (this.selectedNode && this.selectedNode !== clicked) {
             // Condición: player tiene tropas en selectedNode (puede estar conquistando).
-            if (this.world.countAt(this.selectedNode, 'player') > 0) {
+            if (this.world.popAt(this.selectedNode, 'player') > 0) {
                 this.world.sendTroops(this.selectedNode, clicked, this.sendPercent);
                 if (this.sfx) this.sfx.move();
             }
@@ -548,7 +548,7 @@ export class InputManager {
         // No requiere que el nodo sea nuestro: si estamos conquistando un nodo
         // neutral o enemigo (tropas presentes, dueño aún no cambiado), debe
         // ser seleccionable para poder redirigir esas tropas.
-        if (this.world.countAt(clicked, 'player') > 0) {
+        if (this.world.popAt(clicked, 'player') > 0) {
             this._select(clicked);
         }
     }
@@ -600,11 +600,11 @@ export class InputManager {
         if (e.pointerType === 'touch') {
             delete this._activeTouches[e.pointerId];
         }
-        this.isPanning     = false;
+        this.isPanning = false;
         this.dragStartNode = null;
-        this.isDragging    = false;
-        this.dragButton    = 0;
-        this.dragMode      = null;
+        this.isDragging = false;
+        this.dragButton = 0;
+        this.dragMode = null;
         this._cancelLongPress();
         this.tunnelSourceNode = null;
         this._pinchActive = false;
@@ -657,30 +657,30 @@ export class InputManager {
     showEvolutionMenu(node) {
         if (!this.evoMenu) return;
         this.selectedNode = node;
-        const w       = this.game.world;
+        const w = this.game.world;
         const screenX = node.x * w.scale.x + w.position.x;
         const screenY = node.y * w.scale.y + w.position.y;
 
         this.evoMenu.style.left = `${screenX}px`;
-        this.evoMenu.style.top  = `${screenY}px`;
+        this.evoMenu.style.top = `${screenY}px`;
         this.evoMenu.classList.remove('hidden');
 
-        const buttons         = Array.from(document.querySelectorAll('.evo-btn'));
-        const currentTroops   = this.world.countAt(node, 'player');
+        const buttons = Array.from(document.querySelectorAll('.evo-btn'));
+        const currentTroops = this.world.popAt(node, 'player');
         const expansionRadius = node.radius + 45;
-        const baseAngle       = -Math.PI / 2;
-        const arcSpread       = Math.PI * 0.85;
+        const baseAngle = -Math.PI / 2;
+        const arcSpread = Math.PI * 0.85;
 
         const evoButtons = buttons.filter(b => b.dataset.evo !== 'cancel');
-        const cancelBtn  = buttons.find(b => b.dataset.evo === 'cancel');
+        const cancelBtn = buttons.find(b => b.dataset.evo === 'cancel');
 
         evoButtons.forEach((btn, idx) => {
             const angle = baseAngle - (arcSpread / 2) +
-                          (idx * (arcSpread / Math.max(1, evoButtons.length - 1)));
+                (idx * (arcSpread / Math.max(1, evoButtons.length - 1)));
             const x = Math.cos(angle) * expansionRadius;
             const y = Math.sin(angle) * expansionRadius;
             btn.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
-            const cost   = Node.EVOLUTION_COSTS[btn.dataset.evo];
+            const cost = Node.EVOLUTION_COSTS[btn.dataset.evo];
             btn.disabled = currentTroops < cost;
         });
 
@@ -701,7 +701,7 @@ export class InputManager {
             return;
         }
         const cost = Node.EVOLUTION_COSTS[type];
-        if (this.world.countAt(this.selectedNode, 'player') >= cost) {
+        if (this.world.popAt(this.selectedNode, 'player') >= cost) {
             CombatManager.killNPower(this.world, this.selectedNode, 'player', cost);
             this.selectedNode.evolution = type;
             if (type === 'artilleria') this.selectedNode.artilleryInterval = 1.0;
@@ -719,8 +719,8 @@ export class InputManager {
         const campaign = this.campaign || window.campaign;
         if (!campaign || !campaign.visuals) return;
         const visuals = campaign.visuals;
-        if (type === 'move')       visuals.checkHover(this.mouseX, this.mouseY);
-        else if (type === 'down')  visuals.checkClick(this.mouseX, this.mouseY);
+        if (type === 'move') visuals.checkHover(this.mouseX, this.mouseY);
+        else if (type === 'down') visuals.checkClick(this.mouseX, this.mouseY);
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -742,7 +742,7 @@ export class InputManager {
                 this._drawTunnelLine(ctx, sx, sy, this.mouseX, this.mouseY, now);
             } else {
                 this._drawAttackArrow(ctx, sx, sy, this.mouseX, this.mouseY,
-                                      this.dragStartNode.owner);
+                    this.dragStartNode.owner);
             }
         }
 
@@ -758,13 +758,13 @@ export class InputManager {
             ctx.beginPath();
             ctx.arc(sx, sy, sr + 6 + pulse * 8, 0, Math.PI * 2);
             ctx.strokeStyle = '#f39c12';
-            ctx.lineWidth   = 2.5;
+            ctx.lineWidth = 2.5;
             ctx.globalAlpha = 0.8 * pulse;
             ctx.stroke();
 
             ctx.beginPath();
             ctx.arc(sx, sy, sr + 14 + pulse * 4, 0, Math.PI * 2);
-            ctx.lineWidth   = 1.2;
+            ctx.lineWidth = 1.2;
             ctx.globalAlpha = 0.35 * pulse;
             ctx.stroke();
             ctx.restore();
@@ -796,26 +796,26 @@ export class InputManager {
 
     // ─── Flecha sólida de ataque / envío de tropas ────────────────
     _drawAttackArrow(ctx, x1, y1, x2, y2, owner, alphaOverride) {
-        const dx   = x2 - x1;
-        const dy   = y2 - y1;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 10) return;
 
-        const angle      = Math.atan2(dy, dx);
+        const angle = Math.atan2(dy, dx);
         // Node.COLORS cubre todas las facciones (player, enemy, fuego, carpinteras, etc.)
         // Evita el FACTIONS.find() O(n) que antes importaba faction_data aquí.
         const nodeColors = Node.COLORS[owner];
-        const color      = nodeColors
+        const color = nodeColors
             ? `#${nodeColors.fill.toString(16).padStart(6, '0')}`
             : '#ffffff';
 
         ctx.save();
-        ctx.strokeStyle   = color;
-        ctx.fillStyle     = color;
-        ctx.lineWidth     = 3.5;
-        ctx.globalAlpha   = alphaOverride ?? 0.88;
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 3.5;
+        ctx.globalAlpha = alphaOverride ?? 0.88;
         ctx.setLineDash([]);
-        ctx.lineCap       = 'round';
+        ctx.lineCap = 'round';
 
         ctx.beginPath();
         ctx.moveTo(x1, y1);
@@ -826,9 +826,9 @@ export class InputManager {
         ctx.beginPath();
         ctx.moveTo(x2, y2);
         ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6),
-                   y2 - headLen * Math.sin(angle - Math.PI / 6));
+            y2 - headLen * Math.sin(angle - Math.PI / 6));
         ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6),
-                   y2 - headLen * Math.sin(angle + Math.PI / 6));
+            y2 - headLen * Math.sin(angle + Math.PI / 6));
         ctx.closePath();
         ctx.fill();
         ctx.restore();
@@ -836,8 +836,8 @@ export class InputManager {
 
     // ─── Línea punteada animada para modo túnel ───────────────────
     _drawTunnelLine(ctx, x1, y1, x2, y2, now) {
-        const dx   = x2 - x1;
-        const dy   = y2 - y1;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 12) return;
 
@@ -846,9 +846,9 @@ export class InputManager {
         ctx.save();
 
         // Halo exterior suave
-        ctx.strokeStyle   = '#f39c12';
-        ctx.lineWidth     = 5;
-        ctx.globalAlpha   = 0.18;
+        ctx.strokeStyle = '#f39c12';
+        ctx.lineWidth = 5;
+        ctx.globalAlpha = 0.18;
         ctx.setLineDash([]);
         ctx.beginPath();
         ctx.moveTo(x1, y1);
@@ -856,12 +856,12 @@ export class InputManager {
         ctx.stroke();
 
         // Línea punteada animada principal
-        ctx.strokeStyle    = '#f39c12';
-        ctx.lineWidth      = 2.5;
-        ctx.globalAlpha    = 0.92;
+        ctx.strokeStyle = '#f39c12';
+        ctx.lineWidth = 2.5;
+        ctx.globalAlpha = 0.92;
         ctx.setLineDash([10, 14]);
         ctx.lineDashOffset = dashOffset;
-        ctx.lineCap        = 'round';
+        ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
@@ -871,11 +871,11 @@ export class InputManager {
         ctx.setLineDash([]);
         ctx.beginPath();
         ctx.arc(x2, y2, 7, 0, Math.PI * 2);
-        ctx.fillStyle   = '#f39c12';
+        ctx.fillStyle = '#f39c12';
         ctx.globalAlpha = 0.88;
         ctx.fill();
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth   = 1.5;
+        ctx.lineWidth = 1.5;
         ctx.globalAlpha = 0.70;
         ctx.stroke();
 

@@ -20,68 +20,68 @@ export const LEVELS = [
         name: "Nivel 1: Aprende a Conquistar",
         description: "1. Haz CLIC en tu base azul.\n2. Ajusta la barra de enviar tropas al 100%.\n3. Haz CLIC en el nodo enemigo para atacarlo.",
         nodes: [
-            { id: "base_player",    x: 0.15, y: 0.5,  owner: 'player',  type: 'normal',  startUnits: 80 },
-            { id: "base_enemy",     x: 0.85, y: 0.5,  owner: 'enemy',   type: 'normal',  startUnits: 50 },
-            { id: "neutral_center", x: 0.5,  y: 0.5,  owner: 'neutral', type: 'normal',  startUnits: 20 }
+            { id: "base_player", x: 0.15, y: 0.5, owner: 'player', type: 'normal', startUnits: 80 },
+            { id: "base_enemy", x: 0.85, y: 0.5, owner: 'enemy', type: 'normal', startUnits: 50 },
+            { id: "neutral_center", x: 0.5, y: 0.5, owner: 'neutral', type: 'normal', startUnits: 20 }
         ]
     },
     {
         name: "Nivel 2: Disputa por los Recursos",
         description: "Asegura los nodos de tipo enjambre del centro antes que el enemigo.",
         nodes: [
-            { id: "base_player", x: 0.1,  y: 0.8,  owner: 'player',  type: 'gigante',  startUnits: 150 },
-            { id: "base_enemy",  x: 0.9,  y: 0.2,  owner: 'enemy',   type: 'gigante',  startUnits: 150 },
-            { id: "swarm_1",     x: 0.35, y: 0.35, owner: 'neutral', type: 'enjambre', startUnits: 30 },
-            { id: "swarm_2",     x: 0.65, y: 0.65, owner: 'neutral', type: 'enjambre', startUnits: 30 }
+            { id: "base_player", x: 0.1, y: 0.8, owner: 'player', type: 'gigante', startUnits: 150 },
+            { id: "base_enemy", x: 0.9, y: 0.2, owner: 'enemy', type: 'gigante', startUnits: 150 },
+            { id: "swarm_1", x: 0.35, y: 0.35, owner: 'neutral', type: 'enjambre', startUnits: 30 },
+            { id: "swarm_2", x: 0.65, y: 0.65, owner: 'neutral', type: 'enjambre', startUnits: 30 }
         ]
     },
     {
         name: "Nivel 3: El Foso Central",
         description: "Estamos rodeados. Sobrevive a dos frentes simultáneos.",
         nodes: [
-            { id: "player_center", x: 0.5,  y: 0.5,  owner: 'player',  type: 'normal',   startUnits: 200 },
-            { id: "enemy_1",       x: 0.1,  y: 0.1,  owner: 'enemy',   type: 'enjambre', startUnits: 100 },
-            { id: "enemy_2",       x: 0.9,  y: 0.8,  owner: 'enemy',   type: 'enjambre', startUnits: 100 },
-            { id: "neutral_top",   x: 0.8,  y: 0.2,  owner: 'neutral', type: 'gigante',  startUnits: 60 },
-            { id: "neutral_bot",   x: 0.2,  y: 0.8,  owner: 'neutral', type: 'gigante',  startUnits: 60 }
+            { id: "player_center", x: 0.5, y: 0.5, owner: 'player', type: 'normal', startUnits: 200 },
+            { id: "enemy_1", x: 0.1, y: 0.1, owner: 'enemy', type: 'enjambre', startUnits: 100 },
+            { id: "enemy_2", x: 0.9, y: 0.8, owner: 'enemy', type: 'enjambre', startUnits: 100 },
+            { id: "neutral_top", x: 0.8, y: 0.2, owner: 'neutral', type: 'gigante', startUnits: 60 },
+            { id: "neutral_bot", x: 0.2, y: 0.8, owner: 'neutral', type: 'gigante', startUnits: 60 }
         ]
     },
     {
         name: "CONEXIONES SUBTERRÁNEAS",
         description: "Utiliza los Túneles Profundos para viajar largas distancias. Crea Caminos Logísticos fuertes. Lucha entre tres frentes iguales.",
         nodes: [
-            { id: "base_player", x: 0.1,  y: 0.5,  owner: 'player',  type: 'gigante',  startUnits: 150 },
-            { id: "base_enemy",  x: 0.9,  y: 0.5,  owner: 'enemy',   type: 'gigante',  startUnits: 150 },
-            { id: "base_fuego",  x: 0.5,  y: 0.9,  owner: 'fuego',   type: 'gigante',  startUnits: 150 },
+            { id: "base_player", x: 0.1, y: 0.5, owner: 'player', type: 'gigante', startUnits: 150 },
+            { id: "base_enemy", x: 0.9, y: 0.5, owner: 'enemy', type: 'gigante', startUnits: 150 },
+            { id: "base_fuego", x: 0.5, y: 0.9, owner: 'fuego', type: 'gigante', startUnits: 150 },
 
-            { id: "center",      x: 0.5,  y: 0.5,  owner: 'neutral', type: 'enjambre' },
-            { id: "mid_left",    x: 0.35, y: 0.5,  owner: 'neutral', type: 'normal' },
-            { id: "mid_right",   x: 0.65, y: 0.5,  owner: 'neutral', type: 'normal' },
-            { id: "flank_tl",    x: 0.35, y: 0.35, owner: 'neutral', type: 'enjambre' },
-            { id: "flank_tr",    x: 0.65, y: 0.35, owner: 'neutral', type: 'enjambre' },
-            { id: "top",         x: 0.5,  y: 0.2,  owner: 'neutral', type: 'gigante' },
+            { id: "center", x: 0.5, y: 0.5, owner: 'neutral', type: 'enjambre' },
+            { id: "mid_left", x: 0.35, y: 0.5, owner: 'neutral', type: 'normal' },
+            { id: "mid_right", x: 0.65, y: 0.5, owner: 'neutral', type: 'normal' },
+            { id: "flank_tl", x: 0.35, y: 0.35, owner: 'neutral', type: 'enjambre' },
+            { id: "flank_tr", x: 0.65, y: 0.35, owner: 'neutral', type: 'enjambre' },
+            { id: "top", x: 0.5, y: 0.2, owner: 'neutral', type: 'gigante' },
 
-            { id: 'hole_left',   x: 0.15, y: 0.8,  owner: 'neutral', type: 'tunel', tunnelTo: 'hole_right', startUnits: 0 },
-            { id: 'hole_right',  x: 0.85, y: 0.2,  owner: 'neutral', type: 'tunel', tunnelTo: 'hole_left',  startUnits: 0 }
+            { id: 'hole_left', x: 0.15, y: 0.8, owner: 'neutral', type: 'tunel', tunnelTo: 'hole_right', startUnits: 0 },
+            { id: 'hole_right', x: 0.85, y: 0.2, owner: 'neutral', type: 'tunel', tunnelTo: 'hole_left', startUnits: 0 }
         ]
     },
     {
         name: "Nivel 5: La Hoja Flotante",
         description: "El centro está bloqueado por un charco de insecticida letal. Usa la hoja flotante móvil para cruzar de forma segura sin perder tropas.",
         nodes: [
-            { id: "p1",        x: 0.1,  y: 0.5,  owner: 'player',  type: 'gigante',  startUnits: 150 },
-            { id: "p2",        x: 0.1,  y: 0.3,  owner: 'neutral', type: 'normal',   startUnits: 20 },
-            { id: "p3",        x: 0.1,  y: 0.7,  owner: 'neutral', type: 'normal',   startUnits: 20 },
+            { id: "p1", x: 0.1, y: 0.5, owner: 'player', type: 'gigante', startUnits: 150 },
+            { id: "p2", x: 0.1, y: 0.3, owner: 'neutral', type: 'normal', startUnits: 20 },
+            { id: "p3", x: 0.1, y: 0.7, owner: 'neutral', type: 'normal', startUnits: 20 },
 
-            { id: "e1",        x: 0.9,  y: 0.1,  owner: 'enemy',   type: 'gigante',  startUnits: 150 },
-            { id: "e2",        x: 0.7,  y: 0.1,  owner: 'neutral', type: 'normal',   startUnits: 20 },
+            { id: "e1", x: 0.9, y: 0.1, owner: 'enemy', type: 'gigante', startUnits: 150 },
+            { id: "e2", x: 0.7, y: 0.1, owner: 'neutral', type: 'normal', startUnits: 20 },
 
-            { id: "f1",        x: 0.9,  y: 0.9,  owner: 'fuego',   type: 'gigante',  startUnits: 150 },
-            { id: "f2",        x: 0.7,  y: 0.9,  owner: 'neutral', type: 'normal',   startUnits: 20 },
+            { id: "f1", x: 0.9, y: 0.9, owner: 'fuego', type: 'gigante', startUnits: 150 },
+            { id: "f2", x: 0.7, y: 0.9, owner: 'neutral', type: 'normal', startUnits: 20 },
 
-            { id: "center",    x: 0.6,  y: 0.5,  owner: 'neutral', type: 'gigante',  startUnits: 100 },
-            { id: "top_mid",   x: 0.6,  y: 0.2,  owner: 'neutral', type: 'enjambre', startUnits: 50 },
-            { id: "bot_mid",   x: 0.6,  y: 0.8,  owner: 'neutral', type: 'enjambre', startUnits: 50 },
+            { id: "center", x: 0.6, y: 0.5, owner: 'neutral', type: 'gigante', startUnits: 100 },
+            { id: "top_mid", x: 0.6, y: 0.2, owner: 'neutral', type: 'enjambre', startUnits: 50 },
+            { id: "bot_mid", x: 0.6, y: 0.8, owner: 'neutral', type: 'enjambre', startUnits: 50 },
 
             {
                 id: "hoja_movil", x: 0.35, y: 0.5,
@@ -100,24 +100,24 @@ export const LEVELS = [
         name: "Nivel 6: Carreteras y Pantanos",
         description: "El terreno afecta a tu velocidad. Las zonas verdes (carreteras de hojas) te aceleran el doble. Las zonas rojas (barro pegajoso) te ralentizan a la mitad.",
         nodes: [
-            { id: "p1", x: 0.15, y: 0.35, owner: 'player',  type: 'gigante',  startUnits: 150 },
-            { id: "p2", x: 0.25, y: 0.25, owner: 'neutral', type: 'normal',   startUnits: 20 },
-            { id: "p3", x: 0.25, y: 0.45, owner: 'neutral', type: 'normal',   startUnits: 20 },
+            { id: "p1", x: 0.15, y: 0.35, owner: 'player', type: 'gigante', startUnits: 150 },
+            { id: "p2", x: 0.25, y: 0.25, owner: 'neutral', type: 'normal', startUnits: 20 },
+            { id: "p3", x: 0.25, y: 0.45, owner: 'neutral', type: 'normal', startUnits: 20 },
 
-            { id: "e1", x: 0.85, y: 0.65, owner: 'enemy',   type: 'gigante',  startUnits: 150 },
-            { id: "e2", x: 0.75, y: 0.55, owner: 'neutral', type: 'normal',   startUnits: 20 },
-            { id: "e3", x: 0.75, y: 0.75, owner: 'neutral', type: 'normal',   startUnits: 20 },
+            { id: "e1", x: 0.85, y: 0.65, owner: 'enemy', type: 'gigante', startUnits: 150 },
+            { id: "e2", x: 0.75, y: 0.55, owner: 'neutral', type: 'normal', startUnits: 20 },
+            { id: "e3", x: 0.75, y: 0.75, owner: 'neutral', type: 'normal', startUnits: 20 },
 
-            { id: "n1", x: 0.5,  y: 0.5,  owner: 'neutral', type: 'enjambre', startUnits: 80 },
-            { id: "n2", x: 0.2,  y: 0.8,  owner: 'neutral', type: 'normal',   startUnits: 30 },
-            { id: "n3", x: 0.3,  y: 0.7,  owner: 'neutral', type: 'normal',   startUnits: 30 },
-            { id: "n4", x: 0.8,  y: 0.2,  owner: 'neutral', type: 'normal',   startUnits: 30 },
-            { id: "n5", x: 0.7,  y: 0.3,  owner: 'neutral', type: 'normal',   startUnits: 30 }
+            { id: "n1", x: 0.5, y: 0.5, owner: 'neutral', type: 'enjambre', startUnits: 80 },
+            { id: "n2", x: 0.2, y: 0.8, owner: 'neutral', type: 'normal', startUnits: 30 },
+            { id: "n3", x: 0.3, y: 0.7, owner: 'neutral', type: 'normal', startUnits: 30 },
+            { id: "n4", x: 0.8, y: 0.2, owner: 'neutral', type: 'normal', startUnits: 30 },
+            { id: "n5", x: 0.7, y: 0.3, owner: 'neutral', type: 'normal', startUnits: 30 }
         ],
         zones: [
-            { id: "green1", color: 0x00FF00, alpha: 0.2,  speedMult: 2.0, x: 0.05, y: 0.1,  width: 0.35, height: 0.4 },
-            { id: "green2", color: 0x00FF00, alpha: 0.2,  speedMult: 2.0, x: 0.6,  y: 0.5,  width: 0.35, height: 0.4 },
-            { id: "red1",   color: 0xFF0000, alpha: 0.15, speedMult: 0.5, x: 0.0,  y: 0.0,  width: 1.0,  height: 1.0 }
+            { id: "green1", color: 0x00FF00, alpha: 0.2, speedMult: 2.0, x: 0.05, y: 0.1, width: 0.35, height: 0.4 },
+            { id: "green2", color: 0x00FF00, alpha: 0.2, speedMult: 2.0, x: 0.6, y: 0.5, width: 0.35, height: 0.4 },
+            { id: "red1", color: 0xFF0000, alpha: 0.15, speedMult: 0.5, x: 0.0, y: 0.0, width: 1.0, height: 1.0 }
         ]
     },
 
@@ -134,41 +134,41 @@ export const LEVELS = [
     // PARÁMETROS (v3 mundo):
     //   · speed 20 u/s  — lenta; a 1920px de mundo tarda ~96 s en cruzar
     //   · width 0.032   — fracción del mundo ≈ 62 px sobre ~1920 de mundo
-    //   · cooldown 32 s — ciclo completo ~35 s; máx. 2-3 barras simultáneas
-    //   · initialDelay 10 s — tiempo para prepararse antes de la primera ola
+    //   · cooldown 37 s — ciclo completo ~40 s; máx. 2-3 barras simultáneas
+    //   · initialDelay 15 s — tiempo para prepararse antes de la primera ola
     // ══════════════════════════════════════════════════════════════════
     {
         name: "Nivel 7: El Arroyuelo",
         description: "Una corriente de agua barre el campo periódicamente.\nElimina TODAS las tropas a su paso — aliadas y enemigas.\nLos nodos sobreviven vacíos. El borde izquierdo te avisa 3 s antes.\n\nSincroniza tus ataques con el ciclo del agua para ganar.",
         nodes: [
             // ── Jugador (Azul) — flanco izquierdo ──
-            { id: "p_base",   x: 0.07, y: 0.5,  owner: 'player', type: 'gigante',  startUnits: 130 },
-            { id: "p_top",    x: 0.18, y: 0.28, owner: 'player', type: 'normal',   startUnits: 45 },
-            { id: "p_bot",    x: 0.18, y: 0.72, owner: 'player', type: 'normal',   startUnits: 45 },
+            { id: "p_base", x: 0.07, y: 0.5, owner: 'player', type: 'gigante', startUnits: 130 },
+            { id: "p_top", x: 0.18, y: 0.28, owner: 'player', type: 'normal', startUnits: 45 },
+            { id: "p_bot", x: 0.18, y: 0.72, owner: 'player', type: 'normal', startUnits: 45 },
 
             // ── Nodos neutrales — corredor central ──
             // La marea los vaciará repetidamente; consolidarlos es la clave.
-            { id: "n_top",    x: 0.38, y: 0.22, owner: 'neutral', type: 'enjambre', startUnits: 55 },
-            { id: "n_center", x: 0.5,  y: 0.5,  owner: 'neutral', type: 'gigante',  startUnits: 90 },
-            { id: "n_bot",    x: 0.38, y: 0.78, owner: 'neutral', type: 'enjambre', startUnits: 55 },
+            { id: "n_top", x: 0.38, y: 0.22, owner: 'neutral', type: 'enjambre', startUnits: 55 },
+            { id: "n_center", x: 0.5, y: 0.5, owner: 'neutral', type: 'gigante', startUnits: 90 },
+            { id: "n_bot", x: 0.38, y: 0.78, owner: 'neutral', type: 'enjambre', startUnits: 55 },
 
             // ── Enemigo 1 (Rojo) — flanco derecho superior ──
-            { id: "e1_front", x: 0.65, y: 0.28, owner: 'enemy', type: 'normal',  startUnits: 50 },
-            { id: "e1_base",  x: 0.88, y: 0.18, owner: 'enemy', type: 'gigante', startUnits: 130 },
+            { id: "e1_front", x: 0.65, y: 0.28, owner: 'enemy', type: 'normal', startUnits: 50 },
+            { id: "e1_base", x: 0.88, y: 0.18, owner: 'enemy', type: 'gigante', startUnits: 130 },
 
             // ── Enemigo 2 (Fuego/Naranja) — flanco derecho inferior ──
-            { id: "e2_front", x: 0.65, y: 0.72, owner: 'fuego', type: 'normal',  startUnits: 50 },
-            { id: "e2_base",  x: 0.88, y: 0.82, owner: 'fuego', type: 'gigante', startUnits: 130 }
+            { id: "e2_front", x: 0.65, y: 0.72, owner: 'fuego', type: 'normal', startUnits: 50 },
+            { id: "e2_base", x: 0.88, y: 0.82, owner: 'fuego', type: 'gigante', startUnits: 130 }
         ],
 
         waterSweeps: [
             {
-                speed:        20,     // unidades-de-mundo / s → ~96 s para cruzar el mundo
-                width:        0.032,  // fracción del mundo ≈ 62px sobre ~1920 de mundo
-                cooldown:     32,     // s entre spawns → máx. 2-3 barras simultáneas
-                initialDelay: 10,     // s antes del primer spawn
-                color:        0x0097a7,
-                alpha:        0.42
+                speed: 20,     // unidades-de-mundo / s → ~96 s para cruzar el mundo
+                width: 0.032,  // fracción del mundo ≈ 62px sobre ~1920 de mundo
+                cooldown: 37,     // s entre spawns (ajustado para dar margen)
+                initialDelay: 15,     // s antes del primer spawn (ajustado)
+                color: 0x0097a7,
+                alpha: 0.42
             }
         ]
     },
@@ -200,45 +200,45 @@ export const LEVELS = [
 
         nodes: [
             // ── Jugador (Azul) — flanco superior izquierdo (ANTES e1) ──
-            { id: "p_base",    x: 0.10, y: 0.12, owner: 'player',  type: 'gigante',  startUnits: 140, isMarkedForSweep: true },
-            { id: "p_front",   x: 0.22, y: 0.25, owner: 'player',  type: 'normal',   startUnits: 40,  isMarkedForSweep: true },
+            { id: "p_base", x: 0.10, y: 0.12, owner: 'player', type: 'gigante', startUnits: 140, isMarkedForSweep: true },
+            { id: "p_front", x: 0.22, y: 0.25, owner: 'player', type: 'normal', startUnits: 40, isMarkedForSweep: true },
 
             // ── Enemigo 2 (Naranja) — flanco superior derecho ────────
-            { id: "e2_base",   x: 0.90, y: 0.12, owner: 'fuego',   type: 'gigante',  startUnits: 130, isMarkedForSweep: true },
-            { id: "e2_front",  x: 0.78, y: 0.25, owner: 'fuego',   type: 'normal',   startUnits: 40,  isMarkedForSweep: true },
+            { id: "e2_base", x: 0.90, y: 0.12, owner: 'fuego', type: 'gigante', startUnits: 130, isMarkedForSweep: true },
+            { id: "e2_front", x: 0.78, y: 0.25, owner: 'fuego', type: 'normal', startUnits: 40, isMarkedForSweep: true },
 
             // ── Fila superior neutral (alineados con las bases) ──────
-            { id: "n_top_l",   x: 0.35, y: 0.18, owner: 'neutral', type: 'normal',   startUnits: 25, isMarkedForSweep: true },
-            { id: "n_top_c",   x: 0.50, y: 0.12, owner: 'neutral', type: 'enjambre', startUnits: 50, isMarkedForSweep: true },
-            { id: "n_top_r",   x: 0.65, y: 0.18, owner: 'neutral', type: 'normal',   startUnits: 25, isMarkedForSweep: true },
+            { id: "n_top_l", x: 0.35, y: 0.18, owner: 'neutral', type: 'normal', startUnits: 25, isMarkedForSweep: true },
+            { id: "n_top_c", x: 0.50, y: 0.12, owner: 'neutral', type: 'enjambre', startUnits: 50, isMarkedForSweep: true },
+            { id: "n_top_r", x: 0.65, y: 0.18, owner: 'neutral', type: 'normal', startUnits: 25, isMarkedForSweep: true },
 
             // ── Fila CENTRAL ─────────────────────────────────────────
-            { id: "n_mid_ll",  x: 0.22, y: 0.48, owner: 'neutral', type: 'normal',   startUnits: 20, isMarkedForSweep: true },
-            { id: "n_mid_l",   x: 0.36, y: 0.48, owner: 'neutral', type: 'enjambre', startUnits: 35, isMarkedForSweep: true },
-            { id: "n_mid_c",   x: 0.50, y: 0.48, owner: 'neutral', type: 'gigante',  startUnits: 70, isMarkedForSweep: true },
-            { id: "n_mid_r",   x: 0.64, y: 0.48, owner: 'neutral', type: 'enjambre', startUnits: 35, isMarkedForSweep: true },
-            { id: "n_mid_rr",  x: 0.78, y: 0.48, owner: 'neutral', type: 'normal',   startUnits: 20, isMarkedForSweep: true },
+            { id: "n_mid_ll", x: 0.22, y: 0.48, owner: 'neutral', type: 'normal', startUnits: 20, isMarkedForSweep: true },
+            { id: "n_mid_l", x: 0.36, y: 0.48, owner: 'neutral', type: 'enjambre', startUnits: 35, isMarkedForSweep: true },
+            { id: "n_mid_c", x: 0.50, y: 0.48, owner: 'neutral', type: 'gigante', startUnits: 70, isMarkedForSweep: true },
+            { id: "n_mid_r", x: 0.64, y: 0.48, owner: 'neutral', type: 'enjambre', startUnits: 35, isMarkedForSweep: true },
+            { id: "n_mid_rr", x: 0.78, y: 0.48, owner: 'neutral', type: 'normal', startUnits: 20, isMarkedForSweep: true },
 
             // ── Enemigo 1 (Rojo) — base inferior central (ANTES plyr) ──
-            { id: "e1_base",   x: 0.50, y: 0.82, owner: 'enemy',   type: 'gigante',  startUnits: 130 },
-            { id: "e1_left",   x: 0.28, y: 0.78, owner: 'enemy',   type: 'normal',   startUnits: 30 },
-            { id: "e1_right",  x: 0.72, y: 0.78, owner: 'enemy',   type: 'normal',   startUnits: 30 },
+            { id: "e1_base", x: 0.50, y: 0.82, owner: 'enemy', type: 'gigante', startUnits: 130 },
+            { id: "e1_left", x: 0.28, y: 0.78, owner: 'enemy', type: 'normal', startUnits: 30 },
+            { id: "e1_right", x: 0.72, y: 0.78, owner: 'enemy', type: 'normal', startUnits: 30 },
 
             // ── Fila inferior neutral (inmune al rayo) ────────────────
-            { id: "n_bot_l",   x: 0.36, y: 0.65, owner: 'neutral', type: 'normal',   startUnits: 20 },
-            { id: "n_bot_r",   x: 0.64, y: 0.65, owner: 'neutral', type: 'normal',   startUnits: 20 }
+            { id: "n_bot_l", x: 0.36, y: 0.65, owner: 'neutral', type: 'normal', startUnits: 20 },
+            { id: "n_bot_r", x: 0.64, y: 0.65, owner: 'neutral', type: 'normal', startUnits: 20 }
         ],
 
         lightSweeps: [
             {
-                speed:        420,       // px/s — MUY rápido
-                cooldown:     16,        // s entre rayazos
+                speed: 420,       // px/s — MUY rápido
+                cooldown: 16,        // s entre rayazos
                 initialDelay: 12,        // s antes del primer rayo
-                color:        0xff8c00,  // ámbar candente
-                orbRadius:    15,        // orbe concentrado (pequeño)
-                
+                color: 0xff8c00,  // ámbar candente
+                orbRadius: 15,        // orbe concentrado (pequeño)
+
                 // Estos son los "Rieles" (Y relativo). Hay nodos en Y=0.12, 0.18, 0.25 y 0.48
-                rails:        [0.12, 0.18, 0.25, 0.48]
+                rails: [0.12, 0.18, 0.25, 0.48]
             }
         ]
     }
