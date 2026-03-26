@@ -27,6 +27,9 @@ export class WorldManager {
         // así la barra se mueve con el mundo igual que nodos y unidades.
         this.waterSweeps = [];
 
+        // Rayo de Luz — instancias LightSweep del nivel actual (Nivel 8).
+        this.lightSweeps = [];
+
         this.combatInterval = config.combatInterval || 0.7;
         this._tunnelsDirty = true;
 
@@ -180,6 +183,12 @@ export class WorldManager {
         }
         this.waterSweeps = [];
 
+        // Destruir los PIXI.Graphics de los rayos de luz
+        for (let sweep of this.lightSweeps) {
+            if (sweep.destroy) sweep.destroy();
+        }
+        this.lightSweeps = [];
+
         this.allUnits.length     = 0;
         this.travelingIds.length = 0;
         this.nodes.length        = 0;
@@ -235,8 +244,11 @@ export class WorldManager {
     // La barra de la ola se dibuja directamente en PIXI dentro de update().
     // ─────────────────────────────────────────────────────────────────
     drawSweep(ctx, gameState, isPaused) {
-        if (gameState !== 'PLAYING' || isPaused || this.waterSweeps.length === 0) return;
+        if (gameState !== 'PLAYING' || isPaused) return;
         for (let sweep of this.waterSweeps) {
+            sweep.draw(ctx, this.game);
+        }
+        for (let sweep of this.lightSweeps) {
             sweep.draw(ctx, this.game);
         }
     }
@@ -351,6 +363,11 @@ export class WorldManager {
 
         // update() de cada marea: gestiona colisión Y actualiza su PIXI.Graphics
         for (let sweep of this.waterSweeps) {
+            sweep.update(dt, this.allUnits, this.nodes, this.game);
+        }
+
+        // update() de cada rayo de luz: gestiona reset de nodos marcados
+        for (let sweep of this.lightSweeps) {
             sweep.update(dt, this.allUnits, this.nodes, this.game);
         }
 

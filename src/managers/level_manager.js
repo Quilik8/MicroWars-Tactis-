@@ -2,6 +2,7 @@ import { LEVELS } from '../data/levels.js';
 import { Node } from '../entities/node.js';
 import { PIXI } from '../core/engine.js';
 import { WaterSweep } from '../systems/water_sweep.js';
+import { LightSweep } from '../systems/light_sweep.js';
 
 export class LevelManager {
     constructor(game, world, ui, sfx, music) {
@@ -27,7 +28,12 @@ export class LevelManager {
                 this.unlockedLevels = JSON.parse(saved).unlockedLevels || 1;
             } catch (e) { console.error("Error loading save:", e); }
         }
-        // TODO: RECORDATORIO - REMOVER EN PRODUCCIÓN
+        // ── MODO DESARROLLO ──────────────────────────────────────────────────────
+        // Todos los niveles permanecen desbloqueados durante la fase de pruebas.
+        // Esto permite iterar, resetear el navegador y probar cualquier nivel
+        // sin necesidad de completar los anteriores.
+        // ANTES DE PRODUCCIÓN: eliminar esta línea para activar el progreso real.
+        // ────────────────────────────────────────────────────────────────────────
         this.unlockedLevels = LEVELS.length;
     }
 
@@ -61,6 +67,10 @@ export class LevelManager {
                 n.orbitSpeed   = nData.orbitSpeed;
                 n.orbitAngle   = 0;
             }
+            // Nivel 8 — marcar nodo si el nivel lo indica
+            if (nData.isMarkedForSweep) {
+                n.isMarkedForSweep = true;
+            }
             return n;
         });
 
@@ -89,15 +99,23 @@ export class LevelManager {
             }
         }
 
-        // ── Marea Barriente (WaterSweep) ─────────────────────────────
-        // Cada WaterSweep recibe un PIXI.Graphics del layerVFX para que
-        // la barra viva en espacio de mundo y se mueva con el mapa.
+        // ── Marea Barriente (WaterSweep) ─────────────────────────────────────────
         this.world.waterSweeps = [];
         if (levelData.waterSweeps) {
             for (let swCfg of levelData.waterSweeps) {
                 const sweep = new WaterSweep(swCfg);
                 sweep.initGraphics(PIXI, this.game.layerVFX);
                 this.world.waterSweeps.push(sweep);
+            }
+        }
+
+        // ── Rayo de Luz (LightSweep) ────────────────────────────────────
+        this.world.lightSweeps = [];
+        if (levelData.lightSweeps) {
+            for (let lsCfg of levelData.lightSweeps) {
+                const sweep = new LightSweep(lsCfg);
+                sweep.initGraphics(PIXI, this.game.layerVFX);
+                this.world.lightSweeps.push(sweep);
             }
         }
 

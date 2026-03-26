@@ -33,7 +33,6 @@
 
 import { PIXI } from '../core/engine.js';
 import { Node } from '../entities/node.js';
-import { FACTIONS } from '../campaign/faction_data.js';
 import { CombatManager } from './combat_manager.js';
 
 // ── Constantes de interacción ────────────────────────────────────
@@ -43,11 +42,12 @@ const DBL_CLICK_MS    = 300;  // ventana de doble clic/tap
 const TUNNEL_COST     = 15;   // tropas que cuesta crear una línea de suministro
 
 export class InputManager {
-    constructor(game, world, ui, sfx) {
-        this.game  = game;
-        this.world = world;
-        this.ui    = ui;
-        this.sfx   = sfx;
+    constructor(game, world, ui, sfx, campaign = null) {
+        this.game     = game;
+        this.world    = world;
+        this.ui       = ui;
+        this.sfx      = sfx;
+        this.campaign = campaign;
 
         // Posición del puntero en pantalla y en espacio de mundo
         this.mouseX      = 0;
@@ -92,6 +92,28 @@ export class InputManager {
     // ─── API pública ──────────────────────────────────────────────
     setSendPercent(val) {
         this.sendPercent = Math.max(0.01, Math.min(1.0, val));
+    }
+
+    /**
+     * Llamado desde el game loop una vez por frame (main.js → game.onUpdate).
+     * Detecta si selectedNode dejó de pertenecer al jugador Y el jugador ya no
+     * tiene tropas en él — limpia la selección antes del siguiente input.
+     *
+     * La condición es doble intencionalmente:
+     *   · owner !== 'player'       → el nodo no es nuestro
+     *   · countAt(...) === 0       → tampoco tenemos tropas atacando/conquistando
+     * Si el jugador está conquistando un nodo (tropas presentes, dueño aún no),
+     * la selección se mantiene activa para poder redirigir esas tropas.
+     * Si el nodo fue reseteado por LightSweep o conquistado por el enemigo
+     * Y ya no quedan tropas del jugador → se limpia.
+     */
+    validateState() {
+        if (!this.selectedNode) return;
+        if (this.selectedNode.owner !== 'player' &&
+            this.world.countAt(this.selectedNode, 'player') === 0) {
+            if (this.evoMenu) this.evoMenu.classList.add('hidden');
+            this._deselect();
+        }
     }
 
     init() {
@@ -442,8 +464,9 @@ export class InputManager {
         if (!src) return;
 
         if (wasDragging) {
-            // Drag LMB: envío de tropas (nunca crea túnel)
-            if (clicked && clicked !== src && src.owner === 'player') {
+            // Drag LMB: envío de tropas (nunca crea túnel).
+            // Condición: player tiene tropas en src (puede estar conquistando el nodo).
+            if (clicked && clicked !== src && this.world.countAt(src, 'player') > 0) {
                 this.world.sendTroops(src, clicked, this.sendPercent);
                 if (this.sfx) this.sfx.move();
             }
@@ -506,7 +529,8 @@ export class InputManager {
 
         // ── Hay selección + clic en nodo distinto → enviar tropas ─
         if (this.selectedNode && this.selectedNode !== clicked) {
-            if (this.selectedNode.owner === 'player') {
+            // Condición: player tiene tropas en selectedNode (puede estar conquistando).
+            if (this.world.countAt(this.selectedNode, 'player') > 0) {
                 this.world.sendTroops(this.selectedNode, clicked, this.sendPercent);
                 if (this.sfx) this.sfx.move();
             }
@@ -520,8 +544,11 @@ export class InputManager {
             return;
         }
 
-        // ── Seleccionar nodo propio con tropas ────────────────────
-        if (clicked.owner === 'player' && this.world.countAt(clicked, 'player') > 0) {
+        // ── Seleccionar nodo con tropas del jugador ───────────────
+        // No requiere que el nodo sea nuestro: si estamos conquistando un nodo
+        // neutral o enemigo (tropas presentes, dueño aún no cambiado), debe
+        // ser seleccionable para poder redirigir esas tropas.
+        if (this.world.countAt(clicked, 'player') > 0) {
             this._select(clicked);
         }
     }
@@ -666,6 +693,13 @@ export class InputManager {
         const type = btn.dataset.evo;
         this.evoMenu.classList.add('hidden');
         if (type === 'cancel' || !this.selectedNode) return;
+        // Guardia: el nodo puede haber cambiado de dueño entre frames y el clic del botón
+        // (LightSweep, conquista enemiga). validateState() lo limpia en el próximo frame,
+        // pero este check cubre el instante exacto entre ambos.
+        if (this.selectedNode.owner !== 'player') {
+            this._deselect();
+            return;
+        }
         const cost = Node.EVOLUTION_COSTS[type];
         if (this.world.countAt(this.selectedNode, 'player') >= cost) {
             CombatManager.killNPower(this.world, this.selectedNode, 'player', cost);
@@ -680,7 +714,9 @@ export class InputManager {
     // CAMPAÑA
     // ═══════════════════════════════════════════════════════════════
     handleCampaignInput(e, type) {
-        const campaign = window.campaign;
+        // this.campaign se inyecta desde el constructor (Pass 4 de main.js).
+        // window.campaign es el fallback de compatibilidad mientras se migra.
+        const campaign = this.campaign || window.campaign;
         if (!campaign || !campaign.visuals) return;
         const visuals = campaign.visuals;
         if (type === 'move')       visuals.checkHover(this.mouseX, this.mouseY);
@@ -765,11 +801,13 @@ export class InputManager {
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 10) return;
 
-        const angle = Math.atan2(dy, dx);
-        const fData = FACTIONS.find(f => f.id === owner);
-        const color = fData
-            ? `#${fData.color.toString(16).padStart(6, '0')}`
-            : (owner === 'player' ? '#3498db' : '#e74c3c');
+        const angle      = Math.atan2(dy, dx);
+        // Node.COLORS cubre todas las facciones (player, enemy, fuego, carpinteras, etc.)
+        // Evita el FACTIONS.find() O(n) que antes importaba faction_data aquí.
+        const nodeColors = Node.COLORS[owner];
+        const color      = nodeColors
+            ? `#${nodeColors.fill.toString(16).padStart(6, '0')}`
+            : '#ffffff';
 
         ctx.save();
         ctx.strokeStyle   = color;

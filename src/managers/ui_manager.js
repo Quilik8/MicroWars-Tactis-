@@ -253,6 +253,7 @@ export class UIManager {
         if (state === 'MENU') {
             this.showScreen('mainMenu');
             this.hideNodeTooltip();
+            if (this.callbacks.onSetSpeed)    this.callbacks.onSetSpeed(1);    // ← reset velocidad al menú
             if (this.callbacks.onStopCampaign) this.callbacks.onStopCampaign();
             if (this.callbacks.onClearLevel) this.callbacks.onClearLevel();
             if (this.callbacks.onResetCamera) this.callbacks.onResetCamera();

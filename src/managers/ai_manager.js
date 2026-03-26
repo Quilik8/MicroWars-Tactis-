@@ -2,11 +2,19 @@
  * AI Manager for MicroWars (Skirmish AI)
  * FIX #11: Eliminados filter()/sort()/Math.min(...map()) en el hot path.
  * Se usan bucles directos para evitar allocations y GC pressure.
+ *
+ * FIX Pass4: Timer por facción — antes las 5 facciones compartían un único
+ * this.timer, por lo que todas atacaban exactamente en el mismo tick.
+ * Ahora cada facción tiene su propio contador en this._timers[faction],
+ * inicializado con un offset aleatorio para que los ataques se distribuyan
+ * de forma natural a lo largo del ciclo en vez de llegar en avalancha.
  */
 export class AIManager {
     constructor(config) {
         this.attackInterval = config.attackInterval || 6;
-        this.timer = 0;
+        // _timers: objeto plano { [factionId]: number } — inicializado
+        // con offset aleatorio la primera vez que se ve cada facción.
+        this._timers = {};
         // Buffers reutilizables para evitar allocations en el hot path
         this._aiNodes = [];
         this._targetNodes = [];
@@ -18,9 +26,15 @@ export class AIManager {
     }
 
     update(dt, nodes, allUnits, aiFaction = 'enemy', playerFaction = 'player') {
-        this.timer += dt;
-        if (this.timer < this.attackInterval) return;
-        this.timer = 0;
+        // Inicializar el timer de esta facción con un offset aleatorio la primera
+        // vez que se ve — garantiza que las 5 facciones no ataquen sincronizadas.
+        if (this._timers[aiFaction] === undefined) {
+            this._timers[aiFaction] = Math.random() * this.attackInterval;
+        }
+
+        this._timers[aiFaction] += dt;
+        if (this._timers[aiFaction] < this.attackInterval) return;
+        this._timers[aiFaction] = 0;
 
         // Reusar arrays del buffer — limpiar sin crear nuevos
         this._aiNodes.length = 0;

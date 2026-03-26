@@ -58,6 +58,11 @@ export class Node {
 
         this.isSelected = false;
         this.hovered = false;
+
+        // Nivel 8 — Rayo de Luz
+        this.isMarkedForSweep = false;  // true si el rayo lo puede neutralizar
+        this._sweepMarkAngle  = 0;      // ángulo rotacional del anillo de marca (visual)
+        this._sweepAlerting   = false;  // true durante la fase de alerta (activa el pulso)
         this.tunnelTo = null;
         this.counts = { player: 0, enemy: 0, neutral: 0 };
 
@@ -132,7 +137,11 @@ export class Node {
 
     containsPoint(mx, my) {
         let dx = mx - this.x, dy = my - this.y;
-        return dx * dx + dy * dy <= this.radius * this.radius;
+        // Nodos marcados con el anillo de rayo de sol tienen radio interactivo
+        // extendido (+12 px) para que coincida con el área visual del anillo orbital
+        // (orbitR = r + 14 en NodeRenderer, dejamos 2 px de margen interior).
+        const r = this.isMarkedForSweep ? this.radius + 12 : this.radius;
+        return dx * dx + dy * dy <= r * r;
     }
 
     /**
@@ -144,6 +153,16 @@ export class Node {
      * @param sfx
      */
     update(dt, grid, allUnits, vfxGraphics, sparksGraphics, sfx) {
+
+        // ── Animación del anillo de marca (Nivel 8) ──
+        // update() es el único responsable de animar y redibujar el anillo orbital.
+        // Centralizar aquí el redraw del sweep mark permite que combat_manager deje
+        // de llamar redraw() cada frame en nodos sin combate activo (Pass 2).
+        if (this.isMarkedForSweep) {
+            this._sweepMarkAngle += dt * 1.2; // ~1.2 rad/s de rotación
+            if (this._sweepMarkAngle > Math.PI * 2) this._sweepMarkAngle -= Math.PI * 2;
+            this.redraw();
+        }
 
         // ── Flash visual del nodo ──
         if (this.flashTimer > 0) {

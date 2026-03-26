@@ -13,6 +13,9 @@ export class CombatManager {
     static processCombat(world, nodeIdx, dt, SFX) {
         let node = world.nodes[nodeIdx];
         let prevOwner = node.owner;
+        // Capturar conquestProgress antes de la lógica para detectar
+        // el frame en que el anillo pasa de >0 a 0 (necesita un redraw final).
+        const prevConquestProgress = node.conquestProgress;
         // node.power se inicializa en updateNodeCounts; en el primer frame puede ser undefined
         let p = node.power || {};
 
@@ -109,10 +112,18 @@ export class CombatManager {
             }
         }
 
-        // Siempre redibujar: el anillo de conquista necesita actualizarse frame a frame.
-        // La ganancia real de rendimiento está en factionCache (elimina O(n) FACTIONS.find),
-        // no en evitar el redraw que es solo llamar a Graphics.clear() + trazar círculos.
-        node.redraw(getFactionData(node.owner));
+        // Redraw condicional — solo cuando hay cambio visual real que combat gestiona:
+        //   · owner cambió         → nuevo color de nodo
+        //   · conquestProgress > 0 → el arco de conquista necesita animarse cada frame
+        //   · prevConquest > 0     → un redraw final para borrar el arco cuando llega a 0
+        // El sweep mark (Nivel 8) lo redibuja node.update() cada frame (Pass 1) — no aquí.
+        // El flash lo redibuja node.update() al activarlo y al expirar — no aquí.
+        const needsRedraw = node.owner !== prevOwner
+            || node.conquestProgress > 0
+            || prevConquestProgress > 0;
+        if (needsRedraw) {
+            node.redraw(getFactionData(node.owner));
+        }
 
         if (node.owner !== prevOwner) {
             if (SFX) {

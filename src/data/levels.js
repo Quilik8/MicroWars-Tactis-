@@ -5,11 +5,12 @@
  *
  * PROPIEDAD waterSweeps[]
  *   Define "Mareas Barrientes" que barren el nivel periódicamente.
+ *   Todos los valores espaciales están en COORDENADAS DE MUNDO.
  *   Parámetros:
- *     speed        — velocidad en px/s de pantalla
- *     width        — ancho de la franja en px
- *     cooldown     — segundos entre barridas
- *     initialDelay — segundos hasta la primera barrida
+ *     speed        — velocidad en unidades-de-mundo / s (ej. 20 → ~96s para cruzar 1920px de mundo)
+ *     width        — fracción del ancho del mundo (ej. 0.032 ≈ 62px sobre un mundo de 1920)
+ *     cooldown     — segundos entre spawns (el timer arranca en el spawn, no al desaparecer)
+ *     initialDelay — segundos hasta el primer spawn
  *     color        — color hex numérico PixiJS (ej. 0x0097a7)
  *     alpha        — opacidad de la franja (0.0 – 1.0)
  */
@@ -123,20 +124,17 @@ export const LEVELS = [
     // ══════════════════════════════════════════════════════════════════
     // NIVEL 7: EL ARROYUELO
     // ══════════════════════════════════════════════════════════════════
-    // MECÁNICA CENTRAL — Marea Barriente:
-    //   Una franja azul-agua (teal) cruza el campo de izquierda a derecha
-    //   cada ~8 segundos. Elimina TODAS las unidades a su paso (aliadas
-    //   y enemigas). Los nodos sobreviven con su propietario intacto pero
-    //   quedan completamente vacíos de tropas.
+    // MECÁNICA CENTRAL — Marea Barriente (coordenadas de mundo):
+    //   Una franja azul-agua (teal) cruza el mundo de izquierda a derecha.
+    //   Nace en worldX = -barWorldWidth, muere cuando supera game.width.
+    //   Elimina TODAS las unidades a su paso — aliadas y enemigas.
+    //   Los nodos sobreviven con su dueño intacto pero sin tropas.
+    //   Hacer zoom/pan NO afecta ni la velocidad percibida ni la colisión.
     //
-    // FIX DE CÁMARA:
-    //   La zona de colisión se calcula con un snapshot de la cámara tomado
-    //   al inicio de cada barrida. Mover la cámara durante el sweep NO
-    //   desplaza la zona de muerte — el exploit está eliminado.
-    //
-    // PARÁMETROS:
-    //   · speed 20 px/s  — muy lenta, el jugador tiene tiempo de reaccionar
-    //   · cooldown 8 s   — frecuente, obliga a planear constantemente
+    // PARÁMETROS (v3 mundo):
+    //   · speed 20 u/s  — lenta; a 1920px de mundo tarda ~96 s en cruzar
+    //   · width 0.032   — fracción del mundo ≈ 62 px sobre ~1920 de mundo
+    //   · cooldown 32 s — ciclo completo ~35 s; máx. 2-3 barras simultáneas
     //   · initialDelay 10 s — tiempo para prepararse antes de la primera ola
     // ══════════════════════════════════════════════════════════════════
     {
@@ -165,12 +163,82 @@ export const LEVELS = [
 
         waterSweeps: [
             {
-                speed:        20,       // px/s de pantalla — muy lento, deliberado
-                width:        62,       // px de ancho visible de la franja
-                cooldown:     8,        // s entre barridas — ciclo frecuente
-                initialDelay: 10,       // s antes de la PRIMERA barrida
-                color:        0x0097a7, // azul-agua teal
+                speed:        20,     // unidades-de-mundo / s → ~96 s para cruzar el mundo
+                width:        0.032,  // fracción del mundo ≈ 62px sobre ~1920 de mundo
+                cooldown:     32,     // s entre spawns → máx. 2-3 barras simultáneas
+                initialDelay: 10,     // s antes del primer spawn
+                color:        0x0097a7,
                 alpha:        0.42
+            }
+        ]
+    },
+
+    // ══════════════════════════════════════════════════════════════════
+    // NIVEL 8: EL OJO DEL SOL
+    // ══════════════════════════════════════════════════════════════════
+    // MECÁNICA CENTRAL — Rayo de Luz (LightSweep):
+    //   Un haz de luz solar barre el campo de izquierda a derecha
+    //   cada ~15 segundos. Cuando toca un nodo marcado (anillo dorado
+    //   giratorio):
+    //     - El nodo vuelve a NEUTRAL (pierde su dueño).
+    //     - Cualquier mejora (espinoso/tanque/artillería) desaparece.
+    //     - Los caminos (túneles logísticos) conectados se rompen.
+    //     - Las hormigas presentes NO mueren — conservan su facción.
+    //
+    //   Las bases de jugador/enemigo son inmunes (NO están marcadas).
+    //   La franja central de nodos neutrales sí están marcados — el
+    //   jugador debe decidir cuándo y cuánto invertir en ellos.
+    //
+    // ESTRATEGIA:
+    //   Sincroniza tus expansiones con el ciclo solar. Mejora nodos
+    //   justo después de que el rayo pase para aprovechar la ventana.
+    //   Tomar los nodos marcados da producción pero no es permanente.
+    // ══════════════════════════════════════════════════════════════════
+    {
+        name: "Nivel 8: El Ojo del Sol",
+        description: "Orbes solares barren el campo rápidamente por rieles térmicos.\nTocan cualquier nodo marcado (aro cian) → lo vuelve NEUTRAL y pierde mejoras.\nLas hormigas sobreviven. ¡Mide bien tus tiempos!",
+
+        nodes: [
+            // ── Jugador (Azul) — flanco superior izquierdo (ANTES e1) ──
+            { id: "p_base",    x: 0.10, y: 0.12, owner: 'player',  type: 'gigante',  startUnits: 140, isMarkedForSweep: true },
+            { id: "p_front",   x: 0.22, y: 0.25, owner: 'player',  type: 'normal',   startUnits: 40,  isMarkedForSweep: true },
+
+            // ── Enemigo 2 (Naranja) — flanco superior derecho ────────
+            { id: "e2_base",   x: 0.90, y: 0.12, owner: 'fuego',   type: 'gigante',  startUnits: 130, isMarkedForSweep: true },
+            { id: "e2_front",  x: 0.78, y: 0.25, owner: 'fuego',   type: 'normal',   startUnits: 40,  isMarkedForSweep: true },
+
+            // ── Fila superior neutral (alineados con las bases) ──────
+            { id: "n_top_l",   x: 0.35, y: 0.18, owner: 'neutral', type: 'normal',   startUnits: 25, isMarkedForSweep: true },
+            { id: "n_top_c",   x: 0.50, y: 0.12, owner: 'neutral', type: 'enjambre', startUnits: 50, isMarkedForSweep: true },
+            { id: "n_top_r",   x: 0.65, y: 0.18, owner: 'neutral', type: 'normal',   startUnits: 25, isMarkedForSweep: true },
+
+            // ── Fila CENTRAL ─────────────────────────────────────────
+            { id: "n_mid_ll",  x: 0.22, y: 0.48, owner: 'neutral', type: 'normal',   startUnits: 20, isMarkedForSweep: true },
+            { id: "n_mid_l",   x: 0.36, y: 0.48, owner: 'neutral', type: 'enjambre', startUnits: 35, isMarkedForSweep: true },
+            { id: "n_mid_c",   x: 0.50, y: 0.48, owner: 'neutral', type: 'gigante',  startUnits: 70, isMarkedForSweep: true },
+            { id: "n_mid_r",   x: 0.64, y: 0.48, owner: 'neutral', type: 'enjambre', startUnits: 35, isMarkedForSweep: true },
+            { id: "n_mid_rr",  x: 0.78, y: 0.48, owner: 'neutral', type: 'normal',   startUnits: 20, isMarkedForSweep: true },
+
+            // ── Enemigo 1 (Rojo) — base inferior central (ANTES plyr) ──
+            { id: "e1_base",   x: 0.50, y: 0.82, owner: 'enemy',   type: 'gigante',  startUnits: 130 },
+            { id: "e1_left",   x: 0.28, y: 0.78, owner: 'enemy',   type: 'normal',   startUnits: 30 },
+            { id: "e1_right",  x: 0.72, y: 0.78, owner: 'enemy',   type: 'normal',   startUnits: 30 },
+
+            // ── Fila inferior neutral (inmune al rayo) ────────────────
+            { id: "n_bot_l",   x: 0.36, y: 0.65, owner: 'neutral', type: 'normal',   startUnits: 20 },
+            { id: "n_bot_r",   x: 0.64, y: 0.65, owner: 'neutral', type: 'normal',   startUnits: 20 }
+        ],
+
+        lightSweeps: [
+            {
+                speed:        420,       // px/s — MUY rápido
+                cooldown:     16,        // s entre rayazos
+                initialDelay: 12,        // s antes del primer rayo
+                color:        0xff8c00,  // ámbar candente
+                orbRadius:    15,        // orbe concentrado (pequeño)
+                
+                // Estos son los "Rieles" (Y relativo). Hay nodos en Y=0.12, 0.18, 0.25 y 0.48
+                rails:        [0.12, 0.18, 0.25, 0.48]
             }
         ]
     }

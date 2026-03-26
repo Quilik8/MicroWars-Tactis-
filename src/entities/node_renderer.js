@@ -141,6 +141,56 @@ export class NodeRenderer {
             g.circle(node.x, node.y, r + 2);
             g.stroke({ color: 0xffffff, alpha: 0.2, width: 1 });
         }
+
+        // E. Marca de Rayo de Sol (Nivel 8) — anillo orbital cian eléctrico
+        if (node.isMarkedForSweep) {
+            // orbitR es FIJO (r + 14) y nunca varía su tamaño.
+            // Antes pulseScale expandía el radio durante la alerta, lo que hacía que
+            // el anillo visual sobresaliera fuera del área interactiva de containsPoint
+            // y causaba clics "en el vacío" al pulsar el borde animado del nodo.
+            // Ahora solo pulseAlpha varía: la urgencia se comunica con intensidad
+            // luminosa, no con expansión de radio.
+            // containsPoint usa r + 12, orbitR es r + 14 → 2 px de margen interior.
+            const orbitR  = r + 14;
+            const angle   = node._sweepMarkAngle || 0;
+            const numDots = 8;
+            const dotR    = 3.2;
+
+            let pulseAlpha = 0.75;
+            if (node._sweepAlerting) {
+                const t    = Date.now() * 0.005;
+                const pulse = 0.5 + 0.5 * Math.abs(Math.sin(t));
+                pulseAlpha  = 0.55 + 0.45 * pulse;  // solo opacidad pulsa, no el radio
+            }
+
+            // Anillo base tenue
+            g.circle(node.x, node.y, orbitR);
+            g.stroke({ color: 0x00e5ff, alpha: 0.22 * pulseAlpha, width: 1.5 });
+
+            // Puntos orbitales giratorios
+            for (let i = 0; i < numDots; i++) {
+                const a     = angle + (i / numDots) * Math.PI * 2;
+                const dotX  = node.x + Math.cos(a) * orbitR;
+                const dotY  = node.y + Math.sin(a) * orbitR;
+                const scale = 0.6 + 0.4 * Math.abs(Math.sin(a));
+                g.circle(dotX, dotY, dotR * scale);
+                g.fill({ color: 0x00e5ff, alpha: pulseAlpha * scale });
+            }
+
+            // Destello blanco en posición de "sol"
+            const sunX = node.x + Math.cos(angle) * orbitR;
+            const sunY = node.y + Math.sin(angle) * orbitR;
+            g.circle(sunX, sunY, dotR * 1.6);
+            g.fill({ color: 0xffffff, alpha: 0.9 * pulseAlpha });
+
+            // Halo de alerta: radio fijo, solo la opacidad late
+            if (node._sweepAlerting) {
+                const t    = Date.now() * 0.004;
+                const halo = 0.3 + 0.7 * Math.abs(Math.sin(t));
+                g.circle(node.x, node.y, orbitR + 6);
+                g.stroke({ color: 0xff8c00, alpha: 0.35 * halo, width: 2 });
+            }
+        }
     }
 
     static drawTooltip(node, ctx) {

@@ -54,13 +54,16 @@ const ui = new UIManager({
     }
 });
 const world = new WorldManager(game, ui, CONFIG);
-
 const ai = new AIManager({ attackInterval: CONFIG.aiAttackInterval });
-const input = new InputManager(game, world, ui, SFX);
-const level = new LevelManager(game, world, ui, SFX, { start: startMusic });
+// campaign se declara antes de input para poder inyectarlo en el constructor
+// y eliminar la dependencia de window.campaign dentro de InputManager.
 const campaign = new CampaignCore(game, ui);
+const input = new InputManager(game, world, ui, SFX, campaign);
+const level = new LevelManager(game, world, ui, SFX, { start: startMusic });
 
-// Exponer para InputManager (Auditoría: Fallo de desacoplamiento temporal)
+// Mantener window.campaign únicamente como puente de compatibilidad para
+// botones HTML legacy (btnBackFromCampaign, etc.) que lo referencian directamente.
+// InputManager ya usa this.campaign inyectado — no depende de este global.
 window.campaign = campaign;
 
 // ══════════════════════════════════════════════════════════════
@@ -94,6 +97,10 @@ game.onUpdate = (dt) => {
 
     // 2. Lógica específica de partida activa
     if (ui.gameState === 'PLAYING' && !ui.isPaused) {
+        // Validar estado de selección: limpia selectedNode si el nodo dejó
+        // de pertenecer al jugador (LightSweep, conquista enemiga, etc.)
+        input.validateState();
+
         // IDs dinámicos basados en el modo (Campaña vs Skirmish)
         const pId = campaign.isStarted ? (campaign.playerFaction?.id || 'player') : 'player';
 
@@ -146,7 +153,7 @@ window.addEventListener('load', async () => {
     world.init(game.app);
     input.init();
     campaign.init();
-    ui.renderLevelGrid(LEVELS, LEVELS.length, (idx) => level.loadLevel(idx)); // Temporarily unlock all
+    ui.renderLevelGrid(LEVELS, level.unlockedLevels, (idx) => level.loadLevel(idx));
     ui.setGameState('MENU');
 });
 
