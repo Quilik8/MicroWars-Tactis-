@@ -241,5 +241,79 @@ export const LEVELS = [
                 rails: [0.12, 0.18, 0.25, 0.48]
             }
         ]
+    },
+
+    // ══════════════════════════════════════════════════════════════════
+    // NIVEL 9: LA FORTALEZA DE CRISTAL
+    // ══════════════════════════════════════════════════════════════════
+    // MECÁNICA CENTRAL — Barrera de Bloqueo:
+    //   Un muro de fuerza azul en forma de U encierra el nido enemigo.
+    //   Las hormigas NO pueden atravesar el muro — se acumulan en el
+    //   borde sin recibir daño, intentando pasar.
+    //
+    //   La ÚNICA forma de entrar es el FERRY: un nodo móvil que viaja
+    //   verticalmente, cruzando la pared inferior de la U.
+    //   Si una unidad está IDLE dentro del ferry cuando cruza el muro,
+    //   el muro la ignora completamente (inmunidad de ferry).
+    //
+    // ESTRATEGIA:
+    //   1. Envía tropas al ferry cuando esté en TU lado (fuera de la U).
+    //   2. Espera a que el ferry cruce el muro inferior hacia el interior.
+    //   3. Desde dentro, envía las tropas a atacar el nido enemigo.
+    //   4. Una vez dentro, las tropas permanecen — no pueden salir fácil.
+    //
+    // DISPOSICIÓN:
+    //   · Jugador: fuera, debajo de la U (en la zona abierta inferior).
+    //   · Enemigos: dentro de la U.
+    //   · Ferry: cruza la pared inferior (y ≈ 0.83–0.88) cada ~16 s.
+    //   · U abierta por arriba (sin pared superior) — los nodos del
+    //     borde superior son accesibles para ambos lados.
+    // ══════════════════════════════════════════════════════════════════
+    {
+        name: "Nivel 9: La Fortaleza de Cristal",
+        description: "Un muro de fuerza azul encierra el nido enemigo por tres lados.\nLas hormigas NO pueden atravesar el muro — se acumulan en el borde, sin daño.\nEl FERRY (nodo móvil central) sube y baja cruzando la pared inferior.\n¡Embarca tus tropas en el ferry para infiltrarte y atacar desde dentro!",
+
+        nodes: [
+            // ── Jugador (Azul) — fuera de la U, muy al fondo ─────────
+            { id: "p_base",  x: 0.50, y: 0.92, owner: 'player', type: 'gigante', startUnits: 140 },
+            { id: "p_left",  x: 0.25, y: 0.92, owner: 'player', type: 'normal',  startUnits: 45 },
+            { id: "p_right", x: 0.75, y: 0.92, owner: 'player', type: 'normal',  startUnits: 45 },
+
+            // ── Ferry (nodo móvil) — cruza la pared inferior de la U ──
+            // Pared inferior está en y=0.58.
+            // Recorrido vertical estricto: y=0.48 (interior) ↔ y=0.68 (exterior).
+            {
+                id: "ferry",
+                x: 0.50, y: 0.58,
+                owner: 'neutral', type: 'enjambre', startUnits: 0,
+                isMobile:     true,
+                orbitAnchorX: 0.50,
+                orbitAnchorY: 0.58,
+                orbitRadiusX: 0,
+                orbitRadiusY: 0.10,
+                orbitSpeed:   0.38 
+            },
+
+            // ── Enemigo 1 Clásico (Rojo) — Zona Superior Izquierda ──
+            { id: "e1_base",  x: 0.22, y: 0.12, owner: 'enemy',   type: 'gigante', startUnits: 130 },
+            { id: "e1_front", x: 0.38, y: 0.32, owner: 'enemy',   type: 'normal',  startUnits: 55 },
+
+            // ── Enemigo 2 Fuego (Naranja) — Zona Superior Derecha ──
+            { id: "e2_base",  x: 0.78, y: 0.12, owner: 'fuego',   type: 'gigante', startUnits: 130 },
+            { id: "e2_front", x: 0.62, y: 0.32, owner: 'fuego',   type: 'normal',  startUnits: 55 },
+
+            // ── Neutral estratégico en el interior de la U ────────────
+            { id: "n_inner", x: 0.50, y: 0.25, owner: 'neutral', type: 'enjambre', startUnits: 65 }
+        ],
+
+        // ── Barreras de Bloqueo — forma de U más corta ──────
+        barriers: [
+            // Pared IZQUIERDA (vertical)
+            { x: 0.12, y: 0.04, width: 0.03, height: 0.54 },
+            // Pared DERECHA (vertical)
+            { x: 0.85, y: 0.04, width: 0.03, height: 0.54 },
+            // Pared INFERIOR (horizontal)
+            { x: 0.12, y: 0.58, width: 0.76, height: 0.03 }
+        ]
     }
 ];

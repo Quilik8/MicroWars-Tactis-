@@ -30,6 +30,10 @@ export class WorldManager {
         // Rayo de Luz — instancias LightSweep del nivel actual (Nivel 8).
         this.lightSweeps = [];
 
+        // Barreras de Bloqueo (Nivel 9) — rectángulos AABB que las hormigas
+        // no pueden atravesar, salvo si van dentro de un nodo móvil (ferry).
+        this.barriers = [];
+
         this.combatInterval = config.combatInterval || 0.7;
         this._tunnelsDirty = true;
 
@@ -188,6 +192,9 @@ export class WorldManager {
             if (sweep.destroy) sweep.destroy();
         }
         this.lightSweeps = [];
+
+        // Barreras de bloqueo — los Graphics se limpian en layerNodes.removeChildren()
+        this.barriers = [];
 
         this.allUnits.length     = 0;
         this.travelingIds.length = 0;

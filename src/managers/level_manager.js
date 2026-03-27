@@ -74,6 +74,40 @@ export class LevelManager {
             return n;
         });
 
+        // ── Prevención de Solapamiento Visual y Físico ─────────────
+        // Evita tajantemente que un Nivel inicie con Hitboxes Visuales 
+        // tocándose. Repulsiones vectoriales equitativas hasta separarlos.
+        const MIN_GAP = 20; // Píxeles de respiro adicionales al radio sumado
+        let iterations = 0;
+        let hasOverlaps = true;
+        while(hasOverlaps && iterations < 50) {
+            hasOverlaps = false;
+            for (let i = 0; i < this.world.nodes.length; i++) {
+                for (let j = i + 1; j < this.world.nodes.length; j++) {
+                    const n1 = this.world.nodes[i];
+                    const n2 = this.world.nodes[j];
+                    const dx = n2.x - n1.x;
+                    const dy = n2.y - n1.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    const safeDist = n1.radius + n2.radius + MIN_GAP;
+
+                    if (dist < safeDist && dist > 0.1) {
+                        hasOverlaps = true;
+                        const overlap = safeDist - dist;
+                        const pushAmt = (overlap / 2) + 0.1;
+                        const nx = dx / dist;
+                        const ny = dy / dist;
+                        
+                        // Empujar solo si no son isMobile con rutas forzadas absolutas 
+                        // (El Ferry se auto-regula por su órbita en el loop anyway).
+                        if (!n1.isMobile) { n1.x -= nx * pushAmt; n1.y -= ny * pushAmt; }
+                        if (!n2.isMobile) { n2.x += nx * pushAmt; n2.y += ny * pushAmt; }
+                    }
+                }
+            }
+            iterations++;
+        }
+
         for (let n of this.world.nodes) {
             this.world.createNodeGfx(n);
         }
@@ -117,6 +151,18 @@ export class LevelManager {
                 sweep.initGraphics(PIXI, this.game.layerVFX);
                 this.world.lightSweeps.push(sweep);
             }
+        }
+
+        // ── Barreras de Bloqueo (Nivel 9) ───────────────────────────────
+        // Rectángulos AABB que bloquean el paso de hormigas.
+        // El ferry (nodo móvil) los atraviesa libremente.
+        // Los Graphics van en layerNodes y se destruyen con clearLevel().
+        this.world.barriers = [];
+        if (levelData.barriers && levelData.barriers.length > 0) {
+            for (let b of levelData.barriers) {
+                this.world.barriers.push({ ...b });
+            }
+            this._drawBarriers(levelData.barriers, cx, cy);
         }
 
         if (levelData.zones) {
@@ -192,6 +238,13 @@ export class LevelManager {
             return false;
         }
 
+        // Victoria de Dominación Total (Jugador controla TODOS los nodos del mapa)
+        if (playerNodes > 0 && playerNodes === this.world.nodes.length) {
+            this.ui.setGameState('VICTORY');
+            this.onLevelComplete();
+            return true;
+        }
+
         // Victoria clásica
         if (enemyNodes === 0 && enemyUnits === 0) {
             this.ui.setGameState('VICTORY');
@@ -217,5 +270,43 @@ export class LevelManager {
             this.saveProgress();
             this.ui.renderLevelGrid(LEVELS, this.unlockedLevels, (idx) => this.loadLevel(idx));
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // _drawBarriers — dibuja las paredes de cristal azul en layerNodes.
+    //
+    // Visual: Campo de fuerza de energía luminosa (sin mallas complejas).
+    //   1. Relleno azul cian semitransparente con glow
+    //   2. Borde exterior brillante
+    //   3. Destello interior
+    // ─────────────────────────────────────────────────────────────────
+    _drawBarriers(barriers, cx, cy) {
+        const gfx = new PIXI.Graphics();
+        
+        for (const b of barriers) {
+            const rx = b.x * cx;
+            const ry = b.y * cy;
+            const rw = b.width  * cx;
+            const rh = b.height * cy;
+
+            // 1. Relleno base (cian profundo semitransparente)
+            gfx.rect(rx, ry, rw, rh);
+            gfx.fill({ color: 0x0088ff, alpha: 0.25 });
+
+            // 2. Borde exterior brillante (glow azul eléctrico)
+            gfx.rect(rx, ry, rw, rh);
+            gfx.stroke({ color: 0x00e5ff, alpha: 0.85, width: 2.5 });
+
+            // 3. Highlight interior / núcleo central de la barrera
+            if (rw > 6 && rh > 6) {
+                // Dibujamos un núcleo sólido ligeramente más pequeño en el centro
+                const inset = 4;
+                gfx.rect(rx + inset, ry + inset, rw - inset * 2, rh - inset * 2);
+                gfx.fill({ color: 0x4dd0e1, alpha: 0.15 });
+                gfx.stroke({ color: 0x84ffff, alpha: 0.4, width: 1.5 });
+            }
+        }
+
+        this.game.layerNodes.addChild(gfx);
     }
 }

@@ -707,6 +707,7 @@ export class InputManager {
             if (type === 'artilleria') this.selectedNode.artilleryInterval = 1.0;
             this.selectedNode.redraw();
             if (this.sfx) this.sfx.evolve();
+            this._deselect();
         }
     }
 

@@ -118,6 +118,11 @@ export class UIManager {
             if (this.callbacks.onRestartLevel) this.callbacks.onRestartLevel();
         };
 
+        const btnRestartLevel = document.getElementById('btnRestartLevel');
+        if (btnRestartLevel) btnRestartLevel.onclick = () => {
+            if (this.callbacks.onRestartLevel) this.callbacks.onRestartLevel();
+        };
+
         const btnNextLevel = document.getElementById('btnNextLevel');
         if (btnNextLevel) btnNextLevel.onclick = () => {
             if (this.callbacks.onNextLevel) this.callbacks.onNextLevel();

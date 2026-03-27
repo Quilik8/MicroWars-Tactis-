@@ -64,6 +64,7 @@ export class PhysicsManager {
 
         for (let u of world.allUnits) u.updatePosition(dt);
 
+        this.resolveBarriers(world);       // ← Barrera de cristal (Nivel 9)
         this.processLevelLogic(world, dt);
     }
 
@@ -82,6 +83,8 @@ export class PhysicsManager {
                 
                 n.vx = (n.x - oldX) / dt;
                 n.vy = (n.y - oldY) / dt;
+
+                n.redraw(); // Forzar actualización visual del nodo en su nueva coordenada
             }
         }
 
@@ -172,6 +175,49 @@ export class PhysicsManager {
                     u.homeNode = tn;
                     u.speedMult = 1.0;
                 }
+            }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // BARRERA DE CRISTAL (Nivel 9) — empuja unidades fuera del muro.
+    //
+    // Reglas:
+    //   · Unidades IDLE sobre un nodo MÓVIL (el ferry) → inmunes.
+    //     El ferry las transporta a través del muro sin resistencia.
+    //   · Todas las demás → se empujan al borde más cercano del AABB.
+    //     Sin daño. La velocidad hacia el interior se cancela.
+    //     Las unidades quedan "apiladas" en el borde intentando pasar.
+    // ─────────────────────────────────────────────────────────────────
+    static resolveBarriers(world) {
+        if (!world.barriers || world.barriers.length === 0) return;
+        const gw = world.game.width;
+        const gh = world.game.height;
+
+        for (let u of world.allUnits) {
+            if (u.pendingRemoval) continue;
+            // Inmunidad: idle dentro de un nodo móvil (el ferry)
+            if (u.state === 'idle' && u.targetNode && u.targetNode.isMobile) continue;
+
+            for (let b of world.barriers) {
+                const bx = b.x * gw;
+                const by = b.y * gh;
+                const bw = b.width * gw;
+                const bh = b.height * gh;
+
+                if (u.x < bx || u.x > bx + bw || u.y < by || u.y > by + bh) continue;
+
+                // Empujar hacia el borde más cercano
+                const dL = u.x - bx;
+                const dR = bx + bw - u.x;
+                const dT = u.y - by;
+                const dB = by + bh - u.y;
+                const m  = Math.min(dL, dR, dT, dB);
+
+                if      (m === dL) { u.x = bx - 1;       if (u.vx > 0) u.vx = 0; }
+                else if (m === dR) { u.x = bx + bw + 1;  if (u.vx < 0) u.vx = 0; }
+                else if (m === dT) { u.y = by - 1;        if (u.vy > 0) u.vy = 0; }
+                else               { u.y = by + bh + 1;  if (u.vy < 0) u.vy = 0; }
             }
         }
     }
