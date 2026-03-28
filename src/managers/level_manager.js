@@ -119,17 +119,9 @@ export class LevelManager {
         this.world.hazards = [];
         if (levelData.hazards) {
             for (let hz of levelData.hazards) {
-                this.world.hazards.push({ ...hz });
-                const gfx = new PIXI.Graphics();
-                if (hz.shape === "semicircle") {
-                    gfx.moveTo(hz.x * cx, hz.y * cy - hz.radius * cx);
-                    gfx.arc(hz.x * cx, hz.y * cy, hz.radius * cx, -Math.PI / 2, Math.PI / 2);
-                    gfx.closePath();
-                } else {
-                    gfx.circle(hz.x * cx, hz.y * cy, hz.radius * cx);
-                }
-                gfx.fill({ color: hz.color || 0xff0000, alpha: hz.alpha || 0.2 });
-                this.game.layerNodes.addChild(gfx);
+                let h = { ...hz };
+                h.seed = Math.random() * 100;
+                this.world.hazards.push(h);
             }
         }
 

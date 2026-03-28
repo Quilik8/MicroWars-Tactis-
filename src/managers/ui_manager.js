@@ -9,7 +9,6 @@ export class UIManager {
         this.gameState = 'MENU';
         this.isPaused = false;
 
-        // Element references (initialized later in init() if needed, but we can try now)
         this.hudFPS = null;
         this.hudUnits = null;
         this.sendSlider = null;
@@ -18,6 +17,7 @@ export class UIManager {
         this.hud = null;
         this.sendBar = null;
         this.nodeTooltip = null;
+        this.difficultyBtns = null;   // ← NUEVO
     }
 
     init() {
@@ -30,8 +30,8 @@ export class UIManager {
         this.hud = document.getElementById('hud');
         this.sendBar = document.getElementById('sendBar');
         this.speedBtns = document.querySelectorAll('.speed-btn');
+        this.difficultyBtns = document.querySelectorAll('.diff-select-btn'); // ← NUEVO
 
-        // Tooltip DOM element
         let existingTooltip = document.getElementById('nodeTooltip');
         if (existingTooltip) existingTooltip.remove();
 
@@ -68,6 +68,18 @@ export class UIManager {
                 btn.addEventListener('click', () => {
                     const speed = parseInt(btn.dataset.speed);
                     if (this.callbacks.onSetSpeed) this.callbacks.onSetSpeed(speed);
+                });
+            });
+        }
+
+        // ── Botones de dificultad ────────────────────────────────────
+        if (this.difficultyBtns) {
+            this.difficultyBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const d = btn.dataset.difficulty;
+                    if (d && this.callbacks.onSetDifficulty) {
+                        this.callbacks.onSetDifficulty(d);
+                    }
                 });
             });
         }
@@ -139,6 +151,14 @@ export class UIManager {
         };
     }
 
+    // ── NUEVO: actualiza el estado visual de los botones de dificultad ─────
+    updateDifficultyButtons(activeDifficulty) {
+        if (!this.difficultyBtns) return;
+        this.difficultyBtns.forEach(btn => {
+            btn.classList.toggle('active-difficulty', btn.dataset.difficulty === activeDifficulty);
+        });
+    }
+
     updateHUD(fps, units, power) {
         if (this.hudFPS) this.hudFPS.textContent = `FPS: ${fps}`;
         if (this.hudUnits) this.hudUnits.textContent = `Hormigas: ${units} (Fuerza: ${power})`;
@@ -156,7 +176,7 @@ export class UIManager {
         if (!this.nodeTooltip) return;
         if (!node.gfx || node.gfx.destroyed || !node.gfx.parent) return;
 
-        const world = node.gfx.parent.parent; // Access world container to get scale/position
+        const world = node.gfx.parent.parent;
         if (!world) return;
         const screenX = node.x * world.scale.x + world.position.x;
         const screenY = node.y * world.scale.y + world.position.y;
@@ -166,25 +186,19 @@ export class UIManager {
 
         let total = Math.round(p['neutral'] || 0);
         let factionHtml = '';
-        
+
         let allKeys = Object.keys(p);
-        
-        // Custom Faction sorting so player is first if involved
         if (allKeys.includes('player')) {
             allKeys = allKeys.filter(k => k !== 'player');
             allKeys.unshift('player');
         }
-        
+
         for (let factionId of allKeys) {
-            if (factionId === 'neutral') continue; // Don't list neutral
+            if (factionId === 'neutral') continue;
             let count = Math.round(p[factionId] || 0);
             if (count > 0 || factionId === 'player' || factionId === 'enemy') {
-                // Provide fallback name capitalized
                 let factionName = Node.COLORS[factionId]?.name || factionId.charAt(0).toUpperCase() + factionId.slice(1);
-                
-                // Generar CSS en linea seguro extrayendo el color relleno del Node.COLORS
                 let colorHex = Node.COLORS[factionId] ? "#" + Node.COLORS[factionId].fill.toString(16).padStart(6, '0') : "#ffffff";
-                
                 factionHtml += `<div class="tooltip-row"><span>${factionName}:</span> <span style="font-weight: bold; color: ${colorHex}">${count}</span></div>\n`;
             }
             total += count;
@@ -248,7 +262,6 @@ export class UIManager {
     setGameState(state) {
         this.gameState = state;
 
-        // HUD/UI Visibility
         const isIngame = (state === 'PLAYING' || state === 'VICTORY' || state === 'GAMEOVER');
 
         if (this.hud) this.hud.classList.toggle('hidden', !isIngame);
@@ -258,39 +271,37 @@ export class UIManager {
         if (state === 'MENU') {
             this.showScreen('mainMenu');
             this.hideNodeTooltip();
-            if (this.callbacks.onSetSpeed)    this.callbacks.onSetSpeed(1);    // ← reset velocidad al menú
+            if (this.callbacks.onSetSpeed)     this.callbacks.onSetSpeed(1);
             if (this.callbacks.onStopCampaign) this.callbacks.onStopCampaign();
-            if (this.callbacks.onClearLevel) this.callbacks.onClearLevel();
-            if (this.callbacks.onResetCamera) this.callbacks.onResetCamera();
+            if (this.callbacks.onClearLevel)   this.callbacks.onClearLevel();
+            if (this.callbacks.onResetCamera)  this.callbacks.onResetCamera();
             if (this.callbacks.onSpawnMenuAnts) this.callbacks.onSpawnMenuAnts();
-            if (this.callbacks.onStartMusic) this.callbacks.onStartMusic('MENU');
+            if (this.callbacks.onStartMusic)   this.callbacks.onStartMusic('MENU');
         } else if (state === 'LEVELS') {
             this.showScreen('levelSelection');
             this.hideNodeTooltip();
             if (this.callbacks.onClearMenuAnts) this.callbacks.onClearMenuAnts();
-            if (this.callbacks.onClearLevel) this.callbacks.onClearLevel();
+            if (this.callbacks.onClearLevel)    this.callbacks.onClearLevel();
         } else if (state === 'CAMPAIGN') {
             this.showScreen('campaignScreen');
             this.hideNodeTooltip();
             if (this.callbacks.onClearMenuAnts) this.callbacks.onClearMenuAnts();
-            if (this.callbacks.onStartMusic) this.callbacks.onStartMusic('MENU');
+            if (this.callbacks.onStartMusic)    this.callbacks.onStartMusic('MENU');
             if (this.callbacks.onStartCampaign) this.callbacks.onStartCampaign();
         } else if (state === 'FACTIONS') {
             this.showScreen('factionSelection');
-            if (this.callbacks.onClearMenuAnts) this.callbacks.onClearMenuAnts();
+            if (this.callbacks.onClearMenuAnts)  this.callbacks.onClearMenuAnts();
             if (this.callbacks.onRenderFactions) this.callbacks.onRenderFactions();
         } else if (state === 'PLAYING') {
-            // Hide all potential interfering screens
             ['mainMenu', 'levelSelection', 'levelComplete', 'gameOver', 'levelIntro', 'campaignScreen'].forEach(id => {
                 const s = document.getElementById(id);
                 if (s) { s.classList.remove('active'); s.classList.add('hidden'); }
             });
             if (this.callbacks.onClearMenuAnts) this.callbacks.onClearMenuAnts();
-            // Siempre arrancar en velocidad normal al iniciar un nivel
-            if (this.callbacks.onSetSpeed) this.callbacks.onSetSpeed(1);
+            if (this.callbacks.onSetSpeed)      this.callbacks.onSetSpeed(1);
         } else if (state === 'VICTORY') {
             if (this.callbacks.onSetSpeed) this.callbacks.onSetSpeed(1);
-            if (this.callbacks.onVictory) this.callbacks.onVictory();
+            if (this.callbacks.onVictory)  this.callbacks.onVictory();
             this.showScreen('levelComplete');
             if (this.callbacks.onStopMusic) this.callbacks.onStopMusic();
         } else if (state === 'GAMEOVER') {
@@ -310,7 +321,6 @@ export class UIManager {
             const card = document.createElement('div');
             card.className = `faction-card ${f.isPremium ? 'premium-locked' : ''}`;
 
-            // Colores CSS variables para los hover dinámicos
             const colorHex = '#' + f.color.toString(16).padStart(6, '0');
             card.style.setProperty('--f-color', colorHex);
             card.style.setProperty('--f-color-alpha', colorHex + '44');
@@ -340,7 +350,6 @@ export class UIManager {
         }
 
         if (!skipCallback && this.callbacks.onTogglePause) {
-            // This ensures ticker speed is updated in main.js
             this.callbacks.onTogglePause(isPaused);
         }
     }

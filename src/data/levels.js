@@ -87,13 +87,13 @@ export const LEVELS = [
                 id: "hoja_movil", x: 0.35, y: 0.5,
                 owner: 'neutral', type: 'enjambre', startUnits: 0,
                 isMobile: true,
-                orbitAnchorX: 0.34, orbitAnchorY: 0.5,
-                orbitRadiusX: 0.17, orbitRadiusY: 0,
+                orbitAnchorX: 0.35, orbitAnchorY: 0.5,
+                orbitRadiusX: 0.13, orbitRadiusY: 0,
                 orbitSpeed: 0.6
             }
         ],
         hazards: [
-            { x: 0.16, y: 0.5, radius: 0.30, dps: 15, color: 0x8e44ad, alpha: 0.25, shape: "semicircle" }
+            { x: 0.35, y: 0.5, radius: 0.12, dps: 6, color: 0x8e44ad, alpha: 0.25, shape: "puddle", scaleY: 1.6 }
         ]
     },
     {

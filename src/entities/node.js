@@ -79,6 +79,11 @@ export class Node {
         this.activeShots = [];
         // ──────────────────────────────────────────────────────────
 
+        // ── Espinoso: temporizador determinista de ráfaga ──────────
+        // Mata exactamente 1 unidad cada ESPINOSO_KILL_INTERVAL segundos (~3/s).
+        // Sin Math.random(): resultado predecible e independiente del grupo.
+        this.espinosoTimer = 0;
+
         this.regenTimer  = 0;
         this.combatTimer = 0;
 
@@ -100,6 +105,10 @@ export class Node {
         // Gráficos PixiJS
         this.gfx = null;
     }
+
+    // Intervalo fijo de daño del Espinoso: 1 baja cada 0.15 s ≈ 6.6 bajas/seg.
+    // Determinista — sin azar, sin amplificación por tamaño de grupo.
+    static ESPINOSO_KILL_INTERVAL = 0.15;
 
     static TYPES = {
         normal:   { radius: 25, maxUnits: 200, regenInterval: 1.0 },
@@ -133,7 +142,6 @@ export class Node {
     };
 
     redraw(factionData = null) { NodeRenderer.redraw(this, factionData); }
-    drawTooltip(ctx)           { NodeRenderer.drawTooltip(this, ctx); }
 
     containsPoint(mx, my) {
         let dx = mx - this.x, dy = my - this.y;
@@ -175,28 +183,52 @@ export class Node {
         }
 
         // ─────────────────────────────────────────────────────────
-        // 1. ESPINOSO: Aura de daño pasivo
+        // 1. ESPINOSO: Aura de daño determinista (ráfaga temporizada)
+        //    Mata exactamente 1 unidad enemiga cada 0.33 s (~3/s).
+        //    Sin Math.random() → sin varianza, predecible, justo.
         // ─────────────────────────────────────────────────────────
         if (this.evolution === 'espinoso') {
-            const espinosoRange = this.radius + (this.artilleryRange * 0.25);
-            const neighbors = [];
-            grid.findNear(this.x, this.y, espinosoRange, neighbors);
-            const killProbability = 2.4 * dt;
-            for (let idx of neighbors) {
-                let u = allUnits[idx];
-                if (u && u.faction !== this.owner && !u.pendingRemoval && u.state === 'traveling') {
+            this.espinosoTimer += dt;
+
+            // Procesar todas las ráfagas acumuladas en este frame
+            // (importante para dt grandes o game-speed x4)
+            while (this.espinosoTimer >= Node.ESPINOSO_KILL_INTERVAL) {
+                this.espinosoTimer -= Node.ESPINOSO_KILL_INTERVAL;
+
+                const espinosoRange = this.radius + (this.artilleryRange * 0.25);
+                const rangeSq = espinosoRange * espinosoRange;
+                const radiusSq = this.radius * this.radius;
+                const neighbors = [];
+                grid.findNear(this.x, this.y, espinosoRange, neighbors);
+
+                // Buscar la víctima más cercana al borde del aura (la primera que
+                // cruce es la primera que cae — FIFO espacial, predecible)
+                let victim = null;
+                let closestDist = Infinity;
+
+                for (const idx of neighbors) {
+                    const u = allUnits[idx];
+                    if (!u || u.faction === this.owner || u.pendingRemoval || u.state !== 'traveling') continue;
                     const ddx = u.x - this.x;
                     const ddy = u.y - this.y;
-                    if (ddx * ddx + ddy * ddy < espinosoRange * espinosoRange
-                        && ddx * ddx + ddy * ddy > this.radius * this.radius
-                        && Math.random() < killProbability) {
-                        u.pendingRemoval = true;
-                        if (this.flashTimer <= 0) {
-                            this.flashTargetColor = 0xff6666;
-                            this.flashTimer = 0.15;
-                            this.redraw();
-                        }
+                    const dSq = ddx * ddx + ddy * ddy;
+                    if (dSq < rangeSq && dSq > radiusSq && dSq < closestDist) {
+                        closestDist = dSq;
+                        victim = u;
                     }
+                }
+
+                if (victim) {
+                    victim.pendingRemoval = true;
+                    if (this.flashTimer <= 0) {
+                        this.flashTargetColor = 0xff6666;
+                        this.flashTimer = 0.15;
+                        this.redraw();
+                    }
+                } else {
+                    // Sin víctimas en rango — resetear timer para no acumular ráfagas
+                    this.espinosoTimer = 0;
+                    break;
                 }
             }
         }

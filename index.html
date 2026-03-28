@@ -7,7 +7,6 @@
     <title>MicroWars: Swarm Tactics</title>
     <link rel="stylesheet" href="style.css">
 
-    <!-- PixiJS v8 via CDN import map — sin instalación requerida -->
     <script type="importmap">
     {
         "imports": {
@@ -45,6 +44,21 @@
         <!-- Pantalla de Selección de Nivel -->
         <div id="levelSelection" class="screen hidden">
             <h1>SELECCIONAR ESCARAMUZA</h1>
+
+            <!-- ── SELECTOR DE DIFICULTAD ─────────────────────────── -->
+            <div class="difficulty-selector">
+                <span class="difficulty-label">Dificultad de la IA:</span>
+                <div class="difficulty-buttons">
+                    <button class="diff-select-btn diff-easy"   data-difficulty="easy"   title="La IA comete errores, ataca lento y rara vez coordina.">FÁCIL</button>
+                    <button class="diff-select-btn diff-normal" data-difficulty="normal" title="Comportamiento equilibrado. La IA expande, evoluciona y ataca con ritmo normal.">NORMAL</button>
+                    <button class="diff-select-btn diff-hard"   data-difficulty="hard"   title="La IA actúa rápido, coordina flancos y hace rush temprano.">DIFÍCIL</button>
+                    <button class="diff-select-btn diff-brutal" data-difficulty="brutal" title="Velocidad máxima, sin errores, pinza permanente y rush garantizado.">BRUTAL</button>
+                </div>
+                <!-- Descripción dinámica de la dificultad activa -->
+                <div class="difficulty-desc" id="difficultyDesc">Comportamiento equilibrado.</div>
+            </div>
+            <!-- ──────────────────────────────────────────────────── -->
+
             <div id="levelGrid" class="level-grid">
                 <!-- Se poblará dinámicamente desde main.js -->
             </div>
@@ -99,6 +113,7 @@
             <button id="btnMenuFromLoss" class="secondary-btn">VOLVER AL MENÚ</button>
         </div>
     </div>
+
     <!-- HUD de diagnóstico -->
     <div id="hud" class="hidden">
         <span id="hudFPS">FPS: --</span>
@@ -115,16 +130,36 @@
         <button id="btnSurrender" class="hud-btn surrender-btn">RENDIRSE</button>
     </div>
 
-    <!-- El canvas ya NO se define aquí, PixiJS crea el suyo propio optimizado para WebGL -->
     <div id="gameContainer"></div>
 
-    <!-- MENÚ RADIAL DE EVOLUCIÓN (Estilo Kingdom Rush) -->
+    <!-- MENÚ RADIAL DE EVOLUCIÓN -->
     <div id="evolutionMenu" class="evolution-menu hidden">
         <button class="evo-btn" data-evo="espinoso" title="Tronco Espinoso (30)">🌵</button>
         <button class="evo-btn" data-evo="artilleria" title="Artillería (40)">🔫</button>
         <button class="evo-btn" data-evo="tanque" title="Tanques (35)">🛡️</button>
         <button class="evo-btn cancel" data-evo="cancel" title="Cancelar">✕</button>
     </div>
+
+    <!-- Script inline para sincronizar descripción de dificultad con el botón activo -->
+    <script>
+    (function() {
+        const DESCS = {
+            easy:   'Conciencia tactica: evalua tropas, reconoce evoluciones y expande con criterio.',
+            normal: 'Conciencia estrategica: planifica rutas, refuerza momentum y evita sobreextension.',
+            hard:   'Inteligencia enjambre: coordinacion de pinzas, ataques precisos y sniping oportunista.',
+            brutal: 'Dominio absoluto: back-capping, flanqueos letales, conciencia de peligros del mapa.'
+        };
+        // El listener se añade después de que el DOM esté listo
+        document.addEventListener('DOMContentLoaded', () => {
+            const desc = document.getElementById('difficultyDesc');
+            document.querySelectorAll('.diff-select-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (desc) desc.textContent = DESCS[btn.dataset.difficulty] || '';
+                });
+            });
+        });
+    })();
+    </script>
 </body>
 
 </html>

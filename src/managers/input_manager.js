@@ -657,17 +657,39 @@ export class InputManager {
     showEvolutionMenu(node) {
         if (!this.evoMenu) return;
         this.selectedNode = node;
-        const w = this.game.world;
-        const screenX = node.x * w.scale.x + w.position.x;
-        const screenY = node.y * w.scale.y + w.position.y;
-
-        this.evoMenu.style.left = `${screenX}px`;
-        this.evoMenu.style.top = `${screenY}px`;
         this.evoMenu.classList.remove('hidden');
 
+        // Initial setup of buttons
         const buttons = Array.from(document.querySelectorAll('.evo-btn'));
         const currentTroops = this.world.popAt(node, 'player');
-        const expansionRadius = node.radius + 45;
+        
+        const evoButtons = buttons.filter(b => b.dataset.evo !== 'cancel');
+        const cancelBtn = buttons.find(b => b.dataset.evo === 'cancel');
+
+        evoButtons.forEach(btn => {
+            const cost = Node.EVOLUTION_COSTS[btn.dataset.evo];
+            btn.disabled = currentTroops < cost;
+        });
+
+        // The position is now fully handled by updateEvolutionMenuPosition()
+        this.updateEvolutionMenuPosition();
+    }
+
+    updateEvolutionMenuPosition() {
+        if (!this.evoMenu || this.evoMenu.classList.contains('hidden') || !this.selectedNode) return;
+        
+        const w = this.game.world;
+        if (!w) return;
+        
+        const screenX = this.selectedNode.x * w.scale.x + w.position.x;
+        const screenY = this.selectedNode.y * w.scale.y + w.position.y;
+        
+        this.evoMenu.style.left = `${screenX}px`;
+        this.evoMenu.style.top = `${screenY}px`;
+
+        // Update button transforms relative to current node radius/scale
+        const buttons = Array.from(document.querySelectorAll('.evo-btn'));
+        const expansionRadius = this.selectedNode.radius + 45;
         const baseAngle = -Math.PI / 2;
         const arcSpread = Math.PI * 0.85;
 
@@ -680,12 +702,10 @@ export class InputManager {
             const x = Math.cos(angle) * expansionRadius;
             const y = Math.sin(angle) * expansionRadius;
             btn.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
-            const cost = Node.EVOLUTION_COSTS[btn.dataset.evo];
-            btn.disabled = currentTroops < cost;
         });
 
         if (cancelBtn) {
-            cancelBtn.style.transform = `translate(-50%, ${node.radius + 15}px)`;
+            cancelBtn.style.transform = `translate(-50%, ${this.selectedNode.radius + 15}px)`;
         }
     }
 
@@ -729,6 +749,9 @@ export class InputManager {
     // ═══════════════════════════════════════════════════════════════
     draw(ctx) {
         if (this.ui.gameState !== 'PLAYING' || this.ui.isPaused) return;
+        
+        this.updateEvolutionMenuPosition();
+        
         const w = this.game.world;
         if (!w) return;
 

@@ -69,6 +69,9 @@ export class PhysicsManager {
     }
 
     static processLevelLogic(world, dt) {
+        if (world.hazardTimer === undefined) world.hazardTimer = 0;
+        world.hazardTimer += dt;
+
         // Mover nodos móviles (Level 5 Orbital)
         for (let n of world.nodes) {
             if (n.isMobile) {
@@ -91,6 +94,12 @@ export class PhysicsManager {
         // Damage units in hazards
         if (world.hazards) {
             for (let hz of world.hazards) {
+                // Determine how many kills should happen this frame based on the fixed DPS
+                const killInterval = hz.dps > 0 ? 1 / hz.dps : 999;
+                let killsPending = Math.floor(world.hazardTimer / killInterval);
+                let killedThisFrame = 0;
+                let anyUnitsInHazard = false;
+
                 const hx = hz.x * world.game.width;
                 const hy = hz.y * world.game.height;
                 const hR = hz.radius * world.game.width; // Assume radius is % of width for circular logic
@@ -104,27 +113,36 @@ export class PhysicsManager {
                     }
                     
                     const dx = u.x - hx;
-                    const dy = u.y - hy;
+                    const sy = hz.scaleY || 1.0;
+                    const dy = (u.y - hy) / sy;
                     
                     if (dx * dx + dy * dy < hR * hR) {
                         if (hz.shape === "semicircle" && dx < 0) {
                             continue; // Ignorar colisión en la mitad trasera/recta del arco
                         }
 
-                        // Daño como porcentaje gradual:
-                        // dps = % de hormigas muertas por segundo
-                        const damageChance = (hz.dps / 100) * dt;
-                        if (Math.random() < damageChance) {
-                            if (u.power > 1) u.power -= 1;
-                            else u.pendingRemoval = true;
+                        anyUnitsInHazard = true;
 
-                            // Flash effect visual universal: Tintes PIXI afectan texturas rojas negativamente. Usamos Alpha.
+                        if (killedThisFrame < killsPending) {
+                            // Deterministic damage: mark for exact removal
+                            u.pendingRemoval = true;
+                            killedThisFrame++;
+
+                            // Flash effect visual universal
                             if (u.sprite && !u.sprite.destroyed) {
                                 u.sprite.alpha = 0.2; // Parpadeo casi invisible
                                 setTimeout(() => { if (u.sprite && !u.sprite.destroyed) u.sprite.alpha = 1.0; }, 80);
                             }
                         }
                     }
+                }
+
+                if (!anyUnitsInHazard) {
+                    // Si no hay tropas para dañar, reiniciamos el reloj para evitar acumulación de muertes (kill debts)
+                    world.hazardTimer = 0;
+                } else if (killedThisFrame > 0) {
+                    // Consume the time used for the kills, but keep remainder
+                    world.hazardTimer = world.hazardTimer % killInterval;
                 }
             }
         }

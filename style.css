@@ -235,6 +235,13 @@ html {
     display: none !important;
 }
 
+#levelSelection, #factionSelection {
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding-top: 8vh;
+    padding-bottom: 8vh;
+}
+
 .screen h1 {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 3rem;
@@ -728,4 +735,94 @@ html {
 .diff-leyenda {
     color: #f1c40f;
     border-color: #f1c40f33;
+}
+/* ══════════════════════════════════════════
+   SELECTOR DE DIFICULTAD (Pantalla de Niveles)
+   ══════════════════════════════════════════ */
+.difficulty-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0 10px;
+    padding: 16px 24px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
+    width: 90%;
+    max-width: 700px;
+}
+
+.difficulty-label {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.difficulty-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Base — todos los botones de dificultad */
+.diff-select-btn {
+    font-family: monospace;
+    font-size: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    padding: 9px 22px;
+    border-radius: 7px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.12s, background 0.18s, border-color 0.18s, box-shadow 0.18s;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.diff-select-btn:hover {
+    transform: translateY(-2px);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* Estado activo — sobreescrito por color de dificultad */
+.diff-select-btn.active-difficulty {
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* Fácil — verde */
+.diff-easy                          { border-color: rgba(46, 204, 113, 0.25); }
+.diff-easy:hover                    { border-color: rgba(46, 204, 113, 0.6);  box-shadow: 0 4px 14px rgba(46,204,113,0.2); }
+.diff-easy.active-difficulty        { background: rgba(46, 204, 113, 0.18);  border-color: #2ecc71; box-shadow: 0 0 12px rgba(46,204,113,0.35); }
+
+/* Normal — azul */
+.diff-normal                        { border-color: rgba(93, 173, 226, 0.25); }
+.diff-normal:hover                  { border-color: rgba(93, 173, 226, 0.6);  box-shadow: 0 4px 14px rgba(93,173,226,0.2); }
+.diff-normal.active-difficulty      { background: rgba(93, 173, 226, 0.18);  border-color: #5dade2; box-shadow: 0 0 12px rgba(93,173,226,0.35); }
+
+/* Difícil — naranja */
+.diff-hard                          { border-color: rgba(230, 126, 34, 0.25); }
+.diff-hard:hover                    { border-color: rgba(230, 126, 34, 0.6);  box-shadow: 0 4px 14px rgba(230,126,34,0.2); }
+.diff-hard.active-difficulty        { background: rgba(230, 126, 34, 0.18);  border-color: #e67e22; box-shadow: 0 0 12px rgba(230,126,34,0.35); }
+
+/* Brutal — rojo */
+.diff-brutal                        { border-color: rgba(231, 76, 60, 0.25); }
+.diff-brutal:hover                  { border-color: rgba(231, 76, 60, 0.6);  box-shadow: 0 4px 14px rgba(231,76,60,0.2); }
+.diff-brutal.active-difficulty      { background: rgba(231, 76, 60, 0.18);  border-color: #e74c3c; box-shadow: 0 0 12px rgba(231,76,60,0.35); }
+
+/* Descripción de la dificultad activa */
+.difficulty-desc {
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.38);
+    text-align: center;
+    min-height: 16px;
+    transition: opacity 0.2s;
+    max-width: 480px;
 }

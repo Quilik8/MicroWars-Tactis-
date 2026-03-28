@@ -58,6 +58,9 @@ export class WorldManager {
         this.zoneGraphics = new PIXI.Graphics();
         this.game.layerNodes.addChild(this.zoneGraphics);
 
+        this.hazardGraphics = new PIXI.Graphics();
+        this.game.layerNodes.addChild(this.hazardGraphics);
+
         this.tunnelGraphics = new PIXI.Graphics();
         this.game.layerNodes.addChild(this.tunnelGraphics);
 
@@ -165,19 +168,28 @@ export class WorldManager {
     }
 
     // Activa el punto de reunión en (x, y).
-    // Las hormigas en radio _GATHER_RADIUS se atraen y orbitan el punto.
+    // Las hormigas en radio _GATHER_RADIUS se atraen y orbitan el punto (remolino interactivo).
     setMenuGather(x, y) {
         const orbitAngles = [];
+        const orbitRadiuses = [];
+        const orbitSpeeds = [];
+
         for (let i = 0; i < this.menuAnts.length; i++) {
             const a = this.menuAnts[i];
             const dx = a.x - x, dy = a.y - y;
-            if (dx * dx + dy * dy < this._GATHER_RADIUS * this._GATHER_RADIUS) {
+            // Solo ~50% de las hormigas en rango se sienten atraídas para que no vayan todas
+            if (dx * dx + dy * dy < this._GATHER_RADIUS * this._GATHER_RADIUS && Math.random() < 0.5) {
                 orbitAngles[i] = Math.atan2(dy, dx);
+                // Radio y velocidad aleatorios para simular el remolino de un nodo real
+                orbitRadiuses[i] = Math.random() * this._GATHER_ORBIT;
+                orbitSpeeds[i] = (0.8 + Math.random() * 2.0) * (Math.random() < 0.5 ? 1 : -1);
             } else {
-                orbitAngles[i] = null;
+                orbitAngles[i]   = null;
+                orbitRadiuses[i] = null;
+                orbitSpeeds[i]   = null;
             }
         }
-        this.menuGatherPoint = { x, y, timer: this._GATHER_DURATION, orbitAngles };
+        this.menuGatherPoint = { x, y, timer: this._GATHER_DURATION, orbitAngles, orbitRadiuses, orbitSpeeds };
     }
 
     clearLevel() {
@@ -200,7 +212,12 @@ export class WorldManager {
         this.travelingIds.length = 0;
         this.nodes.length        = 0;
         this.zones.length        = 0;
+
+        if (this.hazardGraphics) {
+            this.hazardGraphics.clear();
+        }
         this.hazards             = [];
+        this.hazardTimer         = 0;
         this.grid.clear();
 
         if (this.game.layerUnits) {
@@ -217,6 +234,9 @@ export class WorldManager {
 
             this.zoneGraphics = new PIXI.Graphics();
             this.game.layerNodes.addChild(this.zoneGraphics);
+
+            this.hazardGraphics = new PIXI.Graphics();
+            this.game.layerNodes.addChild(this.hazardGraphics);
 
             this.tunnelGraphics = new PIXI.Graphics();
             this.game.layerNodes.addChild(this.tunnelGraphics);
@@ -290,19 +310,20 @@ export class WorldManager {
 
             // ── MODO REUNIÓN ──────────────────────────────────────────
             if (gp && gp.orbitAngles[i] !== null) {
-                // Hacer girar el ángulo de órbita personal
-                const orbitSpeed = 1.4 * (a.faction === 'player' ? 1 : -1);
-                gp.orbitAngles[i] += orbitSpeed * dt;
+                // Hacer girar el ángulo de órbita personal con su velocidad única
+                gp.orbitAngles[i] += gp.orbitSpeeds[i] * dt;
 
-                // Posición objetivo en la órbita
-                const targetX = gp.x + Math.cos(gp.orbitAngles[i]) * this._GATHER_ORBIT;
-                const targetY = gp.y + Math.sin(gp.orbitAngles[i]) * this._GATHER_ORBIT;
+                // Posición objetivo en la órbita (repartidas como en un nodo)
+                const targetX = gp.x + Math.cos(gp.orbitAngles[i]) * gp.orbitRadiuses[i];
+                const targetY = gp.y + Math.sin(gp.orbitAngles[i]) * gp.orbitRadiuses[i];
 
                 // Lerp suave hacia la órbita
-                const lerpFactor = 1 - Math.exp(-5 * dt);
+                const lerpFactor = 1 - Math.exp(-4 * dt);
                 a.x += (targetX - a.x) * lerpFactor;
                 a.y += (targetY - a.y) * lerpFactor;
-                a.angle = gp.orbitAngles[i] + Math.PI / 2 * (a.faction === 'player' ? 1 : -1);
+                
+                // Orientar visualmente
+                a.angle = gp.orbitAngles[i] + Math.PI / 2 * Math.sign(gp.orbitSpeeds[i]);
 
                 if (a.sprite) {
                     a.sprite.x        = a.x;
@@ -367,6 +388,7 @@ export class WorldManager {
 
         if (this.vfxGraphics)    this.vfxGraphics.clear();
         if (this.sparksGraphics) this.sparksGraphics.clear();
+        this.drawHazards();
 
         // update() de cada marea: gestiona colisión Y actualiza su PIXI.Graphics
         for (let sweep of this.waterSweeps) {
@@ -479,6 +501,57 @@ export class WorldManager {
                     u.targetNode = u.homeNode;
                     u.state = 'traveling';
                 }
+            }
+        }
+    }
+
+    drawHazards() {
+        if (!this.hazardGraphics) return;
+        this.hazardGraphics.clear();
+
+        if (!this.hazards || this.hazards.length === 0) return;
+        const cx = this.game.width;
+        const cy = this.game.height;
+        const t = performance.now() * 0.001;
+
+        for (let hz of this.hazards) {
+            const hx = hz.x * cx;
+            const hy = hz.y * cy;
+            const hR = hz.radius * cx;
+
+            if (hz.shape === 'puddle') {
+                // Organic bubbling shape
+                this.hazardGraphics.beginPath();
+                const sy = hz.scaleY || 1.0;
+                
+                const segments = 32;
+                for (let i = 0; i <= segments; i++) {
+                    const angle = (i / segments) * Math.PI * 2;
+                    let ripple = Math.sin(angle * 5 + t * 2 + hz.seed) * 10 + Math.cos(angle * 3 - t * 1.5) * 6;
+                    
+                    const r = hR + ripple;
+                    const px = hx + Math.cos(angle) * r;
+                    const py = hy + Math.sin(angle) * (r * sy);
+                    
+                    if (i === 0) this.hazardGraphics.moveTo(px, py);
+                    else this.hazardGraphics.lineTo(px, py);
+                }
+                
+                const alphaPulse = 0.25 + Math.sin(t * 3) * 0.05;
+                this.hazardGraphics.fill({ color: hz.color || 0x8e44ad, alpha: alphaPulse });
+                
+                // Puddle edge
+                this.hazardGraphics.stroke({ color: 0x27ae60, alpha: 0.6 + Math.sin(t*5)*0.2, width: 3 });
+                
+            } else if (hz.shape === "semicircle") {
+                this.hazardGraphics.moveTo(hx, hy - hR);
+                this.hazardGraphics.arc(hx, hy, hR, -Math.PI / 2, Math.PI / 2);
+                this.hazardGraphics.closePath();
+                const alphaPulse = 0.2 + Math.sin(t * 2) * 0.05;
+                this.hazardGraphics.fill({ color: hz.color || 0xff0000, alpha: alphaPulse });
+            } else {
+                this.hazardGraphics.circle(hx, hy, hR);
+                this.hazardGraphics.fill({ color: hz.color || 0xff0000, alpha: hz.alpha || 0.2 });
             }
         }
     }
