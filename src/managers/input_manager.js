@@ -581,15 +581,10 @@ export class InputManager {
         }
 
         // Click RMB en nodo propio sin selección
-        if (clicked.owner === 'player') {
-            if (clicked.tunnelTo) {
-                // Tiene túnel activo → eliminarlo
-                clicked.tunnelTo = null;
-                clicked.redraw();
-            } else {
-                // Sin túnel → recallToHome (retirar tropas)
-                this.world.recallToHome(clicked);
-            }
+        if (clicked.owner === 'player' && clicked.tunnelTo) {
+            // Tiene túnel activo → eliminarlo
+            clicked.tunnelTo = null;
+            clicked.redraw();
         }
     }
 

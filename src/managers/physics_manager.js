@@ -208,7 +208,18 @@ export class PhysicsManager {
     //     Las unidades quedan "apiladas" en el borde intentando pasar.
     // ─────────────────────────────────────────────────────────────────
     static resolveBarriers(world) {
-        if (!world.barriers || world.barriers.length === 0) return;
+        let activeBarriers = [];
+        if (world.barriers) activeBarriers.push(...world.barriers);
+        
+        if (world.intermittentBarriers) {
+            for (let ib of world.intermittentBarriers) {
+                const act = ib.getActiveBounds();
+                if (act) activeBarriers.push(...act);
+            }
+        }
+
+        if (activeBarriers.length === 0) return;
+
         const gw = world.game.width;
         const gh = world.game.height;
 
@@ -217,7 +228,7 @@ export class PhysicsManager {
             // Inmunidad: idle dentro de un nodo móvil (el ferry)
             if (u.state === 'idle' && u.targetNode && u.targetNode.isMobile) continue;
 
-            for (let b of world.barriers) {
+            for (let b of activeBarriers) {
                 const bx = b.x * gw;
                 const by = b.y * gh;
                 const bw = b.width * gw;

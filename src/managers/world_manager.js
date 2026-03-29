@@ -34,6 +34,9 @@ export class WorldManager {
         // no pueden atravesar, salvo si van dentro de un nodo móvil (ferry).
         this.barriers = [];
 
+        // Barreras Intermitentes (Nivel 11)
+        this.intermittentBarriers = [];
+
         this.combatInterval = config.combatInterval || 0.7;
         this._tunnelsDirty = true;
 
@@ -207,6 +210,11 @@ export class WorldManager {
 
         // Barreras de bloqueo — los Graphics se limpian en layerNodes.removeChildren()
         this.barriers = [];
+
+        for (let ib of this.intermittentBarriers) {
+            if (ib.destroy) ib.destroy();
+        }
+        this.intermittentBarriers = [];
 
         this.allUnits.length     = 0;
         this.travelingIds.length = 0;
@@ -398,6 +406,11 @@ export class WorldManager {
         // update() de cada rayo de luz: gestiona reset de nodos marcados
         for (let sweep of this.lightSweeps) {
             sweep.update(dt, this.allUnits, this.nodes, this.game);
+        }
+
+        // update() de barreras intermitentes
+        for (let ib of this.intermittentBarriers) {
+            ib.update(dt, this.game.width, this.game.height);
         }
 
         let hoveredNode = null;

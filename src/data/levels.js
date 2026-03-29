@@ -315,5 +315,75 @@ export const LEVELS = [
             // Pared INFERIOR (horizontal)
             { x: 0.12, y: 0.58, width: 0.76, height: 0.03 }
         ]
+    },
+
+    // ══════════════════════════════════════════════════════════════════
+    // NIVEL 10: EL MURO INFRANQUEABLE
+    // ══════════════════════════════════════════════════════════════════
+    {
+        name: "Nivel 10: El Muro Infranqueable",
+        description: "Un bloqueo absoluto impide el paso directo entre tu nido inferior izquierdo y el del enemigo.\nDeberás rodear su inmensa estructura de cristal conquistando los nodos superiores para flanquear.",
+        nodes: [
+            // Bases principales (solo 1 por bando, en la parte inferior)
+            { id: "p1", x: 0.20, y: 0.80, owner: 'player', type: 'gigante', startUnits: 150 },
+            { id: "e1", x: 0.80, y: 0.80, owner: 'enemy',  type: 'gigante', startUnits: 150 },
+            
+            // Nodos neutrales (3 formando un arco por la parte superior)
+            { id: "n_left",  x: 0.20, y: 0.30, owner: 'neutral', type: 'enjambre', startUnits: 60 },
+            { id: "n_top",   x: 0.50, y: 0.15, owner: 'neutral', type: 'gigante',  startUnits: 100 },
+            { id: "n_right", x: 0.80, y: 0.30, owner: 'neutral', type: 'enjambre', startUnits: 60 }
+        ],
+        barriers: [
+            // Muro vertical central infranqueable
+            // Comienza debajo de n_top (y=0.45) hasta el fondo del mapa (y=0.90)
+            { x: 0.48, y: 0.45, width: 0.04, height: 0.45 }
+        ]
+    },
+
+    // ══════════════════════════════════════════════════════════════════
+    // NIVEL 11: PRISIONES INTERMITENTES
+    // ══════════════════════════════════════════════════════════════════
+    {
+        name: "Nivel 11: PRISIONES INTERMITENTES",
+        description: "Tus ejércitos inician encerrados en paredes holográficas huecas.\nDentro tienes 2 nodos neutrales para expandirte, pero no puedes salir aún.\nCada 8 segundos la prisión se abre y puedes acceder al centro, donde te esperan valiosos Nodos Tanque.\n¡Domina el medio antes que tu enemigo lo haga!",
+        nodes: [
+            // Nodos dentro de la caja Izquierda (Jugador)
+            { id: "p1", x: 0.12, y: 0.50, owner: 'player', type: 'gigante', startUnits: 180 },
+            { id: "p2", x: 0.26, y: 0.30, owner: 'neutral', type: 'normal',  startUnits: 30 },
+            { id: "p3", x: 0.26, y: 0.70, owner: 'neutral', type: 'normal',  startUnits: 30 },
+            
+            // Nodos libres centrales (Tipo Tanque)
+            { id: "c_top", x: 0.50, y: 0.30, owner: 'neutral', type: 'tanque', startUnits: 120 },
+            { id: "c_bot", x: 0.50, y: 0.70, owner: 'neutral', type: 'tanque', startUnits: 120 },
+
+            // Nodos dentro de la caja Derecha (Enemigo)
+            { id: "e1", x: 0.88, y: 0.50, owner: 'enemy',  type: 'gigante', startUnits: 180 },
+            { id: "e2", x: 0.74, y: 0.30, owner: 'neutral',  type: 'normal',  startUnits: 30 },
+            { id: "e3", x: 0.74, y: 0.70, owner: 'neutral',  type: 'normal',  startUnits: 30 }
+        ],
+        intermittentBarriers: [
+            // Barrera 1: Oscila entre encerrar la base Izquierda (ON) y liberarla (OFF)
+            {
+                zones: [
+                    // Zona 0: Prisión Hueca Azul (izquierda) - ON
+                    { isHollow: true, x: 0.03, y: 0.15, width: 0.32, height: 0.70, color: 0x00e5ff },
+                    // Zona 1: Estado OFF (No bloquea ni dibuja, pero permite que la Zona 0 se sombree)
+                    { hidden: true }
+                ],
+                interval: 8,
+                activeZoneIndex: 0
+            },
+            // Barrera 2: Oscila entre encerrar la base Derecha (ON) y liberarla (OFF)
+            {
+                zones: [
+                    // Zona 0: Prisión Hueca Roja (derecha) - ON
+                    { isHollow: true, x: 0.65, y: 0.15, width: 0.32, height: 0.70, color: 0x00e5ff },
+                    // Zona 1: Estado OFF
+                    { hidden: true }
+                ],
+                interval: 8,
+                activeZoneIndex: 0
+            }
+        ]
     }
 ];

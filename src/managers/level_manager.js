@@ -3,6 +3,7 @@ import { Node } from '../entities/node.js';
 import { PIXI } from '../core/engine.js';
 import { WaterSweep } from '../systems/water_sweep.js';
 import { LightSweep } from '../systems/light_sweep.js';
+import { IntermittentBarrier } from '../systems/intermittent_barrier.js';
 
 export class LevelManager {
     constructor(game, world, ui, sfx, music) {
@@ -152,6 +153,15 @@ export class LevelManager {
         this.world.barriers = [];
         if (levelData.barriers && levelData.barriers.length > 0) {
             for (let b of levelData.barriers) {
+                // Validación estricta impuesta por diseño: Ningún nodo puede nacer sobre una barrera.
+                for (let n of levelData.nodes) {
+                    if (n.x >= b.x && n.x <= b.x + b.width && n.y >= b.y && n.y <= b.y + b.height) {
+                        const errorMsg = `ERROR CRITICO DE DISEÑO: El nodo '${n.id}' intersecta la barrera en (${b.x}, ${b.y}). En el mismo plano NUNCA deben tocarse.`;
+                        console.error(errorMsg);
+                        alert(errorMsg);
+                        throw new Error(errorMsg); // Imposibilidad por código
+                    }
+                }
                 this.world.barriers.push({ ...b });
             }
             this._drawBarriers(levelData.barriers, cx, cy);
@@ -160,6 +170,16 @@ export class LevelManager {
         if (levelData.zones) {
             this.world.zones = [...levelData.zones];
             this.world.drawZones();
+        }
+
+        // ── Barreras Intermitentes (Nivel 11) ───────────────────────────
+        this.world.intermittentBarriers = [];
+        if (levelData.intermittentBarriers) {
+            for (let ibCfg of levelData.intermittentBarriers) {
+                const ib = new IntermittentBarrier(ibCfg);
+                ib.initGraphics(PIXI, this.game.layerNodes);
+                this.world.intermittentBarriers.push(ib);
+            }
         }
 
         for (let i = 0; i < this.world.nodes.length; i++) {
