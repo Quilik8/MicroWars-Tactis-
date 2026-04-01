@@ -200,8 +200,12 @@ export class PhysicsManager {
             let arrivalR = tn.radius * 1.5;
             if (dx * dx + dy * dy <= arrivalR * arrivalR) {
                 if (tn.type === 'tunel' && tn.tunnelTo && tn.owner === u.faction) {
-                    u.x = tn.tunnelTo.x + (Math.random() - 0.5) * tn.tunnelTo.radius;
-                    u.y = tn.tunnelTo.y + (Math.random() - 0.5) * tn.tunnelTo.radius;
+                    if (world.positionUnitInNode) {
+                        world.positionUnitInNode(u, tn.tunnelTo, 1.0, ((tn.tunnelTo.radius | 0) ^ (u.deterministicSeed != null ? u.deterministicSeed : 1)) >>> 0);
+                    } else {
+                        u.x = tn.tunnelTo.x;
+                        u.y = tn.tunnelTo.y;
+                    }
                     u.targetNode = tn.tunnelTo;
                     u.homeNode = tn.tunnelTo;
                     u.state = 'idle';

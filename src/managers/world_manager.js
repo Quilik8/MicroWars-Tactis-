@@ -6,6 +6,7 @@ import { FACTIONS } from '../campaign/faction_data.js';
 import { CombatManager } from './combat_manager.js';
 import { PhysicsManager } from './physics_manager.js';
 import { NavigationSystem } from '../navigation/navigation_system.js';
+import { getNodeSeed, hashStringSeed, mixSeeds, placeUnitInCircle } from '../simulation/deterministic_layout.js';
 
 export class WorldManager {
     constructor(game, ui, config) {
@@ -24,6 +25,7 @@ export class WorldManager {
         this.neighbors = [];
         this.menuAnts = [];
         this.textures = {};
+        this.unitSequence = 1;
 
         // Marea Barriente — instancias WaterSweep del nivel actual.
         // Cada instancia gestiona su propio PIXI.Graphics en el layerVFX,
@@ -116,13 +118,33 @@ export class WorldManager {
         this.game.layerUnits.addChild(sprite);
     }
 
+    nextUnitSeed(node = null, faction = '') {
+        this.unitSequence = (this.unitSequence + 1) >>> 0;
+        return mixSeeds(
+            this.unitSequence,
+            (node ? getNodeSeed(node) : 0) ^ (faction ? hashStringSeed(faction) : 0)
+        );
+    }
+
+    positionUnitInNode(unit, node, radiusScale = 0.7, salt = 0) {
+        if (!unit || !node) return;
+        const baseSeed = mixSeeds(
+            unit.deterministicSeed != null ? unit.deterministicSeed : this.nextUnitSeed(node, unit.faction),
+            salt >>> 0
+        );
+        placeUnitInCircle(unit, node.x, node.y, node.radius, baseSeed, radiusScale);
+    }
+
     spawnUnitsAt(node, faction, count) {
         for (let i = 0; i < count; i++) {
+            const seed = this.nextUnitSeed(node, faction);
             let u = new Unit(
-                node.x + (Math.random() - 0.5) * node.radius,
-                node.y + (Math.random() - 0.5) * node.radius,
-                faction
+                node.x,
+                node.y,
+                faction,
+                seed
             );
+            this.positionUnitInNode(u, node, 1.0, i + 1);
             u.targetNode = node;
             u.homeNode   = node;
             u.state      = 'idle';
@@ -228,6 +250,7 @@ export class WorldManager {
         this.travelingIds.length = 0;
         this.nodes.length        = 0;
         this.zones.length        = 0;
+        this.unitSequence        = 1;
 
         if (this.hazardGraphics) {
             this.hazardGraphics.clear();
@@ -440,6 +463,13 @@ export class WorldManager {
 
     processRegen(nodeIdx, dt) {
         const node = this.nodes[nodeIdx];
+        if (node.pendingEvolution) {
+            node.pendingEvolutionEtaSec -= dt;
+            if (node.pendingEvolutionEtaSec <= 0) {
+                node.completeEvolution();
+            }
+        }
+
         if (node.owner === 'neutral' || node.type === 'tunel') return;
         const faction = node.owner;
         if (node.population[faction] >= node.maxUnits) return;
@@ -448,16 +478,17 @@ export class WorldManager {
         node.regenTimer += dt;
         let interval = node.regenInterval;
         if (node.evolution === 'tanque') interval *= 1.5;
+        let projectedPower = node.population[faction] || 0;
 
-        if (node.regenTimer >= interval) {
-            node.regenTimer = 0;
-            const angle = Math.random() * Math.PI * 2;
-            const r     = Math.random() * node.radius * 0.7;
-            const u     = new Unit(
-                node.x + Math.cos(angle) * r,
-                node.y + Math.sin(angle) * r,
-                faction
-            );
+        while (node.regenTimer >= interval) {
+            const spawnPower = node.evolution === 'tanque' ? 3 : 1;
+            if (projectedPower >= node.maxUnits) break;
+            if (this.allUnits.length >= 3000) break;
+
+            node.regenTimer -= interval;
+            const seed = this.nextUnitSeed(node, faction);
+            const u = new Unit(node.x, node.y, faction, seed);
+            this.positionUnitInNode(u, node, 0.7, projectedPower | 0);
             if (node.evolution === 'tanque') u.power = 3;
 
             if (node.tunnelTo && node.tunnelTo.owner === node.owner && node.type !== 'tunel') {
@@ -473,6 +504,7 @@ export class WorldManager {
             }
             this.attachSprite(u);
             this.allUnits.push(u);
+            projectedPower += spawnPower;
         }
     }
 

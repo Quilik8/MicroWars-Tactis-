@@ -497,7 +497,7 @@ export class InputManager {
             this.lastClickTime = 0;
             this.lastClickNode = null;
 
-            if (clicked.owner === 'player' && !clicked.evolution && clicked.type !== 'tunel') {
+            if (clicked.owner === 'player' && !clicked.evolution && !clicked.pendingEvolution && clicked.type !== 'tunel') {
                 this.showEvolutionMenu(clicked);
                 return;
             }
@@ -506,8 +506,12 @@ export class InputManager {
                 const dest = clicked.tunnelTo;
                 for (let u of this.world.allUnits) {
                     if (u.faction === 'player' && u.targetNode === clicked && u.state === 'idle') {
-                        u.x = dest.x + (Math.random() - 0.5) * dest.radius * 0.5;
-                        u.y = dest.y + (Math.random() - 0.5) * dest.radius * 0.5;
+                        if (this.world.positionUnitInNode) {
+                            this.world.positionUnitInNode(u, dest, 0.5, ((u.deterministicSeed != null ? u.deterministicSeed : 1) ^ (dest.radius | 0)) >>> 0);
+                        } else {
+                            u.x = dest.x;
+                            u.y = dest.y;
+                        }
                         u.targetNode = dest;
                         u.homeNode = dest;
                         u.state = 'idle';
@@ -717,12 +721,11 @@ export class InputManager {
         }
         const cost = Node.EVOLUTION_COSTS[type];
         if (this.world.popAt(this.selectedNode, 'player') >= cost) {
-            CombatManager.killNPower(this.world, this.selectedNode, 'player', cost);
-            this.selectedNode.evolution = type;
-            if (type === 'artilleria') this.selectedNode.artilleryInterval = 1.0;
-            this.selectedNode.redraw();
-            if (this.sfx) this.sfx.evolve();
-            this._deselect();
+            if (this.selectedNode.startEvolution(type)) {
+                CombatManager.killNPower(this.world, this.selectedNode, 'player', cost);
+                if (this.sfx) this.sfx.evolve();
+                this._deselect();
+            }
         }
     }
 

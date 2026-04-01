@@ -196,7 +196,12 @@ export class LightSweep {
         node.owner             = 'neutral';
         node.conquestProgress  = 0;
         node.conqueringFaction = null;
-        node.evolution         = null;
+        if (node.resetEvolutionState) node.resetEvolutionState();
+        else {
+            node.evolution = null;
+            node.pendingEvolution = null;
+            node.pendingEvolutionEtaSec = 0;
+        }
         node.activeShots       = [];
         node.artilleryTimer    = node.artilleryInterval;
 

@@ -1,4 +1,9 @@
 import { FACTIONS } from '../campaign/faction_data.js';
+import {
+    applyDamageToComposition,
+    deriveHeavyBodies,
+    deriveLightBodies
+} from '../simulation/deterministic_rules.js';
 
 // Cache de factionData por id para evitar FACTIONS.find() en el hot path
 const _factionCache = {};
@@ -126,6 +131,7 @@ export class CombatManager {
         }
 
         if (node.owner !== prevOwner) {
+            node.combatDamageCarry = null;
             if (SFX) {
                 if (node.owner === 'player' || node.owner === 'carpinteras') SFX.capture();
                 else if (prevOwner === 'player' || prevOwner === 'carpinteras') SFX.lost();
@@ -140,24 +146,75 @@ export class CombatManager {
 
     static killNPower(world, node, faction, damage) {
         if (damage <= 0) return;
-        for (let i = world.allUnits.length - 1; i >= 0 && damage > 0; i--) {
-            let u = world.allUnits[i];
-            if (u.faction === faction && u.targetNode === node && !u.pendingRemoval) {
-                const dx = u.x - node.x;
-                const dy = u.y - node.y;
-                if (u.state === 'idle' || (dx * dx + dy * dy < node.radius * node.radius * 6.25)) {
-                    let hp = u.power || 1;
-                    if (damage >= hp) {
-                        damage -= hp; u.pendingRemoval = true;
-                    } else {
-                        if (Math.random() < damage / hp) u.pendingRemoval = true;
-                        damage = 0;
-                    }
-                }
-            }
+        if (!node.combatDamageCarry) node.combatDamageCarry = {};
+
+        const bodyCount = node.counts ? (node.counts[faction] || 0) : 0;
+        if (bodyCount <= 0) {
+            node.combatDamageCarry[faction] = 0;
+            return;
+        }
+
+        const powerCount = node.power ? (node.power[faction] || bodyCount) : bodyCount;
+        const lightBodies = deriveLightBodies(bodyCount, powerCount);
+        const heavyBodies = deriveHeavyBodies(bodyCount, powerCount);
+        const carry = node.combatDamageCarry[faction] || 0;
+
+        applyDamageToComposition(lightBodies, heavyBodies, carry, damage, CombatManager._damageScratch);
+        node.combatDamageCarry[faction] = CombatManager._damageScratch.damageCarry;
+
+        let killLight = CombatManager._damageScratch.killedLight | 0;
+        let killHeavy = CombatManager._damageScratch.killedHeavy | 0;
+        if (killLight <= 0 && killHeavy <= 0) return;
+
+        for (let i = world.allUnits.length - 1; i >= 0 && killLight > 0; i--) {
+            const u = world.allUnits[i];
+            if (!u || u.pendingRemoval || u.faction !== faction || u.targetNode !== node) continue;
+            if ((u.power || 1) > 1) continue;
+
+            const dx = u.x - node.x;
+            const dy = u.y - node.y;
+            if (u.state !== 'idle' && (dx * dx + dy * dy >= node.radius * node.radius * 6.25)) continue;
+
+            u.pendingRemoval = true;
+            killLight--;
+        }
+
+        for (let i = world.allUnits.length - 1; i >= 0 && killHeavy > 0; i--) {
+            const u = world.allUnits[i];
+            if (!u || u.pendingRemoval || u.faction !== faction || u.targetNode !== node) continue;
+            if ((u.power || 1) <= 1) continue;
+
+            const dx = u.x - node.x;
+            const dy = u.y - node.y;
+            if (u.state !== 'idle' && (dx * dx + dy * dy >= node.radius * node.radius * 6.25)) continue;
+
+            u.pendingRemoval = true;
+            killHeavy--;
+        }
+
+        for (let i = world.allUnits.length - 1; i >= 0 && (killLight > 0 || killHeavy > 0); i--) {
+            const u = world.allUnits[i];
+            if (!u || u.pendingRemoval || u.faction !== faction || u.targetNode !== node) continue;
+
+            const dx = u.x - node.x;
+            const dy = u.y - node.y;
+            if (u.state !== 'idle' && (dx * dx + dy * dy >= node.radius * node.radius * 6.25)) continue;
+
+            u.pendingRemoval = true;
+            if ((u.power || 1) > 1) killHeavy--;
+            else killLight--;
         }
     }
 }
 
 // Buffer estático compartido para factionIds — evita allocations en el hot path
 CombatManager._factionBuf = [];
+CombatManager._damageScratch = {
+    lightBodies: 0,
+    heavyBodies: 0,
+    damageCarry: 0,
+    killedLight: 0,
+    killedHeavy: 0,
+    killedBodies: 0,
+    killedPower: 0
+};

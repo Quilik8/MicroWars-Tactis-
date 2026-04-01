@@ -20,7 +20,8 @@ export class NodeRenderer {
         // ── Capas de Renderizado ──
 
         // A. Halo exterior (glow reactivo)
-        const ev = node.evolution ? Node.EVOLUTION_COLORS[node.evolution] : null;
+        const displayEvolution = node.pendingEvolution || node.evolution;
+        const ev = displayEvolution ? Node.EVOLUTION_COLORS[displayEvolution] : null;
         g.circle(node.x, node.y, r + 6);
         g.stroke({ color: ev ? ev.accent : glow, alpha: 0.25, width: 8 });
 
@@ -119,6 +120,21 @@ export class NodeRenderer {
             g.stroke({ color: 0xffffff, alpha: 0.3, width: 1 });
         }
 
+        if (node.pendingEvolution) {
+            const pendingC = Node.EVOLUTION_COLORS[node.pendingEvolution] || { accent: 0xffffff };
+            const total = Math.max(0.001, node.pendingEvolutionDurationSec || node.pendingEvolutionEtaSec || 1);
+            const progress = Math.max(0, Math.min(1, 1 - ((node.pendingEvolutionEtaSec || 0) / total)));
+            const startA = -Math.PI / 2;
+            const endA = startA + (Math.PI * 2 * progress);
+
+            g.circle(node.x, node.y, r + 9);
+            g.stroke({ color: pendingC.accent, alpha: 0.18, width: 2, dashArray: [4, 5] });
+
+            g.moveTo(node.x + Math.cos(startA) * (r + 9), node.y + Math.sin(startA) * (r + 9));
+            g.arc(node.x, node.y, r + 9, startA, endA);
+            g.stroke({ color: pendingC.accent, alpha: 0.95, width: 3, cap: 'round' });
+        }
+
         // C. Indicador de Conquista (Anillo)
         if (node.conquestProgress > 0 && node.conqueringFaction) {
             const conquestC = Node.COLORS[node.conqueringFaction] || Node.COLORS.neutral;
@@ -137,7 +153,7 @@ export class NodeRenderer {
             g.stroke({ color: 0xffffff, alpha: 1, width: 2.5 });
         }
 
-        if (!node.evolution && node.owner === 'player') {
+        if (!node.evolution && !node.pendingEvolution && node.owner === 'player') {
             g.circle(node.x, node.y, r + 2);
             g.stroke({ color: 0xffffff, alpha: 0.2, width: 1 });
         }

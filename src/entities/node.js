@@ -11,6 +11,14 @@
  */
 import * as PIXI from 'pixi.js';
 import { NodeRenderer } from './node_renderer.js';
+import {
+    ARTILLERY_BASE_INTERVAL,
+    ARTILLERY_FIRE_INTERVAL,
+    ARTILLERY_SPLASH_POWER_BUDGET,
+    ESPINOSO_KILL_INTERVAL,
+    applyDamageToComposition,
+    getEvolutionDuration
+} from '../simulation/deterministic_rules.js';
 
 // ─── Proyectil de ácido (dato plano, sin objetos PIXI) ───────────────────────
 // Campos:
@@ -69,10 +77,13 @@ export class Node {
 
         // Evolución: null | 'espinoso' | 'artilleria' | 'tanque'
         this.evolution = null;
+        this.pendingEvolution = null;
+        this.pendingEvolutionEtaSec = 0;
+        this.pendingEvolutionDurationSec = 0;
 
         // ── Artillería v2 ──────────────────────────────────────────
-        this.artilleryTimer    = 1.8;   // inicia listo para disparar de inmediato
-        this.artilleryInterval = 1.8;
+        this.artilleryTimer    = ARTILLERY_BASE_INTERVAL;   // inicia listo para disparar de inmediato
+        this.artilleryInterval = ARTILLERY_BASE_INTERVAL;
         this.artilleryRange    = 180;
         this.splashRadius      = 38;    // radio de explosión al impactar
 
@@ -109,7 +120,7 @@ export class Node {
 
     // Intervalo fijo de daño del Espinoso: 1 baja cada 0.15 s ≈ 6.6 bajas/seg.
     // Determinista — sin azar, sin amplificación por tamaño de grupo.
-    static ESPINOSO_KILL_INTERVAL = 0.15;
+    static ESPINOSO_KILL_INTERVAL = ESPINOSO_KILL_INTERVAL;
 
     static TYPES = {
         normal:   { radius: 25, maxUnits: 200, regenInterval: 1.0 },
@@ -143,6 +154,52 @@ export class Node {
     };
 
     redraw(factionData = null) { NodeRenderer.redraw(this, factionData); }
+
+    canStartEvolution(type) {
+        return !!type && this.type !== 'tunel' && !this.evolution && !this.pendingEvolution;
+    }
+
+    startEvolution(type) {
+        if (!this.canStartEvolution(type)) return false;
+
+        this.pendingEvolution = type;
+        this.pendingEvolutionDurationSec = getEvolutionDuration(type);
+        this.pendingEvolutionEtaSec = this.pendingEvolutionDurationSec;
+        this.redraw();
+        return true;
+    }
+
+    completeEvolution(type = this.pendingEvolution) {
+        this.evolution = type || null;
+        this.pendingEvolution = null;
+        this.pendingEvolutionEtaSec = 0;
+        this.pendingEvolutionDurationSec = 0;
+        this.espinosoTimer = 0;
+
+        if (this.evolution === 'artilleria') {
+            this.artilleryInterval = ARTILLERY_FIRE_INTERVAL;
+            this.artilleryTimer = this.artilleryInterval;
+        } else {
+            this.artilleryInterval = ARTILLERY_BASE_INTERVAL;
+            if (this.artilleryTimer > this.artilleryInterval) {
+                this.artilleryTimer = this.artilleryInterval;
+            }
+        }
+
+        this.redraw();
+        return true;
+    }
+
+    resetEvolutionState() {
+        this.evolution = null;
+        this.pendingEvolution = null;
+        this.pendingEvolutionEtaSec = 0;
+        this.pendingEvolutionDurationSec = 0;
+        this.espinosoTimer = 0;
+        this.artilleryInterval = ARTILLERY_BASE_INTERVAL;
+        this.artilleryTimer = this.artilleryInterval;
+        this.combatDamageCarry = null;
+    }
 
     containsPoint(mx, my) {
         let dx = mx - this.x, dy = my - this.y;
@@ -199,7 +256,8 @@ export class Node {
                 const espinosoRange = this.radius + (this.artilleryRange * 0.25);
                 const rangeSq = espinosoRange * espinosoRange;
                 const radiusSq = this.radius * this.radius;
-                const neighbors = [];
+                const neighbors = Node._neighborScratch;
+                neighbors.length = 0;
                 grid.findNear(this.x, this.y, espinosoRange, neighbors);
 
                 // Buscar la víctima más cercana al borde del aura (la primera que
@@ -258,7 +316,8 @@ export class Node {
         if (this.artilleryTimer >= this.artilleryInterval) {
 
             // Buscar todos los enemigos en rango en UN SOLO PASE
-            const neighbors = [];
+            const neighbors = Node._neighborScratch;
+            neighbors.length = 0;
             grid.findNear(this.x, this.y, this.artilleryRange, neighbors);
 
             // Calcular centroide del cluster enemigo y contar targets
@@ -496,16 +555,15 @@ export class Node {
     //   · Centro (t=0): 55% → borde (t=1): 10%
     _applySplashDamage(cx, cy, splashR, grid, allUnits) {
         const splashSq = splashR * splashR;
-        const nearIds  = [];
+        const nearIds  = Node._splashScratch;
+        nearIds.length = 0;
         grid.findNear(cx, cy, splashR, nearIds);
 
         // Máximo 8 kills por disparo — fijo, independiente del tamaño del grupo
-        const MAX_KILLS = 8;
-        let killed = 0;
+        let lightBodies = 0;
+        let heavyBodies = 0;
 
         for (const idx of nearIds) {
-            if (killed >= MAX_KILLS) break;
-
             const u = allUnits[idx];
             if (!u || u.pendingRemoval || u.faction === this.owner) continue;
 
@@ -515,12 +573,45 @@ export class Node {
             if (dSq > splashSq) continue;
 
             // t = 0 en el centro, t = 1 en el borde
-            const t = Math.sqrt(dSq) / splashR;
-            // 55% chance en centro → 10% en borde
-            if (Math.random() < 0.55 - t * 0.45) {
-                u.pendingRemoval = true;
-                killed++;
-            }
+            if ((u.power || 1) > 1) heavyBodies++;
+            else lightBodies++;
+        }
+
+        if (lightBodies <= 0 && heavyBodies <= 0) return;
+
+        applyDamageToComposition(lightBodies, heavyBodies, 0, ARTILLERY_SPLASH_POWER_BUDGET, Node._damageScratch);
+
+        let killLight = Node._damageScratch.killedLight | 0;
+        let killHeavy = Node._damageScratch.killedHeavy | 0;
+
+        for (const idx of nearIds) {
+            if (killLight <= 0) break;
+
+            const u = allUnits[idx];
+            if (!u || u.pendingRemoval || u.faction === this.owner || (u.power || 1) > 1) continue;
+
+            const ddx = u.x - cx;
+            const ddy = u.y - cy;
+            const dSq = ddx * ddx + ddy * ddy;
+            if (dSq > splashSq) continue;
+
+            u.pendingRemoval = true;
+            killLight--;
+        }
+
+        for (const idx of nearIds) {
+            if (killHeavy <= 0) break;
+
+            const u = allUnits[idx];
+            if (!u || u.pendingRemoval || u.faction === this.owner || (u.power || 1) <= 1) continue;
+
+            const ddx = u.x - cx;
+            const ddy = u.y - cy;
+            const dSq = ddx * ddx + ddy * ddy;
+            if (dSq > splashSq) continue;
+
+            u.pendingRemoval = true;
+            killHeavy--;
         }
     }
 
@@ -639,3 +730,15 @@ export class Node {
         }
     }
 }
+
+Node._neighborScratch = [];
+Node._splashScratch = [];
+Node._damageScratch = {
+    lightBodies: 0,
+    heavyBodies: 0,
+    damageCarry: 0,
+    killedLight: 0,
+    killedHeavy: 0,
+    killedBodies: 0,
+    killedPower: 0
+};

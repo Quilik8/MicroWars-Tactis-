@@ -21,6 +21,9 @@
 //   'master' -> + back-capping, flanqueo letal, hazard awareness (dominio absoluto)
 //
 import { NavigationGameStateView, PathEvaluationResult } from '../navigation/navigation_system.js';
+import { CombatManager } from './combat_manager.js';
+import { PredictiveCombatSimulator } from '../simulation/predictive_combat_simulator.js';
+import { fractionFromSeed, hashStringSeed, mixSeeds } from '../simulation/deterministic_layout.js';
 
 const DIFFICULTY_PROFILES = {
     easy: {
@@ -117,6 +120,8 @@ export class AIManager {
         this._navScoreResult = new PathEvaluationResult();
         this._navExecResult = new PathEvaluationResult();
         this._navHopScratch = { routeResult: null, hopTarget: null };
+        this._mentalSandbox = new PredictiveCombatSimulator();
+        this._mentalResult = new Float32Array(PredictiveCombatSimulator.RESULT_SIZE);
 
         // AI-8: Counterplay Adaptation — perfil del jugador durante la partida
         this._playerProfile = {
@@ -133,6 +138,19 @@ export class AIManager {
         this.difficulty = difficulty;
         this._profile   = { ...DIFFICULTY_PROFILES[difficulty] };
         this._timers = {};
+    }
+
+    _factionSeed(factionId, salt = 0) {
+        return mixSeeds(hashStringSeed(`${this.difficulty}:${factionId}`), salt >>> 0);
+    }
+
+    _factionRoll(factionId, salt = 0) {
+        return fractionFromSeed(this._factionSeed(factionId, salt));
+    }
+
+    _nodeRoll(node, factionId, salt = 0) {
+        const nodeSeed = ((node.x | 0) ^ Math.imul(node.y | 0, 19349663) ^ Math.imul((node.radius | 0) + 1, 83492791)) >>> 0;
+        return fractionFromSeed(mixSeeds(this._factionSeed(factionId, salt), nodeSeed));
     }
 
     _evaluateRoute(attacker, target, squadCount, outResult) {
@@ -178,12 +196,12 @@ export class AIManager {
         const prof = this._profile;
 
         if (this._timers[aiFaction] === undefined) {
-            this._timers[aiFaction]        = Math.random() * prof.attackInterval;
+            this._timers[aiFaction]        = this._factionRoll(aiFaction, 1) * prof.attackInterval;
             this._elapsed[aiFaction]       = 0;
             this._rushDone[aiFaction]      = false;
 
-            if (prof.rushEnabled && Math.random() < prof.rushChance) {
-                this._rushScheduled[aiFaction] = 20 + Math.random() * 20;
+            if (prof.rushEnabled && this._factionRoll(aiFaction, 2) < prof.rushChance) {
+                this._rushScheduled[aiFaction] = 20 + (this._factionRoll(aiFaction, 3) * 20);
             } else {
                 this._rushScheduled[aiFaction] = Infinity;
             }
@@ -205,6 +223,10 @@ export class AIManager {
 
         // AI-8: Actualizar perfil del jugador
         this._updatePlayerProfile(dt, allUnits, playerFaction);
+
+        if (this._mentalSandbox && this.world) {
+            this._mentalSandbox.rebuildFutureLedger(this.world);
+        }
 
         const phase = this._detectPhase(nodes, aiFaction);
 
@@ -257,8 +279,8 @@ export class AIManager {
             const count = this._countAt(en, aiFaction);
 
             // A. Evoluciones
-            if (!en.evolution && en.type !== 'tunel' && count >= prof.evolutionMinCount) {
-                if (Math.random() < prof.evolutionChance) {
+            if (!en.evolution && !en.pendingEvolution && en.type !== 'tunel' && count >= prof.evolutionMinCount) {
+                if (this._nodeRoll(en, aiFaction, 10) < prof.evolutionChance) {
                     this._chooseEvolution(en, count, phase, aiFaction, allUnits);
                 }
             }
@@ -383,7 +405,7 @@ export class AIManager {
             if (phase === 'early') {
                 if (count >= this.evoCosts.espinoso) this.buyEvolution(node, 'espinoso', this.evoCosts.espinoso, aiFaction, allUnits);
             } else if (isFrontline) {
-                if (count >= this.evoCosts.artilleria && Math.random() < 0.55) this.buyEvolution(node, 'artilleria', this.evoCosts.artilleria, aiFaction, allUnits);
+                if (count >= this.evoCosts.artilleria && this._nodeRoll(node, aiFaction, 20) < 0.55) this.buyEvolution(node, 'artilleria', this.evoCosts.artilleria, aiFaction, allUnits);
                 else if (count >= this.evoCosts.espinoso) this.buyEvolution(node, 'espinoso', this.evoCosts.espinoso, aiFaction, allUnits);
             } else {
                 if (count >= this.evoCosts.tanque) this.buyEvolution(node, 'tanque', this.evoCosts.tanque, aiFaction, allUnits);
@@ -424,7 +446,7 @@ export class AIManager {
                     this.buyEvolution(node, 'espinoso', this.evoCosts.espinoso, aiFaction, allUnits);
                 } else {
                     // Mix estandar
-                    if (count >= this.evoCosts.artilleria && Math.random() < 0.4) this.buyEvolution(node, 'artilleria', this.evoCosts.artilleria, aiFaction, allUnits);
+                    if (count >= this.evoCosts.artilleria && this._nodeRoll(node, aiFaction, 21) < 0.4) this.buyEvolution(node, 'artilleria', this.evoCosts.artilleria, aiFaction, allUnits);
                     else if (count >= this.evoCosts.espinoso) this.buyEvolution(node, 'espinoso', this.evoCosts.espinoso, aiFaction, allUnits);
                 }
             }
@@ -689,8 +711,11 @@ export class AIManager {
 
         if (!needsDump) {
             // Módulo A, E y H: Simulador Predictivo con Atrición (ahora incluye Neutrales)
-            const isViable = this._simulateBattle(attacker, target, availableAttackers, defenders, aiFaction, playerFaction);
-            if (!isViable) return -Infinity; // Abortar ataque suicida
+            const projectedResult = this._simulateBattle(attacker, target, availableAttackers, defenders, aiFaction, playerFaction);
+            if (projectedResult === PredictiveCombatSimulator.RESULT_DERROTA) return -Infinity;
+            if (projectedResult === PredictiveCombatSimulator.RESULT_EMPATE_ESTANCADO) score -= 240;
+            if (projectedResult === PredictiveCombatSimulator.RESULT_VICTORIA_PIRRICA) score += 90;
+            if (projectedResult === PredictiveCombatSimulator.RESULT_VICTORIA_SEGURA) score += 340;
         }
 
         score -= defenders * 2.8;
@@ -1046,17 +1071,20 @@ export class AIManager {
     }
 
     buyEvolution(node, type, cost, faction, allUnits) {
-        node.evolution = type;
-        if (type === 'artilleria') node.artilleryInterval = 1.0;
-        node.redraw();
+        if (!node.startEvolution(type)) return;
 
-        let killed = 0;
+        if (this.world) {
+            CombatManager.killNPower(this.world, node, faction, cost);
+            return;
+        }
+
+        let remainingCost = cost;
         for (const u of allUnits) {
-            if (killed >= cost) break;
+            if (remainingCost <= 0) break;
             if (!u.pendingRemoval && u.faction === faction
                 && u.targetNode === node && u.state === 'idle') {
                 u.pendingRemoval = true;
-                killed++;
+                remainingCost -= (u.power || 1);
             }
         }
     }
@@ -1064,7 +1092,18 @@ export class AIManager {
     // === MÓDULO A, E & H: SIMULADOR PREDICTIVO ===
     _simulateBattle(attacker, target, sentCount, currentDefenders, aiFaction, playerFaction) {
         const routeResult = this._evaluateRoute(attacker, target, sentCount, this._navExecResult);
-        if (routeResult && !routeResult.isViable) return false;
+        if (routeResult && !routeResult.isViable) return PredictiveCombatSimulator.RESULT_DERROTA;
+        if (this.world && this._mentalSandbox && sentCount > 0) {
+            return this._mentalSandbox.evaluateAttack(
+                this.world,
+                attacker,
+                target,
+                sentCount,
+                aiFaction,
+                routeResult,
+                this._mentalResult
+            );
+        }
 
         // 1. Tiempo de viaje (velocidad base ~60px/s)
         const dist = Math.hypot(target.x - attacker.x, target.y - attacker.y);
@@ -1253,8 +1292,9 @@ export class AIManager {
                         if (threats.has(attacker)) continue;
                         const available = this._countAt(attacker, aiFaction) * 0.8;
                         if (available > 25) {
-                            const isViable = this._simulateBattle(attacker, pb, Math.floor(available), pbDefenders, aiFaction, playerFaction);
-                            if (isViable) {
+                            const projectedResult = this._simulateBattle(attacker, pb, Math.floor(available), pbDefenders, aiFaction, playerFaction);
+                            if (projectedResult !== PredictiveCombatSimulator.RESULT_DERROTA
+                                && projectedResult !== PredictiveCombatSimulator.RESULT_EMPATE_ESTANCADO) {
                                 let sent = 0;
                                 const toSend = Math.floor(available);
                                 for (const u of allUnits) {
