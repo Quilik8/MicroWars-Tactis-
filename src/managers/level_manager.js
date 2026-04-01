@@ -57,8 +57,10 @@ export class LevelManager {
         const cy = this.game.height || window.innerHeight;
         const levelData = LEVELS[index];
 
-        this.world.nodes = levelData.nodes.map(nData => {
+        this.world.nodes = levelData.nodes.map((nData, nodeIndex) => {
             let n = new Node(nData.x * cx, nData.y * cy, nData.owner, nData.type);
+            n.id = nData.id || `node_${nodeIndex}`;
+            n.navIndex = nodeIndex;
             if (nData.isMobile) {
                 n.isMobile     = true;
                 n.orbitAnchorX = nData.orbitAnchorX;
@@ -181,6 +183,8 @@ export class LevelManager {
                 this.world.intermittentBarriers.push(ib);
             }
         }
+
+        this.world.rebuildNavigation();
 
         for (let i = 0; i < this.world.nodes.length; i++) {
             let n     = this.world.nodes[i];

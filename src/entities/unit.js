@@ -52,8 +52,10 @@ export class Unit {
      * @param {number} nodeRadius
      * @param {Array}  neighborIds
      * @param {Array}  unitsList
+     * @param {SpatialHashGrid|null} grid
+     * @param {object|null} localAvoidanceSolver
      */
-    updateForces(dt, targetX, targetY, nodeRadius, neighborIds, unitsList) {
+    updateForces(dt, targetX, targetY, nodeRadius, neighborIds, unitsList, grid = null, localAvoidanceSolver = null) {
         // Detectar cambio de nodo → reasignar posición personal
         if (targetX !== this._lastTargetX || targetY !== this._lastTargetY) {
             this.personalTheta = Math.random() * Math.PI * 2;
@@ -134,6 +136,19 @@ export class Unit {
 
         let tVx = desiredVx + sepVx;
         let tVy = desiredVy + sepVy;
+        if (localAvoidanceSolver && grid) {
+            const adjustedVelocity = localAvoidanceSolver.solve(
+                this,
+                desiredVx,
+                desiredVy,
+                sepVx,
+                sepVy,
+                actualSpeed,
+                grid
+            );
+            tVx = adjustedVelocity[0];
+            tVy = adjustedVelocity[1];
+        }
 
         // FÍSICA INDEPENDIENTE DE FPS:
         // Usamos un factor de suavizado basado en dt (aprox 7.5 unidades de velocidad por segundo)

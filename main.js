@@ -50,6 +50,9 @@ function setDifficulty(d) {
 // ─────────────────────────────────────────────────────────────
 
 const game = new Engine();
+// Pre-declaramos para resolución circular
+let world;
+
 const ui = new UIManager({
     onTogglePause:        (p) => togglePause(p),
     onStartLevel:         (idx) => level.loadLevel(idx),
@@ -83,8 +86,8 @@ const ui = new UIManager({
     }
 });
 
-const world    = new WorldManager(game, ui, CONFIG);
-const ai       = new AIManager({ difficulty: currentDifficulty });
+world = new WorldManager(game, ui, CONFIG);
+const ai       = new AIManager({ difficulty: currentDifficulty, worldRef: world });
 const campaign = new CampaignCore(game, ui);
 const input    = new InputManager(game, world, ui, SFX, campaign);
 const level    = new LevelManager(game, world, ui, SFX, { start: startMusic });

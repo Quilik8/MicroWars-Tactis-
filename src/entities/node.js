@@ -44,6 +44,7 @@ export class Node {
         this.radius = stats.radius;
         this.maxUnits = stats.maxUnits;
         this.regenInterval = stats.regenInterval;
+        this.productionRate = type === 'enjambre' ? 2.5 : (type === 'gigante' ? 1.8 : (type === 'tunel' ? 0 : 1.0));
 
         // Movilidad orbital
         this.isMobile = false;

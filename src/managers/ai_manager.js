@@ -20,6 +20,8 @@
 //   'expert' -> + coordinacion multi-faccion pinzas (inteligencia enjambre)
 //   'master' -> + back-capping, flanqueo letal, hazard awareness (dominio absoluto)
 //
+import { NavigationGameStateView, PathEvaluationResult } from '../navigation/navigation_system.js';
+
 const DIFFICULTY_PROFILES = {
     easy: {
         attackInterval:        5.0,
@@ -90,8 +92,10 @@ export class AIManager {
      * @param {object} config
      * @param {string} [config.difficulty='normal']  'easy'|'normal'|'hard'|'brutal'
      * @param {number} [config.attackInterval]       override manual (retro-compatibilidad)
+     * @param {object} [config.worldRef]             referencia al worldManager
      */
     constructor(config = {}) {
+        this.world = config.worldRef || null;
         this.difficulty = config.difficulty || 'normal';
         this._profile   = { ...DIFFICULTY_PROFILES[this.difficulty] };
 
@@ -109,6 +113,19 @@ export class AIManager {
         this._playerNodes = [];
 
         this.evoCosts = { espinoso: 30, artilleria: 40, tanque: 35 };
+        this._navStateView = new NavigationGameStateView();
+        this._navScoreResult = new PathEvaluationResult();
+        this._navExecResult = new PathEvaluationResult();
+        this._navHopScratch = { routeResult: null, hopTarget: null };
+
+        // AI-8: Counterplay Adaptation — perfil del jugador durante la partida
+        this._playerProfile = {
+            totalAttacks: 0,          // Ataques totales del jugador
+            attacksByFlank: {},        // { 'left': N, 'right': N, 'center': N }
+            lastPlayerNodeCount: 0,    // Para detectar turtle
+            turtleTimer: 0,            // Cuánto tiempo lleva sin expandirse
+            aggressionLevel: 'normal'  // 'turtle' | 'aggressive' | 'normal'
+        };
     }
 
     setDifficulty(difficulty) {
@@ -116,6 +133,44 @@ export class AIManager {
         this.difficulty = difficulty;
         this._profile   = { ...DIFFICULTY_PROFILES[difficulty] };
         this._timers = {};
+    }
+
+    _evaluateRoute(attacker, target, squadCount, outResult) {
+        if (!this.world || !this.world.navigation || !this.world.navigation.store) return null;
+        if (!attacker || !target) return null;
+        if (attacker.navIndex == null || target.navIndex == null) return null;
+
+        this.world.navigation.populateGameStateView(
+            this.world,
+            squadCount,
+            this.world.unitBaseSpeed || 75,
+            this._navStateView
+        );
+
+        return this.world.navigation.evaluatePath(
+            attacker.navIndex,
+            target.navIndex,
+            this._navStateView,
+            outResult
+        );
+    }
+
+    _getFirstHopTarget(attacker, target, squadCount, outResult) {
+        const routeResult = this._evaluateRoute(attacker, target, squadCount, outResult);
+        const hopScratch = this._navHopScratch;
+        hopScratch.routeResult = routeResult;
+        hopScratch.hopTarget = target;
+
+        if (!routeResult || !routeResult.isViable || !this.world || !this.world.navigation) {
+            return hopScratch;
+        }
+
+        const hopIndex = this.world.navigation.peekFirstHop(routeResult.queryHandle);
+        if (hopIndex >= 0 && hopIndex < this.world.nodes.length) {
+            hopScratch.hopTarget = this.world.nodes[hopIndex];
+        }
+
+        return hopScratch;
     }
 
     // === UPDATE ===
@@ -148,6 +203,9 @@ export class AIManager {
 
         if (this._aiNodes.length === 0) return;
 
+        // AI-8: Actualizar perfil del jugador
+        this._updatePlayerProfile(dt, allUnits, playerFaction);
+
         const phase = this._detectPhase(nodes, aiFaction);
 
         // Rush temprano
@@ -156,7 +214,6 @@ export class AIManager {
             && this._playerNodes.length > 0) {
             this._doRush(aiFaction, allUnits);
             this._rushDone[aiFaction] = true;
-            return;
         }
 
         // Timer de ciclo de decision
@@ -164,7 +221,11 @@ export class AIManager {
         if (this._timers[aiFaction] < prof.attackInterval) return;
         this._timers[aiFaction] = 0;
 
-        _factionTargets.set(aiFaction, new Set());
+        if (!_factionTargets.has(aiFaction)) {
+            _factionTargets.set(aiFaction, new Set());
+        } else {
+            _factionTargets.get(aiFaction).clear();
+        }
 
         // 1. Gestion propia: evoluciones y tuneles
         this._manageSelf(phase, aiFaction, allUnits);
@@ -202,45 +263,87 @@ export class AIManager {
                 }
             }
 
-            // B. Tuneles logisticos
+            // ==========================================
+            // B. AI-7: TÚNELES LOGÍSTICOS ESTRATÉGICOS
+            // ==========================================
             if (!prof.tunnelEnabled || en.type === 'tunel') continue;
 
-            if (en.tunnelTo && this._countAt(en.tunnelTo, aiFaction) >= en.tunnelTo.maxUnits * 0.88) {
-                en.tunnelTo = null;
-            }
-            if (en.tunnelTo && en.tunnelTo.isMarkedForSweep && typeof window !== 'undefined' && window.world && window.world.lightSweeps && window.world.lightSweeps.length > 0) {
-                const sweep = window.world.lightSweeps[0];
-                if (sweep.isAlerting) {
+            if (en.tunnelTo) {
+                // Romper el tunel si el destino está saturado o bajo amenaza de rayo
+                if (this._countAt(en.tunnelTo, aiFaction) >= en.tunnelTo.maxUnits * 0.88) {
                     en.tunnelTo = null;
+                } else if (en.tunnelTo.isMarkedForSweep && this.world && this.world.lightSweeps && this.world.lightSweeps.length > 0) {
+                    const sweep = this.world.lightSweeps[0];
+                    if (sweep.isAlerting) en.tunnelTo = null;
                 }
             }
 
             if (count > en.maxUnits * 0.55 && !en.tunnelTo) {
-                let bestFront = null;
-                let bestDist  = Infinity;
+                let bestTarget = null;
+                let highestPriority = -Infinity;
 
-                for (const fn of this._aiNodes) {
-                    if (fn === en) continue;
-                    // En 'master', permite sobre-saturar tuneles para empujar mas rapido
-                    if (prof.targetingIntelligence !== 'master' && this._countAt(fn, aiFaction) >= fn.maxUnits * 0.80) continue;
-                    if (fn.isMarkedForSweep) continue; // Evitar tuneles hacia nodos marcados por el sol
+                // En high/expert/master, evaluamos todos los nodos propios por prioridad logística
+                if (prof.targetingIntelligence === 'high' || prof.targetingIntelligence === 'expert' || prof.targetingIntelligence === 'master') {
+                    for (const fn of this._aiNodes) {
+                        if (fn === en) continue;
+                        if (prof.targetingIntelligence !== 'master' && this._countAt(fn, aiFaction) >= fn.maxUnits * 0.80) continue;
+                        if (fn.isMarkedForSweep) continue; 
 
-                    let minDistPlayer = Infinity;
-                    for (const pn of this._playerNodes) {
-                        const d = Math.hypot(pn.x - fn.x, pn.y - fn.y);
-                        if (d < minDistPlayer) minDistPlayer = d;
+                        let priority = 0;
+                        const distToPlayer = Math.min(...this._playerNodes.map(pn => Math.hypot(pn.x - fn.x, pn.y - fn.y)));
+                        
+                        // 1. Cercanía al frente
+                        priority += 5000 / (distToPlayer + 1);
+
+                        // 2. ¿Este nodo está bajo ataque inminente? (Reforzar)
+                        if (this.world) {
+                            let threats = 0;
+                            for (let u of this.world.allUnits) {
+                                if (!u.pendingRemoval && u.faction !== aiFaction && u.state === 'traveling' && u.targetNode === fn) threats++;
+                            }
+                            if (threats > 0) priority += threats * 10; // Alta prioridad a nodos que necesitan defenderse
+                        }
+
+                        // 3. ¿Este nodo va a atacar? (Pre-cargar tropas para multi-prong o gran asedio)
+                        const myTargets = _factionTargets.get(aiFaction);
+                        if (myTargets && myTargets.has(fn)) {
+                            // Si fn no es nuestro, no le hacemos túnel
+                            // Si el nodo fn está preparando un ataque (no cubierto de forma directa acá, pero asumimos que nodos frontline atacan)
+                        }
+
+                        if (priority > highestPriority) {
+                            highestPriority = priority;
+                            bestTarget = fn;
+                        }
                     }
-                    if (minDistPlayer < bestDist) {
-                        bestDist  = minDistPlayer;
-                        bestFront = fn;
+                } else {
+                    // Logística básica (medium): nodo más cercano al jugador
+                    let bestDist = Infinity;
+                    for (const fn of this._aiNodes) {
+                        if (fn === en || fn.isMarkedForSweep) continue;
+                        if (this._countAt(fn, aiFaction) >= fn.maxUnits * 0.80) continue;
+
+                        let distToPlayer = Infinity;
+                        for (const pn of this._playerNodes) {
+                            const d = Math.hypot(pn.x - fn.x, pn.y - fn.y);
+                            if (d < distToPlayer) distToPlayer = d;
+                        }
+
+                        if (distToPlayer < bestDist) {
+                            bestDist = distToPlayer;
+                            bestTarget = fn;
+                        }
                     }
                 }
-                if (bestFront) en.tunnelTo = bestFront;
+
+                if (bestTarget) en.tunnelTo = bestTarget;
             }
         }
     }
 
-    // -- Seleccion de evolucion segun fase y posicion --
+    // ==========================================
+    // AI-3: EVOLUCIONES CON ROI TEMPORAL
+    // ==========================================
     _chooseEvolution(node, count, phase, aiFaction, allUnits) {
         if (node.isMarkedForSweep) return; // NUNCA evolucionar un nodo condenado al sol
 
@@ -249,19 +352,84 @@ export class AIManager {
             const d = Math.hypot(pn.x - node.x, pn.y - node.y);
             if (d < minDistPlayer) minDistPlayer = d;
         }
+        
         const isFrontline = minDistPlayer < 450;
+        const prof = this._profile;
+        const isMaster = prof.targetingIntelligence === 'master';
+        const isAdvanced = prof.targetingIntelligence === 'high' || prof.targetingIntelligence === 'expert' || isMaster;
 
-        if (phase === 'early') {
-            if (count >= this.evoCosts.espinoso) {
-                this.buyEvolution(node, 'espinoso', this.evoCosts.espinoso, aiFaction, allUnits);
+        // 1. Tesis de No Evolucionar: ¿Está en disputa activa?
+        if (isAdvanced && this.world) {
+            let incomingThreats = 0;
+            for (let u of this.world.allUnits) {
+                if (!u.pendingRemoval && u.faction !== aiFaction && u.targetNode === node) incomingThreats++;
             }
-        } else if (isFrontline) {
-            if (count >= this.evoCosts.artilleria && Math.random() < 0.55) {
-                this.buyEvolution(node, 'artilleria', this.evoCosts.artilleria, aiFaction, allUnits);
-            } else if (count >= this.evoCosts.espinoso) {
-                this.buyEvolution(node, 'espinoso', this.evoCosts.espinoso, aiFaction, allUnits);
+            // Si hay ataques masivos entrando, perder tropas en evolucion nos hace perder el nodo
+            if (incomingThreats > count * 0.5) return; 
+            
+            // 2. Coste de oportunidad: ¿Es mejor gastar 40 tropas capturando neutrales baratos?
+            if (phase === 'early') {
+                for (const target of this._targetNodes) {
+                    if (target.owner === 'neutral' && this._countAt(target, 'neutral') < 15) {
+                        const distToNeut = Math.hypot(target.x - node.x, target.y - node.y);
+                        if (distToNeut < 350) return; // Mejor uso el ejército temprano para expandir, no evolucionar
+                    }
+                }
+            }
+        }
+
+        if (!isAdvanced) {
+            // Lógica antigua / básica para niveles Easy / Normal
+            if (phase === 'early') {
+                if (count >= this.evoCosts.espinoso) this.buyEvolution(node, 'espinoso', this.evoCosts.espinoso, aiFaction, allUnits);
+            } else if (isFrontline) {
+                if (count >= this.evoCosts.artilleria && Math.random() < 0.55) this.buyEvolution(node, 'artilleria', this.evoCosts.artilleria, aiFaction, allUnits);
+                else if (count >= this.evoCosts.espinoso) this.buyEvolution(node, 'espinoso', this.evoCosts.espinoso, aiFaction, allUnits);
+            } else {
+                if (count >= this.evoCosts.tanque) this.buyEvolution(node, 'tanque', this.evoCosts.tanque, aiFaction, allUnits);
+            }
+            return;
+        }
+
+        // Lógica avanzada: ROI Temporal
+
+        // 3. Control de Mapa (Permanencia)
+        const totalNodes = (this._aiNodes.length + this._playerNodes.length + 1); // +1 safety
+        const mapControl = this._aiNodes.length / totalNodes;
+        const playerControl = this._playerNodes.length / totalNodes;
+
+        // 4. Counter-pick con visión futura
+        let playerArtilleria = 0, playerTanque = 0, playerEspinoso = 0;
+        for (const pn of this._playerNodes) {
+            if (pn.evolution === 'artilleria') playerArtilleria++;
+            if (pn.evolution === 'tanque') playerTanque++;
+            if (pn.evolution === 'espinoso') playerEspinoso++;
+        }
+
+        if (isFrontline) {
+            // Predicción: ¿Seguirá siendo frontline?
+            if (mapControl > 0.6) {
+                // Estamos ganando rápido. El frontline de hoy será retaguardia mañana. Tanque es mejor ROI a largo plazo.
+                if (count >= this.evoCosts.tanque) this.buyEvolution(node, 'tanque', this.evoCosts.tanque, aiFaction, allUnits);
+            } else if (playerControl > 0.6) {
+                // Estamos perdiendo. Necesitamos frenar la sangría agresivamente.
+                if (count >= this.evoCosts.espinoso) this.buyEvolution(node, 'espinoso', this.evoCosts.espinoso, aiFaction, allUnits);
+            } else {
+                // Frontline estable. Counter-pick.
+                if (playerEspinoso > 1 && count >= this.evoCosts.artilleria) {
+                    // Si el jugador tiene mucho espinoso, abusar de rango (artilleria).
+                    this.buyEvolution(node, 'artilleria', this.evoCosts.artilleria, aiFaction, allUnits);
+                } else if (playerTanque > 1 && count >= this.evoCosts.espinoso) {
+                    // Si el jugador abusa de tanques (que pegan duro melee), castigarlo con espinosos reflectando daño
+                    this.buyEvolution(node, 'espinoso', this.evoCosts.espinoso, aiFaction, allUnits);
+                } else {
+                    // Mix estandar
+                    if (count >= this.evoCosts.artilleria && Math.random() < 0.4) this.buyEvolution(node, 'artilleria', this.evoCosts.artilleria, aiFaction, allUnits);
+                    else if (count >= this.evoCosts.espinoso) this.buyEvolution(node, 'espinoso', this.evoCosts.espinoso, aiFaction, allUnits);
+                }
             }
         } else {
+            // Retaguardia
             if (count >= this.evoCosts.tanque) {
                 this.buyEvolution(node, 'tanque', this.evoCosts.tanque, aiFaction, allUnits);
             }
@@ -273,58 +441,128 @@ export class AIManager {
         const prof       = this._profile;
         const myTargets  = _factionTargets.get(aiFaction) || new Set();
 
+        // Opt 3: Pre-index idle units by node to avoid O(n^2) scaling
+        const idleUnitsMap = new Map();
+        for (const u of allUnits) {
+            if (!u.pendingRemoval && u.faction === aiFaction && u.state === 'idle' && u.targetNode) {
+                let list = idleUnitsMap.get(u.targetNode);
+                if (!list) {
+                    list = [];
+                    idleUnitsMap.set(u.targetNode, list);
+                }
+                list.push(u);
+            }
+        }
+
+        // ==========================================
+        //  AI-1: MULTI-PRONG ATTACKS (PINZAS)
+        // ==========================================
+        // 1. Agrupar puntajes y ataques viables por Target
+        const possibleAttacks = new Map(); // target -> [ {attacker, score, count, needsDump} ]
+
         for (const attacker of this._aiNodes) {
             const count     = this._countAt(attacker, aiFaction);
             const needsDump = count >= attacker.maxUnits - 10;
 
             if (count < 15 && !needsDump) continue;
 
-            let bestTarget  = null;
-            let bestScore   = -Infinity;
-
             for (const target of this._targetNodes) {
                 const score = this._scoreTarget(
                     target, attacker, count, aiFaction, playerFaction, phase, needsDump, allUnits
                 );
-                if (score > bestScore) {
-                    bestScore  = score;
-                    bestTarget = target;
+                
+                if (score > -Infinity) {
+                    if (!possibleAttacks.has(target)) possibleAttacks.set(target, []);
+                    possibleAttacks.get(target).push({ attacker, score, count, needsDump });
                 }
             }
+        }
 
-            if (!bestTarget || bestScore === -Infinity) continue;
+        // 2. Ordenar Targets por el MEJOR puntaje individual que recibieron
+        const sortedTargets = Array.from(possibleAttacks.keys()).sort((a, b) => {
+            const maxScoreA = Math.max(...possibleAttacks.get(a).map(atk => atk.score));
+            const maxScoreB = Math.max(...possibleAttacks.get(b).map(atk => atk.score));
+            return maxScoreB - maxScoreA;
+        });
 
-            myTargets.add(bestTarget);
-            _factionTargets.set(aiFaction, myTargets);
+        const attackersUsed = new Set();
 
-            // Enviar tropas
-            let ratio = prof.sendRatio;
+        for (const target of sortedTargets) {
+            let atks = possibleAttacks.get(target);
+            // Filtrar los que ya atacaron a otro lado
+            atks = atks.filter(a => !attackersUsed.has(a.attacker));
+            if (atks.length === 0) continue;
 
-            // Ataques de precision (Hard/Brutal):
-            if (ratio === 'dynamic') {
-                let targetDefenders = 0;
-                for (const f in bestTarget.counts) {
-                    if (f !== aiFaction) targetDefenders += (bestTarget.counts[f] || 0);
-                }
-                const needed = Math.floor((targetDefenders + 1) * prof.aggressionThreshold * 1.3);
-                ratio = Math.min(0.85, Math.max(0.15, needed / count));
+            // Ordenar atacantes para ESTE target de mejor a peor
+            atks.sort((a, b) => b.score - a.score);
+
+            // Decidir cuántas puntas (prongs) usar
+            let maxProngs = 1;
+            if (prof.targetingIntelligence === 'expert') maxProngs = 2;
+            if (prof.targetingIntelligence === 'master') maxProngs = 3;
+
+            // Solo usamos multi-prong si el target es del jugador y tiene defensas reales
+            const targetDefenders = this._countAt(target, playerFaction);
+            if (target.owner !== playerFaction && target.owner !== 'neutral') maxProngs = 1;
+
+            let prongsUsed = 0;
+            let totalSent = 0;
+
+            for (const atk of atks) {
+                if (prongsUsed >= maxProngs) break;
+                // Si ya enviamos suficientes tropas solas en el primer prong, no necesitamos más
+                if (prongsUsed > 0 && totalSent > (targetDefenders + 10) * 1.5) break; 
+
+                // Ejecutar el ataque desde este nodo
+                this._executeAttack(atk.attacker, target, atk.count, aiFaction, prof, atk.needsDump, idleUnitsMap, myTargets);
+                
+                attackersUsed.add(atk.attacker);
+                prongsUsed++;
+                
+                // Estimate sent troops
+                const ratio = atk.needsDump ? prof.dumpRatio : prof.sendRatio;
+                let activeRatio = ratio === 'dynamic' ? 0.5 : ratio; // Rough estimate for tracking
+                totalSent += Math.max(1, Math.floor(atk.count * activeRatio));
+            }
+        }
+        
+        _factionTargets.set(aiFaction, myTargets);
+    }
+
+    _executeAttack(attacker, target, count, aiFaction, prof, needsDump, idleUnitsMap, myTargets) {
+        myTargets.add(target);
+
+        let ratio = prof.sendRatio;
+        if (ratio === 'dynamic') {
+            let targetDefenders = 0;
+            for (const f in target.counts) {
+                if (f !== aiFaction) targetDefenders += (target.counts[f] || 0);
             }
 
-            const activeRatio = needsDump ? prof.dumpRatio : ratio;
-            const toSend = Math.max(1, Math.floor(count * activeRatio));
-            let sent = 0;
-
-            for (const u of allUnits) {
-                if (sent >= toSend) break;
-                if (!u.pendingRemoval
-                    && u.faction === aiFaction
-                    && u.targetNode === attacker
-                    && u.state === 'idle') {
-                    u.targetNode = bestTarget;
-                    u.state      = 'traveling';
-                    sent++;
-                }
+            let actualThreshold = prof.aggressionThreshold;
+            if (target.owner === 'neutral' && targetDefenders < 15 && this.difficulty !== 'easy') {
+                actualThreshold = 1.1;
             }
+
+            const needed = Math.floor((targetDefenders + 1) * actualThreshold * 1.3);
+            ratio = Math.min(0.85, Math.max(0.15, needed / count));
+        }
+
+        const activeRatio = needsDump ? prof.dumpRatio : ratio;
+        const toSend = Math.max(1, Math.floor(count * activeRatio));
+        const routedAttack = this._getFirstHopTarget(attacker, target, toSend, this._navExecResult);
+        if (routedAttack.routeResult && !routedAttack.routeResult.isViable) return;
+        if (routedAttack.routeResult && routedAttack.routeResult.suggestedDelay > 0.35) return;
+
+        const hopTarget = routedAttack.hopTarget || target;
+        let sent = 0;
+
+        const idleUnitsForNode = idleUnitsMap.get(attacker) || [];
+        while (sent < toSend && idleUnitsForNode.length > 0) {
+            const u = idleUnitsForNode.pop();
+            u.targetNode = hopTarget;
+            u.state      = 'traveling';
+            sent++;
         }
     }
 
@@ -345,7 +583,20 @@ export class AIManager {
         if (prof.visionRange && dist > prof.visionRange) return -Infinity;
 
         let score = 8000 / (dist + 1);
+        let routeTransitTime = dist / Math.max(1, this.world ? (this.world.unitBaseSpeed || 75) : 75);
+        let routeResult = null;
 
+        if (this.world && this.world.navigation) {
+            routeResult = this._evaluateRoute(attacker, target, Math.max(1, ownCount), this._navScoreResult);
+            if (routeResult && !routeResult.isViable) return -Infinity;
+            if (routeResult) {
+                routeTransitTime = routeResult.projectedTransitTime;
+            }
+        }
+
+        // ==========================================
+        // === AI-2 & AI-6: ECONOMÍA Y DENEGACIÓN ===
+        // ==========================================
         if (target.owner === 'neutral') {
             score += 650;
             let defs = 0;
@@ -353,6 +604,30 @@ export class AIManager {
                 if (f !== aiFaction) defs += (target.counts[f] || 0);
             }
             if (defs < 8) score += 1000;
+
+            // Early game: ROI scoring (Producción / Coste)
+            if (phase === 'early' && this.difficulty !== 'easy') {
+                const travelTimeCost = routeTransitTime;
+                const cost = defs + travelTimeCost * 0.5;
+                const roi = (target.productionRate * 100) / Math.max(1, cost);
+                score += roi * 50; // Gran peso al ROI
+            }
+
+            // Resource Denial: ¿Está el neutral más cerca del jugador que de mí?
+            if (this.difficulty === 'master' || this.difficulty === 'high' || this.difficulty === 'hard' || this.difficulty === 'brutal') {
+                let closestPlayerDist = Infinity;
+                if (this._playerNodes) {
+                    for (const pNode of this._playerNodes) {
+                        const d = Math.hypot(target.x - pNode.x, target.y - pNode.y);
+                        if (d < closestPlayerDist) closestPlayerDist = d;
+                    }
+                }
+                
+                if (dist > closestPlayerDist) {
+                    // Está más cerca del jugador, capturarlo es denegación de recursos
+                    score += 900; 
+                }
+            }
         }
 
         // --- CAPA 1: CONCIENCIA TACTICA (medium+) ---
@@ -361,12 +636,56 @@ export class AIManager {
             if (f !== aiFaction) defenders += (target.counts[f] || 0);
         }
 
-        // Módulo C: Reserva Defensiva
+        // ==========================================
+        //  AI-5: RESERVA DEFENSIVA CONTEXTUAL
+        // ==========================================
         let reserveRatio = 0.0;
-        if (phase === 'early') reserveRatio = 0.25;
-        else if (phase === 'mid') reserveRatio = 0.15;
-        else if (phase === 'late' && this._playerNodes.length * 2 < this._aiNodes.length) reserveRatio = 0.05;
+        
+        // Determinar amenaza activa real sobre el atacante
+        let activeThreatCount = 0;
+        if (this.world && attacker) {
+            for (let u of this.world.allUnits) {
+                if (!u.pendingRemoval && u.faction !== aiFaction && u.state === 'traveling' && u.targetNode === attacker) {
+                    activeThreatCount++;
+                }
+            }
+        }
+
+        if (activeThreatCount > 0) {
+            // Hay amenaza real viajando hacia nosotros. Retener suficiente para defender.
+            const neededToDefende = activeThreatCount * 1.2; 
+            reserveRatio = Math.min(0.8, neededToDefende / Math.max(1, ownCount));
+        } else {
+            // NO hay amenaza activa. Principio: Tropas paradas = tropas desperdiciadas.
+            // Si hay oportunidad de expandir, retenemos muy poco.
+            let hasOpportunity = false;
+            if (target.owner === 'neutral' && defenders < 20) hasOpportunity = true;
+
+            // Retenemos guarnición mínima solo por valor estratégico
+            if (attacker.evolution === 'espinoso' || attacker.evolution === 'artilleria') {
+                reserveRatio = hasOpportunity ? 0.05 : 0.15;
+            } else {
+                reserveRatio = hasOpportunity ? 0.0 : 0.05;
+            }
+            
+            // Si estamos perdiendo el mapa, no nos vaciamos por completo
+            if (this._playerNodes.length > this._aiNodes.length * 1.5) {
+                reserveRatio = Math.max(reserveRatio, 0.15);
+            }
+        }
+
         const availableAttackers = Math.max(1, Math.floor(ownCount * (1.0 - reserveRatio)));
+
+        if (this.world && this.world.navigation) {
+            routeResult = this._evaluateRoute(attacker, target, availableAttackers, this._navScoreResult);
+            if (routeResult && !routeResult.isViable) return -Infinity;
+            if (routeResult) {
+                routeTransitTime = routeResult.projectedTransitTime;
+                score -= routeResult.projectedCasualties * 16;
+                score -= routeResult.suggestedDelay * 110;
+                score -= Math.max(0, routeTransitTime - (dist / 75)) * 22;
+            }
+        }
 
         if (!needsDump) {
             // Módulo A, E y H: Simulador Predictivo con Atrición (ahora incluye Neutrales)
@@ -437,14 +756,14 @@ export class AIManager {
         // --- CAPA 4: DOMINIO ABSOLUTO (master) ---
 
         // 1. Peligros de Nivel (Level Hazards)
-        let hazardPenalty = this._evaluateHazards(target, attacker);
+        let hazardPenalty = routeResult ? 0 : this._evaluateHazards(target, attacker);
         score -= hazardPenalty;
 
         // Evitar nodos marcados por el rayo de luz
         if (target.isMarkedForSweep) {
-            score -= 200; // Penalidad ligera táctica para preferir nodos seguros
-            if (typeof window !== 'undefined' && window.world && window.world.lightSweeps) {
-                for (const sweep of window.world.lightSweeps) {
+            score -= 200;
+            if (this.world && this.world.lightSweeps) {
+                for (const sweep of this.world.lightSweeps) {
                     if (sweep.isAlerting) {
                         score -= 20000; // abort mission!
                     }
@@ -452,7 +771,7 @@ export class AIManager {
             }
         }
 
-        // 2. Anti-Momentum (Back-capping): castigar nodos vaciados por el jugador
+        // 2. Anti-Momentum (Back-capping)
         if (target.owner === playerFaction) {
             let playerEmigrants = 0;
             for (const u of allUnits) {
@@ -464,7 +783,7 @@ export class AIManager {
             else if (playerEmigrants > 15) score += 2000;
         }
 
-        // 3. Flanqueo Total (Surrounding): multiples bases AI adyacentes al target
+        // 3. Flanqueo Total (Surrounding)
         if (target.owner === playerFaction) {
             let adjacentAINodes = 0;
             for (const n of this._aiNodes) {
@@ -474,37 +793,195 @@ export class AIManager {
             if (adjacentAINodes >= 2) score += 1500 * adjacentAINodes;
         }
 
+        // ==========================================
+        // AI-4: TIMING AWARENESS
+        // ==========================================
+        if (this.world) {
+            // Post-sweep rush: si una ola ACABA de pasar, ventana de oportunidad
+            if (this.world.waterSweeps) {
+                for (const sweep of this.world.waterSweeps) {
+                    // Si la ola acaba de pasar (no está alertando y el cooldown > 80% restante)
+                    if (!sweep.isAlerting && sweep.timeToNext > (sweep.cooldown || 0) * 0.75) {
+                        score += 1200; // Bonus por ventana segura post-ola
+                    }
+                }
+            }
+
+            // Barrier sync: en niveles con barreras intermitentes, atacar en la ventana de apertura
+            if (this.world.intermittentBarriers) {
+                for (const ib of this.world.intermittentBarriers) {
+                    // Si la barrera activa actual BLOQUEA nuestra ruta, penalizar
+                    const activeBounds = ib.getActiveBounds();
+                    if (activeBounds.length > 0) {
+                        const gw = this.world.game ? this.world.game.width : 1920;
+                        const gh = this.world.game ? this.world.game.height : 1080;
+                        for (const b of activeBounds) {
+                            if (this._lineIntersectsRect(
+                                attacker.x, attacker.y, target.x, target.y,
+                                b.x * gw, b.y * gh, b.width * gw, b.height * gh
+                            )) {
+                                // Barrera bloqueando. ¿Cuánto falta para que cambie?
+                                const timeToSwitch = ib.interval - ib.timer;
+                                if (timeToSwitch < 3) {
+                                    score -= 500; // Esperar un poco, va a cambiar pronto
+                                } else {
+                                    score -= 8000; // Barrera bloqueará por mucho tiempo
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Light sweep timing: evolucionar justo DESPUÉS (ya manejado en _chooseEvolution)
+        }
+
+        // ==========================================
+        // AI-8: COUNTERPLAY ADAPTATION
+        // ==========================================
+        const pp = this._playerProfile;
+        if (pp) {
+            // Si el jugador hace turtle, la AI escala economía y aplasta tarde
+            if (pp.aggressionLevel === 'turtle' && phase !== 'early') {
+                if (target.owner === 'neutral') score += 800; // Priorizar economía
+                if (target.owner === playerFaction) score -= 400; // No apresurarnos, escalamos
+            }
+
+            // Si el jugador es hiper-agresivo, la AI espera y contraataca
+            if (pp.aggressionLevel === 'aggressive') {
+                if (target.owner === playerFaction && defenders < 15) score += 2500; // Contraataque
+            }
+
+            // Si el jugador ataca siempre un flanco, reforzar ese lado
+            // (esto se usa internamente en la reserva defensiva ya)
+        }
+
         return score;
+    }
+
+    // ==========================================
+    // AI-8: PLAYER PROFILE TRACKING
+    // ==========================================
+    _updatePlayerProfile(dt, allUnits, playerFaction) {
+        const pp = this._playerProfile;
+        if (!pp) return;
+
+        // Detectar turtle: ¿El jugador no expande?
+        const currentPlayerNodes = this._playerNodes.length;
+        if (currentPlayerNodes <= pp.lastPlayerNodeCount) {
+            pp.turtleTimer += dt;
+        } else {
+            pp.turtleTimer = Math.max(0, pp.turtleTimer - dt * 2); // Decay rápido si expande
+        }
+        pp.lastPlayerNodeCount = currentPlayerNodes;
+
+        // Clasificar agresividad
+        let playerTraveling = 0;
+        for (const u of allUnits) {
+            if (u.faction === playerFaction && u.state === 'traveling') playerTraveling++;
+        }
+
+        if (pp.turtleTimer > 30 && playerTraveling < 10) {
+            pp.aggressionLevel = 'turtle';
+        } else if (playerTraveling > 50) {
+            pp.aggressionLevel = 'aggressive';
+        } else {
+            pp.aggressionLevel = 'normal';
+        }
+    }
+
+    // Utilidad: ¿Una línea intersecta un rectángulo?
+    _lineIntersectsRect(x1, y1, x2, y2, rx, ry, rw, rh) {
+        // Cohen-Sutherland simplificado
+        const left = rx, right = rx + rw, top = ry, bottom = ry + rh;
+        
+        // Si ambos puntos están del mismo lado, no hay intersección
+        if ((x1 < left && x2 < left) || (x1 > right && x2 > right)) return false;
+        if ((y1 < top && y2 < top) || (y1 > bottom && y2 > bottom)) return false;
+
+        // Si alguno está dentro del rect, intersecta
+        if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) return true;
+        if (x2 >= left && x2 <= right && y2 >= top && y2 <= bottom) return true;
+
+        // Verificar intersección de la línea con los 4 bordes
+        const dx = x2 - x1, dy = y2 - y1;
+        if (dx === 0 && dy === 0) return false;
+
+        const tLeft   = (left   - x1) / (dx || 1e-10);
+        const tRight  = (right  - x1) / (dx || 1e-10);
+        const tTop    = (top    - y1) / (dy || 1e-10);
+        const tBottom = (bottom - y1) / (dy || 1e-10);
+
+        const tMin = Math.max(Math.min(tLeft, tRight), Math.min(tTop, tBottom));
+        const tMax = Math.min(Math.max(tLeft, tRight), Math.max(tTop, tBottom));
+
+        return tMax >= 0 && tMin <= 1 && tMin <= tMax;
     }
 
     // === CONCIENCIA DE ENTORNO Y MECANICAS (Level Hooks) ===
     _evaluateHazards(target, attacker) {
+        const routeResult = this._evaluateRoute(
+            attacker,
+            target,
+            Math.max(1, this._countAt(attacker, attacker.owner || 'enemy')),
+            this._navScoreResult
+        );
+        if (routeResult) {
+            if (!routeResult.isViable) return Infinity;
+            return (routeResult.projectedCasualties * 12) + (routeResult.suggestedDelay * 120);
+        }
+
         let penalty = 0;
 
         // Marea Barriente: si detectamos Water Sweeps activos
-        if (typeof window !== 'undefined' && window.world
-            && window.world.waterSweeps && window.world.waterSweeps.length > 0) {
-            for (const sweep of window.world.waterSweeps) {
+        if (this.world && this.world.waterSweeps && this.world.waterSweeps.length > 0) {
+            const dist = Math.hypot(target.x - attacker.x, target.y - attacker.y);
+            const vx = dist > 0 ? ((target.x - attacker.x) / dist) * 60.0 : 0;
+            const travelTimeSecs = dist / 60.0;
+            const gw = this.world.game ? this.world.game.width : 1920;
+
+            for (const sweep of this.world.waterSweeps) {
                 if (sweep.isAlerting || sweep.timeToNext < 3.5) {
-                    penalty += 50000;
+                    // Solo penalizar si la trayectoria se interceptará con la franja de agua
+                    let willIntersect = false;
+                    for (let bar of sweep._activeBars) {
+                        if (this._checkSweepCollision(attacker.x, vx, travelTimeSecs, bar.worldX, sweep.speed)) {
+                            willIntersect = true;
+                            break;
+                        }
+                    }
+                    if (!willIntersect && (sweep._isAlerting || sweep._spawnTimer + sweep.alertDuration < travelTimeSecs)) {
+                        let spawnT = sweep._isAlerting ? sweep._alertTimer : sweep._spawnTimer + sweep.alertDuration;
+                        if (spawnT < travelTimeSecs) {
+                            const barStartX = -(sweep.widthFrac * gw) - (sweep.speed * 4);
+                            const antXAtSpawnT = attacker.x + vx * spawnT; 
+                            if (this._checkSweepCollision(antXAtSpawnT, vx, travelTimeSecs - spawnT, barStartX, sweep.speed)) {
+                                willIntersect = true;
+                            }
+                        }
+                    }
+                    
+                    if (willIntersect) {
+                        penalty += 50000;
+                    }
                 }
             }
         }
 
         // Conciencia de Barreras (Nivel 9 y Nivel 11)
-        if (typeof window !== 'undefined' && window.world) {
+        if (this.world) {
             let activeBarriers = [];
-            if (window.world.barriers) activeBarriers.push(...window.world.barriers);
-            if (window.world.intermittentBarriers) {
-                for (let ib of window.world.intermittentBarriers) {
+            if (this.world.barriers) activeBarriers.push(...this.world.barriers);
+            if (this.world.intermittentBarriers) {
+                for (let ib of this.world.intermittentBarriers) {
                     const act = ib.getActiveBounds();
                     if (act) activeBarriers.push(...act);
                 }
             }
 
             if (activeBarriers.length > 0) {
-                const gw = window.world.game ? window.world.game.width  : window.innerWidth;
-                const gh = window.world.game ? window.world.game.height : window.innerHeight;
+                const gw = this.world.game ? this.world.game.width  : 1920;
+                const gh = this.world.game ? this.world.game.height : 1080;
 
                 for (const b of activeBarriers) {
                     if (attacker.isMobile) continue;
@@ -586,9 +1063,12 @@ export class AIManager {
 
     // === MÓDULO A, E & H: SIMULADOR PREDICTIVO ===
     _simulateBattle(attacker, target, sentCount, currentDefenders, aiFaction, playerFaction) {
+        const routeResult = this._evaluateRoute(attacker, target, sentCount, this._navExecResult);
+        if (routeResult && !routeResult.isViable) return false;
+
         // 1. Tiempo de viaje (velocidad base ~60px/s)
         const dist = Math.hypot(target.x - attacker.x, target.y - attacker.y);
-        const travelTimeSecs = dist / 60.0; // FIX: antes era dist * 32.0 lo cual generaba horas de viaje simulado
+        const travelTimeSecs = routeResult ? routeResult.projectedTransitTime : (dist / 60.0);
 
         // 2. Producción Futura del Defensor (Los Neutrales NO producen)
         let futureDefenders = currentDefenders;
@@ -601,11 +1081,11 @@ export class AIManager {
         }
 
         // 3. Atrición en Ruta por Charcos Estáticos (Módulo E)
-        let hazardKills = 0;
-        if (typeof window !== 'undefined' && window.world && window.world.hazards) {
-            const gw = window.world.game ? window.world.game.width : window.innerWidth;
-            const gh = window.world.game ? window.world.game.height : window.innerHeight;
-            for (let hz of window.world.hazards) {
+        let hazardKills = routeResult ? routeResult.projectedCasualties : 0;
+        if (!routeResult && this.world && this.world.hazards) {
+            const gw = this.world.game ? this.world.game.width : 1920;
+            const gh = this.world.game ? this.world.game.height : 1080;
+            for (let hz of this.world.hazards) {
                 const hx = hz.x * gw;
                 const hy = hz.y * gh;
                 const hRadius = hz.radius * gw;
@@ -620,12 +1100,12 @@ export class AIManager {
         }
 
         // 3.5. Módulo H: Intercepción Precisa de Olas Limpiadoras (Water Sweeps)
-        if (typeof window !== 'undefined' && window.world && window.world.waterSweeps) {
+        if (!routeResult && this.world && this.world.waterSweeps) {
             // Vector de velocidad de la tropa en el eje X
             const vx = ((target.x - attacker.x) / dist) * 60.0;
-            const gw = window.world.game ? window.world.game.width : 1920;
+            const gw = this.world.game ? this.world.game.width : 1920;
 
-            for (let sweep of window.world.waterSweeps) {
+            for (let sweep of this.world.waterSweeps) {
                 // Predecir colisión con barras *ya* en la pantalla
                 for (let bar of sweep._activeBars) {
                     if (this._checkSweepCollision(attacker.x, vx, travelTimeSecs, bar.worldX, sweep.speed)) {

@@ -11,6 +11,10 @@ export class SpatialHashGrid {
         this.next = new Int32Array(maxEntities);
 
         this.head.fill(-1);
+
+        this.surfaceStore = null;
+        this.surfaceVisited = null;
+        this.surfaceQueryStamp = 1;
     }
 
     clear() {
@@ -63,6 +67,54 @@ export class SpatialHashGrid {
                         outArray.push(id);
                         id = this.next[id];
                     }
+                }
+            }
+        }
+    }
+
+    setSurfaceStore(surfaceStore) {
+        this.surfaceStore = surfaceStore || null;
+        if (surfaceStore && surfaceStore.surfaceCount > 0) {
+            this.surfaceVisited = new Uint32Array(surfaceStore.surfaceCount);
+            this.surfaceQueryStamp = 1;
+        } else {
+            this.surfaceVisited = null;
+            this.surfaceQueryStamp = 1;
+        }
+    }
+
+    findNearbySurfaces(x, y, radius, outArray) {
+        outArray.length = 0;
+        if (!this.surfaceStore || !this.surfaceVisited) return;
+
+        const store = this.surfaceStore;
+        const cellRange = Math.ceil(radius / this.cellSize);
+        const colCenter = (x / this.cellSize) | 0;
+        const rowCenter = (y / this.cellSize) | 0;
+
+        this.surfaceQueryStamp++;
+        if (this.surfaceQueryStamp === 0xffffffff) {
+            this.surfaceVisited.fill(0);
+            this.surfaceQueryStamp = 1;
+        }
+
+        for (let rowOffset = -cellRange; rowOffset <= cellRange; rowOffset++) {
+            for (let colOffset = -cellRange; colOffset <= cellRange; colOffset++) {
+                const col = colCenter + colOffset;
+                const row = rowCenter + rowOffset;
+
+                if (col < 0 || col >= store.cols || row < 0 || row >= store.rows) continue;
+
+                const cellIndex = col + (row * store.cols);
+                let link = store.surfaceCellHead[cellIndex];
+
+                while (link !== -1) {
+                    const surfaceIndex = store.surfaceCellSurface[link];
+                    if (this.surfaceVisited[surfaceIndex] !== this.surfaceQueryStamp) {
+                        this.surfaceVisited[surfaceIndex] = this.surfaceQueryStamp;
+                        outArray.push(surfaceIndex);
+                    }
+                    link = store.surfaceCellNext[link];
                 }
             }
         }

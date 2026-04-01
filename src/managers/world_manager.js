@@ -5,6 +5,7 @@ import { PIXI } from '../core/engine.js';
 import { FACTIONS } from '../campaign/faction_data.js';
 import { CombatManager } from './combat_manager.js';
 import { PhysicsManager } from './physics_manager.js';
+import { NavigationSystem } from '../navigation/navigation_system.js';
 
 export class WorldManager {
     constructor(game, ui, config) {
@@ -12,6 +13,8 @@ export class WorldManager {
         this.ui = ui;
         this.gridSize = config.gridCellSize || 30;
         this.grid = new SpatialHashGrid(1920, 1080, this.gridSize, 10000);
+        this.unitBaseSpeed = 75;
+        this.simTime = 0;
 
         this.allUnits = [];
         this.nodes = [];
@@ -39,6 +42,7 @@ export class WorldManager {
 
         this.combatInterval = config.combatInterval || 0.7;
         this._tunnelsDirty = true;
+        this.navigation = new NavigationSystem({ baseSpeedPxSec: this.unitBaseSpeed });
 
         // Punto de reunión del menú principal
         // Se activa con setMenuGather(x, y); las hormigas cercanas
@@ -196,6 +200,10 @@ export class WorldManager {
     }
 
     clearLevel() {
+        this.simTime = 0;
+        if (this.navigation) this.navigation.clear();
+        if (this.grid) this.grid.setSurfaceStore(null);
+
         // Destruir los PIXI.Graphics de las mareas antes de limpiar el array
         for (let sweep of this.waterSweeps) {
             if (sweep.destroy) sweep.destroy();
@@ -295,6 +303,7 @@ export class WorldManager {
         }
         if (gameState !== 'PLAYING' || isPaused) return;
 
+        this.simTime += dt;
         this.updateNodeCounts();
         PhysicsManager.updateGrid(this);
         PhysicsManager.updatePhysics(this, dt);
@@ -567,5 +576,14 @@ export class WorldManager {
                 this.hazardGraphics.fill({ color: hz.color || 0xff0000, alpha: hz.alpha || 0.2 });
             }
         }
+    }
+
+    rebuildNavigation() {
+        if (!this.navigation) return null;
+        const store = this.navigation.bakeFromWorld(this);
+        if (this.grid) {
+            this.grid.setSurfaceStore(store);
+        }
+        return store;
     }
 }

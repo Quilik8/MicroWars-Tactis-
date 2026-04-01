@@ -7,6 +7,9 @@ export class PhysicsManager {
         if (world.grid.boundsWidth !== world.game.width || world.grid.boundsHeight !== world.game.height) {
             world.grid = new SpatialHashGrid(world.game.width, world.game.height, world.gridSize, 10000);
         }
+        if (world.navigation && world.navigation.store) {
+            world.grid.setSurfaceStore(world.navigation.store);
+        }
         world.grid.clear();
         world.travelingIds.length = 0;
 
@@ -33,7 +36,16 @@ export class PhysicsManager {
             } else {
                 world.neighbors.length = 0;
             }
-            u.updateForces(dt, u.targetNode.x, u.targetNode.y, targetR, world.neighbors, world.allUnits);
+            u.updateForces(
+                dt,
+                u.targetNode.x,
+                u.targetNode.y,
+                targetR,
+                world.neighbors,
+                world.allUnits,
+                world.grid,
+                world.navigation ? world.navigation.localAvoidanceSolver : null
+            );
         }
 
         // Idle units (orbit)
@@ -69,8 +81,6 @@ export class PhysicsManager {
     }
 
     static processLevelLogic(world, dt) {
-        if (world.hazardTimer === undefined) world.hazardTimer = 0;
-        world.hazardTimer += dt;
 
         // Mover nodos móviles (Level 5 Orbital)
         for (let n of world.nodes) {
@@ -86,6 +96,10 @@ export class PhysicsManager {
                 
                 n.vx = (n.x - oldX) / dt;
                 n.vy = (n.y - oldY) / dt;
+                if (world.navigation && world.navigation.store && n.navIndex != null) {
+                    world.navigation.store.nodeX[n.navIndex] = n.x;
+                    world.navigation.store.nodeY[n.navIndex] = n.y;
+                }
 
                 n.redraw(); // Forzar actualización visual del nodo en su nueva coordenada
             }
@@ -94,9 +108,12 @@ export class PhysicsManager {
         // Damage units in hazards
         if (world.hazards) {
             for (let hz of world.hazards) {
+                if (hz._timer === undefined) hz._timer = 0;
+                hz._timer += dt;
+
                 // Determine how many kills should happen this frame based on the fixed DPS
                 const killInterval = hz.dps > 0 ? 1 / hz.dps : 999;
-                let killsPending = Math.floor(world.hazardTimer / killInterval);
+                let killsPending = Math.floor(hz._timer / killInterval);
                 let killedThisFrame = 0;
                 let anyUnitsInHazard = false;
 
@@ -139,10 +156,10 @@ export class PhysicsManager {
 
                 if (!anyUnitsInHazard) {
                     // Si no hay tropas para dañar, reiniciamos el reloj para evitar acumulación de muertes (kill debts)
-                    world.hazardTimer = 0;
+                    hz._timer = 0;
                 } else if (killedThisFrame > 0) {
                     // Consume the time used for the kills, but keep remainder
-                    world.hazardTimer = world.hazardTimer % killInterval;
+                    hz._timer = hz._timer % killInterval;
                 }
             }
         }
