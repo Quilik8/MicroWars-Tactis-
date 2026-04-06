@@ -80,8 +80,8 @@ Esta fase consolida la visión original, transformando el juego de niveles aisla
     *   **Gestión de Unidades:** Sistema de Enjambres Veteranos con nombres personalizados, acumulación de experiencia por combate y la regla de Muerte Permanente (Permadeath) al perder una batalla.
 *   **El Mundo Vivo:**
     *   **Clima Dinámico y Entorno:** Eventos destructivos telegrafiados como "La Gota de Agua" o "La Lupa", junto con zonas de terreno que aplican modificadores de velocidad (barro ralentizante, vidrio acelerador).
-    *   **Amenazas Evolucionadas:** Aparición de la Amenaza A (Invasiones sorpresa masivas de una facción externa en medio de una partida) y la Amenaza B (Depredadores neutrales de alto nivel custodiando nodos valiosos).
-    *   **Auto-Resolver:** Lógica de resolución matemática automática de batallas para agilizar la campaña en mapas previamente dominados por el jugador.
+    *   **Amenazas Evolucionadas:** Aparición de la Amenaza A (Invasiones sorpresa masivas de una facción Premiun en medio de una partida en el modo campaña) y la Amenaza B (Depredadores neutrales de alto nivel custodiando nodos principales de paso de territorio en el mapa estrategico).
+    *   **Auto-Resolver:** Lógica de resolución matemática automática de batallas para agilizar la campaña en mapas previamente dominados por el jugador con un coste.
 
 ### 5. Fase 4: Ecosistema y Expansión (Sostenibilidad a Largo Plazo)
 La fase final se centra en la comunidad y la escalabilidad comercial, convirtiendo el juego en una plataforma de contenido infinito.
@@ -137,7 +137,7 @@ El núcleo del juego se basa en un modelo de **Flujo de Partículas Inteligentes
 
 *   **Representación Visual (Sin Números):** Siguiendo la estética minimalista de los grandes referentes del género, los nodos **no muestran contadores numéricos de tropas**. La fuerza de un hormiguero es puramente visual: el jugador percibe cuántas unidades tiene por la densidad del enjambre que lo rodea o el tamaño/brillo del nodo. Esto obliga al jugador a desarrollar un instinto táctico basado en la observación del campo de batalla.
 *   **Dibujo de Unidades (Elipsoides):** Las unidades se generan mediante la API de Canvas (`ctx.ellipse`).
-    *   *Geometría:* Forma de elipsoide (grano de arroz).
+    *   *Geometría:* Forma de hormiga diseño puramente CSS.
     *   *Orientación:* Rotación dinámica; la "punta" siempre indica la dirección del movimiento.
     *   *Colores:* Sólidos por facción (Azul, Rojo, etc.).
 *   **Lógica de Ataque:** El comportamiento estándar es el **Enjambre**. Las unidades no avanzan en fila, sino que forman una nube orgánica que flanquea y envuelve el objetivo, permitiendo colisiones múltiples y una saturación visual del nodo enemigo.
@@ -157,12 +157,12 @@ Los nodos pueden evolucionar para cambiar drásticamente la composición del ej�
 *   **Hormiguero de Artillería (Disparador de Ácido):** Nodo de largo alcance que crea una zona de control amplia. Dispara ráfagas de ácido de forma automática a cualquier unidad enemiga que entre en su radio de acción, sin necesidad de que el nodo esté siendo atacado directamente.
 *   **Tronco Espinoso:** Nodo defensivo que inflige daño pasivo a las tropas atacantes antes de que estas lleguen a pelear con el interior. Las tropas dueñas del nodo pasan por las espinas sin recibir daño.
 
-### 4. Sistemas de Tránsito: Túneles de Mapa y Logísticos
+### 4. Sistemas de Tránsito: Túneles de Mapa y caminos Logísticos
 *   **Túneles de Mapa (Huecos de Conquista):** Son nodos estratégicos que no producen tropas. Funcionan como puntos de entrada y salida entre extremos distantes del mapa.
     *   *Mecánica:* Para usar un túnel, primero hay que **conquistar el hueco** como si fuera cualquier otro nodo. 
     *   *Uso:* Una vez conquistado, al hacer clic en el hueco, la cámara o el flujo te lleva al otro extremo. Si el hueco de salida pertenece a un enemigo, se desata una batalla inmediata en el túnel para decidir quién toma el control del acceso.
-*   **Túneles Logísticos (Flujo Automatizado):** Una herramienta de automatización que se puede crear entre dos nodos propios ya conquistados.
-    *   *Mecánica:* El jugador establece una conexión permanente. El porcentaje seleccionado en la barra (por ejemplo, el 50% o el 100% para vaciar constantemente el origen) se enviará de forma ininterrumpida hacia el destino.
+*   **Caminos Logísticos (Flujo Automatizado):** Una herramienta de automatización que se puede crear entre dos nodos propios ya conquistados.
+    *   *Mecánica:* El jugador establece una conexión permanente enviando tropas de forma continua.    
     *   *Inversión:* El flujo se puede invertir o cancelar con un clic sobre el camino, pero si el enemigo captura uno de los extremos, el túnel desaparece.
 
 ### 5. Mecánica de Parásitos, Infección y Purga
@@ -177,27 +177,33 @@ El sigilo y la infiltración añaden una capa de riesgo interno constante.
     
 ## PARTE 5: La Campaña y El Tablero Estratégico (Macro-Gestión)
 
-### 1. El Tablero: El Anillo de Convergencia
-La campaña principal se desarrolla en un mapa estratégico con geometría de anillos concéntricos, similar a una telaraña. Este diseño centraliza el conflicto y asegura una progresión constante hacia el clímax del juego.
+### 1. El Tablero Estratégico: El Gran Jardín (Grand Strategy)
 
-*   **Puntos de Inicio:** Las 6 facciones en juego (el jugador y 5 IAs) comienzan la partida en el borde exterior del mapa, situadas en puntos equidistantes para garantizar un equilibrio de distancia inicial.
-*   **El Objetivo Final:** El centro del tablero contiene el nodo de "El Gran Picnic", un territorio masivo con recursos ilimitados. La victoria se obtiene al conquistar y asegurar este punto central.
-*   **Geometría de Colisión:** Los caminos del tablero se estrechan a medida que las facciones avanzan hacia los anillos interiores. Esto obliga a los ejércitos a cruzarse, generando disputas territoriales fronterizas desde las etapas iniciales de la campaña.
-*   **Tutorial de Combate Directo:** El primer turno de la campaña activa un evento de ataque automático. Una facción vecina o una fuerza neutral invade el territorio inicial del jugador, forzando la transición al primer mapa RTS para instruir al usuario en las mecánicas de mando y defensa.
+La campaña principal se desarrolla en un mapa topográfico masivo y orgánico, compuesto por un volumen de entre 300 y 500 **Territorios** (puntos de batalla). Este diseño adopta un enfoque de Gran Estrategia, obligando a los jugadores a gestionar fronteras irregulares, líneas de suministro y múltiples frentes de guerra simultáneos.
 
-### 2. Tipología de Territorios y Recompensas Roguelike
-Cada nodo del tablero estratégico representa un escenario de batalla único y ofrece beneficios específicos para la progresión de la colonia.
+*   **Estructura Regional:** Los territorios se agrupan en Regiones o Biomas (ej. El Arenero, El Césped, El Asfalto). Cada región posee características geográficas únicas que definen el aspecto visual y los obstáculos de las batallas RTS en esa zona.
+*   **Puntos de Inicio Asimétricos:** Las 6 facciones comienzan en posiciones geográficas radicalmente distintas. La dificultad de la campaña de una facción está directamente vinculada a su exposición territorial (iniciar en un rincón protegido vs. iniciar en el centro absoluto rodeado de 5 facciones enemigas).
+*   **Cuellos de Botella (High Risk / High Reward):** El tránsito entre regiones está bloqueado por territorios fronterizos fortificados. Estos puntos exigen asaltos masivos o tácticas impecables, obligando al jugador a decidir entre un ataque directo temprano de alto riesgo, o invertir turnos en expandir su imperio localmente para construir una fuerza superior antes de cruzar la frontera.
+*   **Condiciones de Victoria Dual:** El jugador decide su meta. Victoria A: Conquistar y asegurar el territorio central masivo ("El Gran Picnic"). Victoria B: Aniquilar a los 5 nidos capitales de las facciones rivales, dominando la totalidad del jardín.
 
-*   **Nodos Comunes (Tierra y Pasto):** Representan la mayoría del mapa. Su conquista otorga Puntos de Evolución estándar, utilizados en el árbol de habilidades globales para mejoras permanentes de la facción.
-*   **Nodos Épicos (Puntos de Interés):** Son territorios singulares como "La Lata de Refresco" o "El Escarabajo Muerto". Su conquista activa la mecánica Roguelike de Mutación: el jugador elige una entre tres mejoras aleatorias de alto nivel para potenciar su ejército. Estos nodos están custodiados permanentemente por la Amenaza B (Depredadores).
-*   **Nodos de Tránsito:** Actúan como puntos de conexión rápida entre anillos, permitiendo movimientos estratégicos para flanquear enemigos o huir de zonas de peligro.
 
-### 3. Gestión de Ejércitos: Enjambres Veteranos
-El jugador maneja fichas de ejército en el tablero estratégico que representan batallones masivos. Estos ejércitos poseen una identidad propia y progresan individualmente.
+### 2. Territorios, Plantillas y Dificultad Procedimental
+ Para soportar la escala de cientos de batallas sin monotonía, los mapas RTS se generan combinando diseño manual y modificadores automáticos.
 
-*   **Personalización y Nivel:** El jugador asigna nombres únicos a sus ejércitos. Cada batalla RTS ganada de forma manual otorga experiencia a la ficha correspondiente, permitiendo subir de nivel y desbloquear rasgos específicos para ese batallón.
-*   **Evolución por Supervivencia:** Los ejércitos veteranos desarrollan resistencias y habilidades especiales (ej. mayor velocidad en barro, mayor resistencia al ácido) que los distinguen de las tropas recién reclutadas.
-*   **Regla de Muerte Permanente (Permadeath):** La aniquilación de un ejército en un mapa RTS conlleva la eliminación definitiva de la ficha en el tablero estratégico. El jugador pierde todos los niveles y mutaciones acumuladas en ese batallón, obligándolo a generar un nuevo ejército de nivel 1 desde su capital.
+*   **Plantillas Base:** El juego cuenta con decenas de diseños topográficos fijos creados a mano, asignados según la región del mapa estratégico.
+*   **Modificadores Matemáticos:** Al atacar un territorio, el motor inyecta variables según el nivel de dificultad (la facción del jugador). En una campaña de dificultad "Infernal", un territorio común carga automáticamente Nidos de Artillería neutrales y una mayor tasa de eventos climáticos hostiles, asegurando que las zonas "fáciles" escalen en agresividad.
+*   **Territorios Épicos (Puntos de Interés):** Territorios singulares custodiados permanentemente por la Amenaza B (Depredadores). Su conquista activa el menú de mutación, permitiendo elegir mejoras de alto nivel para potenciar al ejército atacante.
+
+
+### 3. Gestión de Ejércitos: Enjambres Veteranos y Despliegue
+
+El jugador administra fichas de ejército en el tablero estratégico que representan batallones masivos en movimiento. La progresión de estas fichas otorga ventajas tácticas inmediatas al iniciar una escaramuza.
+
+> *   **Reclutamiento de Nuevos Frentes:** Para gestionar la expansión en un mapa de escala masiva, un solo ejército es insuficiente. El jugador puede invertir los Puntos de Evolución (obtenidos al conquistar territorios) directamente en su Nido Capital para "engendrar" nuevas fichas de ejército. Estos nuevos batallones nacen como ejércitos novatos (iniciando sus batallas al 50% de capacidad de despliegue) y deben ser enviados a las fronteras para ganar su propia veteranía. Esto permite defender múltiples cuellos de botella simultáneamente.
+> *   **Capacidad de Despliegue Inicial (Veteranía):** La experiencia ganada por un ejército tras una victoria no incrementa el límite máximo de tropas del nivel, sino su velocidad de arranque. Un ejército novato inicia la batalla RTS con su hormiguero principal al 50% de su capacidad. Al acumular experiencia y conquistar territorios, el porcentaje inicial escala gradualmente (60%, 70%, 80%) hasta llegar al 100%. Un ejército veterano inicia la partida con sus bases completamente llenas, permitiendo ejecutar asaltos arrolladores en los primeros segundos del nivel.
+> *   **Mutaciones Pasivas:** Junto al aumento de capacidad inicial, los ejércitos veteranos desarrollan resistencias y habilidades especiales exclusivas (ej. inmunidad a las telarañas, mayor resistencia al ácido), individualizando cada batallón según su historial de combate.
+> *   **Regla de Muerte Permanente (Permadeath):** La aniquilación de un ejército en un mapa RTS conlleva la eliminación definitiva de la ficha en el tablero estratégico. El jugador pierde instantáneamente su porcentaje de despliegue inicial alto y sus mutaciones acumuladas, forzando la creación de una ficha de ejército nueva de nivel base desde su capital.
+
 
 ### 4. Dinámica de Guerra y Asimilación Genética
 La campaña es una carrera de 6 bandos donde la eliminación de competidores fortalece a los supervivientes.
@@ -206,13 +212,12 @@ La campaña es una carrera de 6 bandos donde la eliminación de competidores for
 *   **Recompensas por Aniquilación:** Al capturar el último nodo de una facción enemiga y eliminarla del tablero, el jugador asimila parte de sus Puntos de Evolución acumulados.
 *   **Habilidades Consumibles:** La eliminación de un rival otorga una habilidad especial basada en el ADN de la facción derrotada. Estas habilidades son de uso limitado (objetos consumibles) y permiten activar ventajas críticas en batallas posteriores de alta dificultad.
 
-### 5. Resolución de Batallas y Diseño de Mapas
-El sistema de juego equilibra el diseño de niveles artesanal con la agilidad necesaria para una campaña de larga duración.
 
-*   **Mapas Hechos a Mano:** Cada territorio del tablero estratégico corresponde a un mapa RTS diseñado individualmente. Los niveles varían en disposición de nodos, eventos climáticos y presencia de amenazas ambientales, ofreciendo retos tácticos distintos en cada sector del parque.
-*   **Sistema de Auto-Resolver:** El tablero permite calcular el resultado de una batalla de forma matemática e instantánea. Esta opción está disponible exclusivamente para territorios que el jugador ya haya conquistado y superado manualmente en una ocasión anterior. El uso del auto-resolver conlleva un coste mayor de bajas en comparación con la ejecución manual perfecta.
-*   **Estrategia de Evitación:** El jugador puede observar las características del mapa RTS antes de atacar un territorio en el tablero. Los expertos pueden elegir rutas que eviten biomas peligrosos para su facción o buscar específicamente terrenos donde sus Enjambres Veteranos tengan ventaja táctica.
+### 5. Resolución de Batallas y Auto-Resolver
 
+El sistema de juego equilibra el diseño de niveles con la agilidad necesaria para mantener el ritmo de una campaña de 300+ territorios.
+> *   **Sistema de Auto-Resolver:** El tablero permite calcular el resultado de una batalla de forma matemática e instantánea, cruzando los atributos del Enjambre Veterano contra las defensas del territorio. Esta opción se habilita exclusivamente para territorios cuyas plantillas topográficas ya han sido superadas manualmente por el jugador en turnos anteriores. El uso de esta herramienta agiliza la campaña a cambio de un coste garantizado de pausa, el ejercito se queda ahi un turno sin moverse.
+> *   **Estrategia de Evitación:** El jugador visualiza las características ambientales del territorio RTS desde el tablero antes de declarar el ataque. Esta información permite trazar rutas de expansión que esquivan biomas hostiles para su facción o localizar deliberadamente terrenos geográficos que beneficien las mutaciones de sus Enjambres Veteranos.
 
 
 
@@ -230,13 +235,20 @@ El ecosistema microscópico actúa como un participante activo en cada escaramuz
     *   Un aspersor rotativo proyecta una barrera de agua infranqueable que se desplaza circularmente por el nivel, forzando la cancelación de rutas de autoflujo temporalmente.
 *   **Geometría Cambiante (Nodos Móviles):** Ciertos mapas RTS incorporan bases situadas sobre plataformas inestables, como una hoja flotando en la corriente de un charco o un trozo de corteza empujado por la brisa. Estas estructuras se desplazan continuamente por el nivel. La distancia relativa entre el nodo móvil y las bases estáticas cambia en tiempo real, alterando constantemente los tiempos de viaje de las tropas y exigiendo recálculos tácticos permanentes.
 
+### El Ecosistema Hostil y Dinámicas PvEvP
+
+El micro-mundo es intrínsecamente peligroso. Elementos neutrales y externos intervienen en las escaramuzas para romper el estancamiento táctico y elevar la tensión de la partida.
+*   **La Amenaza A (Invasiones Nómadas Premium):** Estas facciones de pago (ej. Avispas) no solo existen en el combate, sino que deambulan como fichas de ejército hostiles por el Tablero Estratégico. Si una de estas fichas errantes choca con un territorio donde el jugador y la IA ya están librando una batalla RTS, irrumpen en los bordes del mapa como un tercer bando masivo. Esto fuerza un cambio absoluto de estrategia, requiriendo cooperación temporal entre los rivales originales.
+*   **La Amenaza B (Depredadores Guardianes):** Entidades biológicas masivas, como Arañas Lobo territoriales o Ciempiés cazadores. En el Tablero Estratégico, custodian celosamente los territorios que actúan como Cuellos de Botella regionales y los Territorios Épicos. Reaccionan agresivamente ante cualquier ejército que intente cruzar su jurisdicción, funcionando como jefes de nivel de altísima dificultad que protegen las mejores recompensas del mapa.
+
+
 ### 2. Visibilidad y Clima Dinámico
 El control de la información y la adaptación a eventos catastróficos son pilares de la supervivencia en el micro-mundo.
 
 *   **Niebla de Guerra Estricta:** La percepción visual del jugador está severamente restringida por elementos del entorno como sombras proyectadas por hojas gigantes o parches de césped denso. El jugador posee visión clara exclusivamente dentro del radio de influencia de los nodos bajo su control y en un pequeño perímetro alrededor de sus tropas en tránsito. Descubrir la topografía completa, ubicar las bases enemigas y detectar amenazas ocultas requiere el envío táctico de pequeños destacamentos de exploración.
 *   **Eventos Climáticos Telegrafiados:** Peligros ambientales de escala masiva impactan la partida en tiempo real, exigiendo respuestas inmediatas.
     *   *La Gota de Agua:* Impacta en zonas circulares específicas. Lava y elimina instantáneamente a todas las tropas que se encuentren dentro de su radio de efecto al momento del impacto.
-    *   *La Lupa:* Concentra un haz de luz solar mortal que barre y calcina líneas enteras de terreno, desintegrando cualquier ejército en su camino.
+    *   *La Lupa:* Concentra un haz de luz solar mortal que barre y calcina líneas enteras de terreno, desintegrando cualquier nodo en su camino y las mejoras.
     *   *Sistema de Alerta:* Ambos eventos emiten advertencias visuales inconfundibles varios segundos antes de su detonación. Sombras crecientes delimitan la zona de impacto de la gota, y halos de luz intensos marcan la trayectoria de la lupa. Estas señales otorgan al jugador una ventana de tiempo estricta para evacuar zonas comprometidas o cancelar flujos logísticos.
 
 ### 3. Sistema de Evolución de Nodos (Menú Radial)
@@ -273,7 +285,7 @@ La elección de la colonia al inicio de la campaña determina directamente el ni
 
 *   **Hormigas Cortadoras de Hojas (Dificultad: Difícil)**
     *   *Habilidad Biológica:* Presentan una tasa de generación de tropas incrementada en un 30% al controlar Hormigueros Enriquecidos (Fuentes de Comida). Sus unidades individuales poseen una fragilidad matemática mayor, requiriendo superioridad numérica absoluta para asegurar victorias en el desgaste frente a tropas estándar.
-    *   *Contexto Estratégico:* Comienzan la campaña en un sector topográfico con escasez de recursos iniciales, fuertemente custodiado por entidades de la Amenaza B (Depredadores).
+    *   *Contexto Estratégico:* Comienzan la campaña en una Región topográfica con escasez de territorios de recursos iniciales, fuertemente custodiada por entidades de la Amenaza B (Depredadores). Están obligadas a organizar expediciones largas y arriesgadas para asegurar su supervivencia.
 
 *   **Hormigas de Fuego (Dificultad: Muy Difícil)**
     *   *Habilidad Biológica:* Aplican el estado alterado de "Incendio" directamente sobre la estructura de los nodos enemigos asaltados. El nodo afectado pierde tropas aliadas gradualmente durante los 5 segundos posteriores al impacto, promoviendo tácticas de asalto y retirada. Sufren una penalización a su velocidad de movimiento general, acentuada en terrenos geográficamente complejos.
@@ -281,7 +293,7 @@ La elección de la colonia al inicio de la campaña determina directamente el ni
 
 *   **Hormigas Legionarias o Bala (Dificultad: Infernal)**
     *   *Habilidad Biológica:* Cuentan con el rasgo de "Vampirismo Táctico". Generan instantáneamente 1 tropa aliada directamente en el frente de batalla por cada 3 unidades enemigas eliminadas durante el combate matemático. Su subsistencia y crecimiento dependen estrictamente del consumo de las hordas rivales.
-    *   *Contexto Estratégico:* Ostentan la posición central más castigada y expuesta de todo el Tablero Estratégico. Las cinco facciones rivales convergen hacia su territorio y las hostigan mediante ataques coordinados desde el Turno 1.
+    *   *   *Contexto Estratégico:* Ostentan la región central más castigada del Tablero Estratégico. Las cinco facciones rivales base tienen fronteras directas hacia su territorio y las hostigan desde el Turno 1. Sumado a esto, son el objetivo primordial de las fichas nómadas de la Facción Premium (Amenaza A), forzando al jugador a combatir simultáneamente contra 6 atacantes en múltiples frentes.
 
 ### 2. Facciones Premium (Expansión Comercial Asimétrica)
 Las especies de insectos ajenas a la familia de las hormigas se integran como contenido de expansión. Estas facciones incorporan reglas físicas y matemáticas disruptivas, alterando por completo la dinámica del mapa y requiriendo estrategias de contrarresto específicas.

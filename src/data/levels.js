@@ -143,8 +143,8 @@ export const LEVELS = [
         nodes: [
             // ── Jugador (Azul) — flanco izquierdo ──
             { id: "p_base", x: 0.07, y: 0.5, owner: 'player', type: 'gigante', startUnits: 130 },
-            { id: "p_top", x: 0.18, y: 0.28, owner: 'player', type: 'normal', startUnits: 45 },
-            { id: "p_bot", x: 0.18, y: 0.72, owner: 'player', type: 'normal', startUnits: 45 },
+            { id: "p_top", x: 0.18, y: 0.28, owner: 'neutral', type: 'normal' },
+            { id: "p_bot", x: 0.18, y: 0.72, owner: 'neutral', type: 'normal' },
 
             // ── Nodos neutrales — corredor central ──
             // La marea los vaciará repetidamente; consolidarlos es la clave.

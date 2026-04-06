@@ -192,6 +192,17 @@ export class LevelManager {
             let cant  = (nData.startUnits !== undefined)
                 ? nData.startUnits
                 : Math.floor(n.maxUnits * 0.4);
+
+            // Estandarización Universal de Tropas Neutrales (Ignora startUnits del JSON)
+            if (nData.owner === 'neutral' && nData.type !== 'tunel') {
+                // Preservar si intencionalmente es 0 (Ferry/Hoja móvil)
+                if (cant !== 0 && nData.startUnits !== 0) {
+                    if (nData.type === 'enjambre') cant = 20;
+                    else if (nData.type === 'normal') cant = 15;
+                    else cant = 30; // gigante, tanque, artilleria, etc.
+                }
+            }
+
             this.world.spawnUnitsAt(n, nData.owner, cant);
 
             if (nData.tunnelTo) {

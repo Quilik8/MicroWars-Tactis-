@@ -140,25 +140,8 @@
         <button class="evo-btn cancel" data-evo="cancel" title="Cancelar">✕</button>
     </div>
 
-    <!-- Script inline para sincronizar descripción de dificultad con el botón activo -->
     <script>
-    (function() {
-        const DESCS = {
-            easy:   'Conciencia tactica: evalua tropas, reconoce evoluciones y expande con criterio.',
-            normal: 'Conciencia estrategica: planifica rutas, refuerza momentum y evita sobreextension.',
-            hard:   'Inteligencia enjambre: coordinacion de pinzas, ataques precisos y sniping oportunista.',
-            brutal: 'Dominio absoluto: back-capping, flanqueos letales, conciencia de peligros del mapa.'
-        };
-        // El listener se añade después de que el DOM esté listo
-        document.addEventListener('DOMContentLoaded', () => {
-            const desc = document.getElementById('difficultyDesc');
-            document.querySelectorAll('.diff-select-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (desc) desc.textContent = DESCS[btn.dataset.difficulty] || '';
-                });
-            });
-        });
-    })();
+    // La descripción de dificultad ahora es manejada íntegramente por UIManager.
     </script>
 </body>
 

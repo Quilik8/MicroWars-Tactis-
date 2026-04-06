@@ -154,6 +154,15 @@ export class UIManager {
     // ── NUEVO: actualiza el estado visual de los botones de dificultad ─────
     updateDifficultyButtons(activeDifficulty) {
         if (!this.difficultyBtns) return;
+        const DESCS = {
+            easy:   'Conciencia táctica: evalúa tropas, reconoce evoluciones y expande con criterio.',
+            normal: 'Conciencia estratégica: planifica rutas, refuerza momentum y evita sobreextensión.',
+            hard:   'Inteligencia enjambre: coordinación de pinzas, ataques precisos y sniping oportunista.',
+            brutal: 'Dominio absoluto: back-capping, flanqueos letales, conciencia de peligros del mapa.'
+        };
+        const desc = document.getElementById('difficultyDesc');
+        if (desc) desc.textContent = DESCS[activeDifficulty] || '';
+
         this.difficultyBtns.forEach(btn => {
             btn.classList.toggle('active-difficulty', btn.dataset.difficulty === activeDifficulty);
         });
