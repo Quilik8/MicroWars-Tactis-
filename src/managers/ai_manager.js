@@ -17,7 +17,7 @@ import { NavigationGameStateView, PathEvaluationResult } from '../navigation/nav
 export class AIManager {
     /**
      * @param {object} config
-     * @param {string} [config.difficulty='normal']  'easy'|'normal'|'hard'|'brutal'
+     * @param {string} [config.difficulty='normal']  'easy'|'normal'|'hard'
      * @param {number} [config.attackInterval]       override manual (retro-compatibilidad)
      * @param {object} [config.worldRef]             referencia al worldManager
      */

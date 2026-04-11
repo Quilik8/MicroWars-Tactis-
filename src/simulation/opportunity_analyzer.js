@@ -8,7 +8,7 @@
  * DISEÑO: Structure of Arrays (SoA) puro con Typed Arrays pre-asignados.
  *         Cero allocations en el hot path. Time-slicing a 4 Hz.
  *
- * ACTIVACIÓN: Solo para dificultades hard / brutal (expert / master intel).
+ * ACTIVACIÓN: Solo para dificultades normal / hard.
  */
 
 import {

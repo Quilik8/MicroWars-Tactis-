@@ -9,14 +9,14 @@ La fantasía de poder central consiste en controlar un macro-enjambre. El núcle
 ### 2. Diferenciadores Clave (Unique Selling Propositions - USPs)
 Aunque el juego nace de la base mecánica de títulos clásicos de nodos (como Solarmax, Auralux o Tentacle Wars), se separa radicalmente del género mediante las siguientes innovaciones en las mecánicas de estrategia de nodos:
 
-*   **Ataques de Enjambre y Automatización Opcional:** El método primordial de expansión es el ataque de enjambre masivo, enviando hordas desde un punto hacia otro para quebrar sus defensas. Una vez conquistados dos nodos propios, el jugador tiene la opción de invertir recursos para excavar "Túneles Logísticos" entre ellos. Esta mecánica establece un flujo constante y autónomo de tropas para reforzar el frente de batalla, transformando la micro-gestión en decisiones tácticas a largo plazo. Esta inversión conlleva un riesgo: si el enemigo captura uno de los nodos conectados, el túnel colapsa y los recursos invertidos en él se pierden definitivamente.
+*   **Ataques de Enjambre y Automatización Opcional:** El método primordial de expansión es el ataque de enjambre masivo, enviando hordas desde un punto hacia otro para quebrar sus defensas. Una vez conquistados dos nodos propios, el jugador tiene la opción de invertir recursos para excavar "caminos Logísticos" entre ellos. Esta mecánica establece un flujo constante y autónomo de tropas para reforzar el frente de batalla, transformando la micro-gestión en decisiones tácticas a largo plazo. Esta inversión conlleva un riesgo: si el enemigo captura uno de los nodos conectados, el camino colapsa y los recursos invertidos en él se pierden definitivamente.
 *   **La Capa de Macro-Gestión (Estilo Tablero Estratégico):** El juego cuenta con un Tablero Estratégico persistente. Las batallas RTS son el medio para avanzar en una guerra territorial masiva, cruzando mecánicas de conquista de territorios por turnos con combates en tiempo real.
 *   **Enfoque Cenital de Alto Rendimiento: El diseño abraza una perspectiva "Top-Down" (vista de dios) en un 2D extremadamente ligero. Esto permite enfocar absolutamente todos los recursos del hardware en la escala del combate, logrando mover fluidamente un límite estricto de 3,000 unidades simultáneas en pantalla. Esta restricción garantiza mantener los 60 FPS casi estables en todo momento, generando la sensación real de un enjambre vivo sin sacrificar el rendimiento del navegador.
 
 ### 3. Psicología del Jugador
 El diseño del juego está construido para detonar tres gatillos psicológicos específicos en el usuario:
 
-*   **El "Zen" del Enjambre (Flujo Visual):** Existe una satisfacción intrínseca y casi hipnótica en observar el movimiento orgánico de las tropas, ya sea en un asalto caótico y envolvente sobre una base enemiga, o a través del tránsito constante de recursos en un túnel logístico recién establecido. Ver la superioridad numérica devorar matemáticamente las defensas enemigas genera un ciclo de recompensa constante.
+*   **El "Zen" del Enjambre (Flujo Visual):** Existe una satisfacción intrínseca y casi hipnótica en observar el movimiento orgánico de las tropas, ya sea en un asalto caótico y envolvente sobre una base enemiga, o a través del tránsito constante de recursos en un camino logístico recién establecido. Ver la superioridad numérica devorar matemáticamente las defensas enemigas genera un ciclo de recompensa constante.
 *   **Tensión por Riesgo / Recompensa:** El jugador toma decisiones constantes de micro y macro-gestión bajo presión. Decide si enviar su enjambre por asfalto caliente sacrificando un porcentaje de las tropas para lograr un flanqueo rápido, o si invertir recursos vitales en automatizar una ruta sabiendo que el enemigo acecha ese territorio.
 *   **Apego y Pérdida (Narrativa Emergente):** A través del sistema de Enjambres Veteranos, el jugador desarrolla un vínculo emocional con sus tropas mediante la inversión de tiempo y experiencia. El sistema de "Muerte Permanente" (Permadeath) asegura que una mala decisión táctica resulte en la pérdida absoluta de un escuadrón altamente mutado, generando picos de adrenalina únicos durante las misiones de alto riesgo.
 
@@ -54,7 +54,7 @@ El objetivo de esta fase es validar la arquitectura matemática del enjambre y e
     *   **Ecosistema Inicial:** Inclusión de Hormigueros Básicos y Hormigueros Enriquecidos. Estos últimos son nodos con fuentes de comida integradas que poseen distintos niveles de tamaño, ofreciendo una capacidad y velocidad de producción de tropas significativamente superior.
     *   **Contenido:** Tres mapas de escaramuza fijos, diseñados mediante archivos JSON, con dificultad creciente para testear el equilibrio de la Inteligencia Artificial básica.
     *   **Interfaz:** HUD minimalista que muestra la cantidad de tropas por nodo y el selector de porcentaje.
-*   **Exclusiones:** En esta fase se omite el mapa estratégico, los túneles de cualquier tipo, eventos climáticos, evolución de unidades, mecánicas de sigilo, multijugador y facciones especiales.
+*   **Exclusiones:** En esta fase se omite el mapa estratégico, los túneles y los caminos, eventos climáticos, evolución de unidades, mecánicas de sigilo, multijugador y facciones especiales.
 
 ### 3. Fase 2: Early Access (Expansión de Profundidad Táctica)
 Una vez validado el bucle de combate, el proyecto evoluciona introduciendo opciones tácticas avanzadas, variantes de tropas y control territorial complejo.
@@ -65,7 +65,7 @@ Una vez validado el bucle de combate, el proyecto evoluciona introduciendo opcio
     *   **Nodos Defensivos:** Introducción del Tronco Espinoso, una estructura que inflige daño pasivo a las tropas enemigas antes del cálculo numérico de conquista.
 *   **Nuevas Vías de Movimiento:**
     *   **Túneles de Mapa:** Estructuras estáticas preexistentes en el terreno que conectan dos extremos distantes del nivel. Permiten traslados inmediatos de tropas, facilitando flanqueos sorpresa y forzando a los jugadores a vigilar constantemente su retaguardia.
-    *   **Túneles Logísticos (Autoflujo):** Herramienta de automatización opcional donde el jugador invierte tropas de un nodo conquistado para establecer una ruta de envío de porcentaje constante hacia otro nodo.
+    *   **Caminos Logísticos (Autoflujo):** Herramienta de automatización opcional donde el jugador invierte tropas de un nodo conquistado para establecer una ruta de envío de porcentaje constante hacia otro nodo.
 *   **Capa Estratégica Inicial:**
     *   **Tablero de Conquista Básico:** Primer prototipo del mapa de campaña, funcionando como un selector de niveles narrativo donde el jugador asegura territorios fijos y experimenta la progresión territorial.
 
@@ -120,7 +120,7 @@ El despliegue del juego se realiza en fases, utilizando los ingresos de una etap
 La promoción se apoya en la autenticidad del desarrollo y en la participación activa en comunidades nicho.
 
 *   **Build in Public (Construcción en Público):** Compartir actualizaciones semanales en comunidades de Reddit (r/gamedev, r/IndieDev) y Discord. Mostrar el progreso técnico (ej. "Cómo logré mover 5,000 hormigas en un navegador") genera respeto y una base de fans leales antes del lanzamiento.
-*   **Contenido de Formato Corto (Shorts / TikTok / Reels):** Crear clips rápidos de 15-30 segundos mostrando momentos caóticos de la batalla, invasiones sorpresa de la Amenaza A o el uso creativo de los túneles. Estos formatos tienen el mayor potencial de viralidad orgánica en 2026.
+*   **Contenido de Formato Corto (Shorts / TikTok / Reels):** Crear clips rápidos de 15-30 segundos mostrando momentos caóticos de la batalla, invasiones sorpresa de la Amenaza A o el uso creativo de los caminos. Estos formatos tienen el mayor potencial de viralidad orgánica en 2026.
 *   **Comunidad y UGC:** Al proporcionar un editor de mapas desde el inicio, se incentiva a los jugadores a compartir sus creaciones. Esto convierte a los usuarios en promotores del juego, atrayendo a nuevos jugadores para probar mapas específicos.
 
 ### 4. Herramientas de Empaquetado y Conversión Técnica
@@ -135,8 +135,8 @@ Para transformar el desarrollo web en productos comerciales nativos sin contrata
 ### 1. El Motor del Enjambre: Representación Visual y Lógica
 El núcleo del juego se basa en un modelo de **Flujo de Partículas Inteligentes**. La prioridad absoluta es el rendimiento gráfico para renderizar miles de unidades simultáneas sin comprometer la fluidez.
 
-*   **Representación Visual (Sin Números):** Siguiendo la estética minimalista de los grandes referentes del género, los nodos **no muestran contadores numéricos de tropas**. La fuerza de un hormiguero es puramente visual: el jugador percibe cuántas unidades tiene por la densidad del enjambre que lo rodea o el tamaño/brillo del nodo. Esto obliga al jugador a desarrollar un instinto táctico basado en la observación del campo de batalla.
-*   **Dibujo de Unidades (Elipsoides):** Las unidades se generan mediante la API de Canvas (`ctx.ellipse`).
+*   **Representación Visual :** Siguiendo la estética minimalista de los grandes referentes del género, los nodos muestran contadores numéricos en cuadros emergentes o algo mejor diseñado La fuerza de un hormiguero es visual y tambien numérica: el jugador percibe cuántas unidades tiene por la densidad del enjambre que lo rodea o el tamaño/brillo del nodo ademas de elementos de chispas. Esto obliga al jugador a desarrollar un instinto táctico basado en la observación del campo de batalla y a los indicadores que puede ver.
+*   **Dibujo de Unidades:** Las unidades se generan mediante la API de Canvas (`ctx.ellipse`).
     *   *Geometría:* Forma de hormiga diseño puramente CSS.
     *   *Orientación:* Rotación dinámica; la "punta" siempre indica la dirección del movimiento.
     *   *Colores:* Sólidos por facción (Azul, Rojo, etc.).
@@ -163,7 +163,7 @@ Los nodos pueden evolucionar para cambiar drásticamente la composición del ej�
     *   *Uso:* Una vez conquistado, al hacer clic en el hueco, la cámara o el flujo te lleva al otro extremo. Si el hueco de salida pertenece a un enemigo, se desata una batalla inmediata en el túnel para decidir quién toma el control del acceso.
 *   **Caminos Logísticos (Flujo Automatizado):** Una herramienta de automatización que se puede crear entre dos nodos propios ya conquistados.
     *   *Mecánica:* El jugador establece una conexión permanente enviando tropas de forma continua.    
-    *   *Inversión:* El flujo se puede invertir o cancelar con un clic sobre el camino, pero si el enemigo captura uno de los extremos, el túnel desaparece.
+    *   *Inversión:* El flujo se puede invertir o cancelar con un clic sobre el camino, pero si el enemigo captura uno de los extremos, el camino desaparece.
 
 ### 5. Mecánica de Parásitos, Infección y Purga
 El sigilo y la infiltración añaden una capa de riesgo interno constante.
@@ -276,7 +276,7 @@ La elección de la colonia al inicio de la campaña determina directamente el ni
     *   *Contexto Estratégico:* Inician la campaña en una esquina remota y aislada del Tablero Estratégico. Cuentan con un único frente fronterizo, limitando la exposición a ataques sorpresivos.
 
 *   **Hormigas Negras (Dificultad: Fácil)**
-    *   *Habilidad Biológica:* Reducen un 20% la inversión de tropas inicial requerida para establecer Túneles Logísticos (rutas de autoflujo). Optimizan la creación de redes de refuerzo automatizadas desde las primeras etapas.
+    *   *Habilidad Biológica:* Reducen un 20% la inversión de tropas inicial requerida para establecer caminos Logísticos (rutas de autoflujo). Optimizan la creación de redes de refuerzo automatizadas desde las primeras etapas.
     *   *Contexto Estratégico:* Su posición de inicio es periférica y geográficamente segura, permitiendo una expansión metódica hacia los anillos interiores.
 
 *   **Hormigas Tejedoras (Dificultad: Normal)**

@@ -1,4 +1,4 @@
-import { LEVELS } from '../data/levels.js';
+import { SECTORS } from '../data/levels.js';
 import { Node } from '../entities/node.js';
 import { PIXI } from '../core/engine.js';
 import { WaterSweep } from '../systems/water_sweep.js';
@@ -13,8 +13,9 @@ export class LevelManager {
         this.sfx = sfx;
         this.startMusic = music.start;
 
+        this.currentSectorIndex = 0;
         this.currentLevelIndex = 0;
-        this.unlockedLevels = 1;
+        this.unlockedLevels = 999;
 
         this._levelStartGrace = 0;
         this._GRACE_DURATION = 1.5;
@@ -35,16 +36,30 @@ export class LevelManager {
         // sin necesidad de completar los anteriores.
         // ANTES DE PRODUCCIÓN: eliminar esta línea para activar el progreso real.
         // ────────────────────────────────────────────────────────────────────────
-        this.unlockedLevels = LEVELS.length;
+        this.unlockedLevels = 999;
     }
 
     saveProgress() {
         localStorage.setItem('microwars_save', JSON.stringify({ unlockedLevels: this.unlockedLevels }));
     }
 
-    loadLevel(index) {
-        if (index >= LEVELS.length) index = 0;
-        this.currentLevelIndex = index;
+    loadNextLevel() {
+        let sIdx = this.currentSectorIndex;
+        let lIdx = this.currentLevelIndex + 1;
+        if (lIdx >= SECTORS[sIdx].levels.length) {
+            lIdx = 0;
+            sIdx++;
+            if (sIdx >= SECTORS.length) sIdx = 0;
+        }
+        this.loadLevel(sIdx, lIdx);
+    }
+
+    loadLevel(sectorIndex, levelIndex) {
+        if (sectorIndex >= SECTORS.length) sectorIndex = 0;
+        if (levelIndex >= SECTORS[sectorIndex].levels.length) levelIndex = 0;
+        
+        this.currentSectorIndex = sectorIndex;
+        this.currentLevelIndex = levelIndex;
         this._levelStartGrace = 0;
 
         this.ui.setGameState('PLAYING');
@@ -55,7 +70,19 @@ export class LevelManager {
 
         const cx = this.game.width  || window.innerWidth;
         const cy = this.game.height || window.innerHeight;
-        const levelData = LEVELS[index];
+        const currentSector = SECTORS[sectorIndex];
+        const levelData = currentSector.levels[levelIndex];
+
+        // Mapeo global para input
+        this.world.allowEvolutions = currentSector.config ? currentSector.config.allowEvolutions : true;
+
+        // Actualizar título global de intro si existe el callback
+        const sectorName = currentSector.name;
+        
+        if (!levelData || !levelData.nodes) {
+            console.error("Nivel vacío o no implementado");
+            return;
+        }
 
         this.world.nodes = levelData.nodes.map((nData, nodeIndex) => {
             let n = new Node(nData.x * cx, nData.y * cy, nData.owner, nData.type);
@@ -155,8 +182,9 @@ export class LevelManager {
         this.world.barriers = [];
         if (levelData.barriers && levelData.barriers.length > 0) {
             for (let b of levelData.barriers) {
-                // Validación estricta impuesta por diseño: Ningún nodo puede nacer sobre una barrera.
+                // Validación estricta impuesta por diseño: Ningún nodo estático puede nacer sobre una barrera.
                 for (let n of levelData.nodes) {
+                    if (n.isMobile) continue;
                     if (n.x >= b.x && n.x <= b.x + b.width && n.y >= b.y && n.y <= b.y + b.height) {
                         const errorMsg = `ERROR CRITICO DE DISEÑO: El nodo '${n.id}' intersecta la barrera en (${b.x}, ${b.y}). En el mismo plano NUNCA deben tocarse.`;
                         console.error(errorMsg);
@@ -234,7 +262,7 @@ export class LevelManager {
         const introTitle  = document.getElementById('introTitle');
         const introDesc   = document.getElementById('introDesc');
         const introScreen = document.getElementById('levelIntro');
-        if (introTitle) introTitle.innerText = levelData.name        || `NIVEL ${index + 1}`;
+        if (introTitle) introTitle.innerText = levelData.name || `SECTOR ${sectorIndex + 1} - NIVEL ${levelIndex + 1}`;
         if (introDesc)  introDesc.innerText  = levelData.description || "Acaba con el nido enemigo.";
         if (introScreen) {
             introScreen.classList.remove('hidden');
@@ -249,7 +277,7 @@ export class LevelManager {
             introScreen.addEventListener('click', onIntroClick);
         }
 
-        if (this.startMusic) this.startMusic('LEVEL', index);
+        if (this.startMusic) this.startMusic('LEVEL', sectorIndex);
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -291,12 +319,7 @@ export class LevelManager {
     }
 
     onLevelComplete() {
-        if (this.currentLevelIndex + 2 > this.unlockedLevels &&
-            this.currentLevelIndex + 1 < LEVELS.length) {
-            this.unlockedLevels = this.currentLevelIndex + 2;
-            this.saveProgress();
-            this.ui.renderLevelGrid(LEVELS, this.unlockedLevels, (idx) => this.loadLevel(idx));
-        }
+        // Estructura libre para testeo
     }
 
     // ─────────────────────────────────────────────────────────────────

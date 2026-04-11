@@ -806,15 +806,10 @@ html {
 .diff-normal:hover                  { border-color: rgba(93, 173, 226, 0.6);  box-shadow: 0 4px 14px rgba(93,173,226,0.2); }
 .diff-normal.active-difficulty      { background: rgba(93, 173, 226, 0.18);  border-color: #5dade2; box-shadow: 0 0 12px rgba(93,173,226,0.35); }
 
-/* Difícil — naranja */
-.diff-hard                          { border-color: rgba(230, 126, 34, 0.25); }
-.diff-hard:hover                    { border-color: rgba(230, 126, 34, 0.6);  box-shadow: 0 4px 14px rgba(230,126,34,0.2); }
-.diff-hard.active-difficulty        { background: rgba(230, 126, 34, 0.18);  border-color: #e67e22; box-shadow: 0 0 12px rgba(230,126,34,0.35); }
-
-/* Brutal — rojo */
-.diff-brutal                        { border-color: rgba(231, 76, 60, 0.25); }
-.diff-brutal:hover                  { border-color: rgba(231, 76, 60, 0.6);  box-shadow: 0 4px 14px rgba(231,76,60,0.2); }
-.diff-brutal.active-difficulty      { background: rgba(231, 76, 60, 0.18);  border-color: #e74c3c; box-shadow: 0 0 12px rgba(231,76,60,0.35); }
+/* Difícil — rojo */
+.diff-hard                          { border-color: rgba(231, 76, 60, 0.25); }
+.diff-hard:hover                    { border-color: rgba(231, 76, 60, 0.6);  box-shadow: 0 4px 14px rgba(231,76,60,0.2); }
+.diff-hard.active-difficulty        { background: rgba(231, 76, 60, 0.18);  border-color: #e74c3c; box-shadow: 0 0 12px rgba(231,76,60,0.35); }
 
 /* Descripción de la dificultad activa */
 .difficulty-desc {
@@ -825,4 +820,578 @@ html {
     min-height: 16px;
     transition: opacity 0.2s;
     max-width: 480px;
+}
+
+/* ══════════════════════════════════════════
+   SELECTOR MACRO-BIOLÓGICO (PANORÁMICO)
+   ══════════════════════════════════════════ */
+#levelSelection {
+    padding: 0;
+    justify-content: center;
+    background: #050508;
+    overflow: hidden;
+}
+
+#levelSelection > h1, #levelSelection > .difficulty-selector, #levelSelection > #btnBackToMenu {
+    position: absolute;
+    z-index: 10;
+}
+#levelSelection > h1 { top: 20px; left: 40px; font-size: 2rem; color: rgba(255,255,255,0.7); pointer-events: none; }
+#levelSelection > .difficulty-selector { top: 20px; right: 40px; transform: scale(0.85); transform-origin: top right; margin:0; }
+#levelSelection > #btnBackToMenu { bottom: 20px; left: 40px; z-index: 10; font-size: 0.9rem; padding: 10px 20px;}
+
+.sector-gallery {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    gap: 0;
+}
+
+.sector-gallery::-webkit-scrollbar {
+    height: 6px;
+}
+.sector-gallery::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+}
+
+.sector-macro-card {
+    flex: 0 0 100vw;
+    height: 100vh;
+    scroll-snap-align: center;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.smc-bg {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    transition: transform 0.8s ease, filter 0.8s;
+}
+
+@keyframes morphBreath {
+    0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+    50% { border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; }
+    100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+}
+
+.smc-shape {
+    position: relative;
+    width: 65vw;
+    height: 70vh;
+    background: rgba(10, 10, 15, 0.6);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: morphBreath 12s ease-in-out infinite both alternate;
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.9);
+}
+
+.sector-macro-card:hover .smc-bg {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+}
+
+.sector-macro-card:hover .smc-shape {
+    background: rgba(20, 20, 25, 0.75);
+}
+
+/* Arte CSS Procedural de Fondo por Bioma */
+.bg-bio-1 { background: radial-gradient(circle at center, #111522 0%, #050508 100%), repeating-linear-gradient(45deg, rgba(93,173,226,0.03) 0px, rgba(93,173,226,0.03) 2px, transparent 2px, transparent 20px); }
+.border-bio-1 { border-color: rgba(93,173,226,0.5); box-shadow: 0 0 40px rgba(93,173,226,0.2), inset 0 0 50px rgba(0,0,0,0.9); }
+.border-bio-1 .smc-title { text-shadow: 0 0 20px rgba(93,173,226,0.8); }
+
+.bg-bio-2 { 
+    background: radial-gradient(circle at center, #130b04 0%, #050508 100%); 
+}
+
+/* Las dos burbujas interconectadas de los Túneles (Sector 2) */
+.bg-bio-2::before, .bg-bio-2::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 45vh;
+    height: 45vh;
+    border-radius: 50%;
+    border: 2px solid rgba(230,126,34,0.2);
+    background-image: radial-gradient(circle, rgba(230,126,34,0.9) 0%, transparent 65%);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* El conector logístico central */
+.border-bio-2::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -20vw;
+    right: -20vw;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(230,126,34,0.5) 20%, rgba(230,126,34,0.5) 80%, transparent 100%);
+    box-shadow: 0 0 20px rgba(230,126,34,0.8);
+    transform: translateY(-50%);
+    z-index: -1;
+}
+
+/* Burbuja Izquierda */
+.bg-bio-2::before {
+    left: 8vw;
+    animation: tunnelPulseLeft 10s infinite ease-in-out;
+}
+
+/* Burbuja Derecha */
+.bg-bio-2::after {
+    right: 8vw;
+    animation: tunnelPulseRight 10s infinite ease-in-out;
+}
+
+
+@keyframes tunnelPulseLeft {
+    0%, 100% { background-size: 150% 150%; filter: brightness(1.5); box-shadow: 0 0 80px rgba(230,126,34,0.6); }
+    50% { background-size: 0% 0%; filter: brightness(0.2); box-shadow: 0 0 10px rgba(230,126,34,0.05); }
+}
+
+@keyframes tunnelPulseRight {
+    0%, 100% { background-size: 0% 0%; filter: brightness(0.2); box-shadow: 0 0 10px rgba(230,126,34,0.05); }
+    50% { background-size: 150% 150%; filter: brightness(1.5); box-shadow: 0 0 80px rgba(230,126,34,0.6); }
+}
+
+/* Se elimina el cuadrado opaco gigante para no estorbar el túnel */
+.border-bio-2 { 
+    background: transparent !important;
+    border: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    animation: none !important; /* eliminamos el latido organico base que no corresponde a este sector */
+}
+.border-bio-2 .smc-title { text-shadow: 0 0 20px rgba(230,126,34,0.8); }
+
+/* --- Sector 3: Toxic Impact (gotas que GOLPEAN la cámara) --- */
+.bg-bio-3 { background: radial-gradient(ellipse at 40% 80%, #0a2010 0%, #040c06 100%); overflow: hidden; }
+
+/* Contenedor fijo en pantalla — la gota viene hacia ti y golpea */
+.toxic-drop-wrap {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    /* sin animación propia: solo acta de ancla */
+}
+
+/* La gota: pequeña al inicio (lejos), grande al impactar */
+.toxic-drop {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(160,255,160,1), rgba(46,204,113,0.8) 50%, rgba(10,80,20,0.3));
+    box-shadow: 0 0 12px rgba(46,204,113,0.9), 0 0 4px rgba(255,255,255,0.6) inset;
+    animation: toxicDropApproach linear infinite;
+}
+@keyframes toxicDropApproach {
+    0%   { transform: scale(0.05); opacity: 0; }
+    8%   { opacity: 1; }
+    52%  { transform: scale(1.1); opacity: 1; }   /* impacta! */
+    58%  { transform: scale(0.0); opacity: 0; }   /* desaparece en el impacto */
+    100% { transform: scale(0.0); opacity: 0; }   /* espera siguiente ciclo */
+}
+
+/* El splash blob: irregular, se expande al impactar y chorrea */
+.toxic-splash {
+    position: absolute;
+    border-radius: 48% 52% 44% 56% / 55% 45% 55% 45%;
+    background: radial-gradient(ellipse, rgba(46,204,113,0.55) 0%, rgba(46,204,113,0.2) 55%, transparent 75%);
+    border: 1.5px solid rgba(46,204,113,0.6);
+    box-shadow: 0 0 18px rgba(46,204,113,0.3);
+    opacity: 0;
+    animation: toxicSplatBlob linear infinite;
+}
+@keyframes toxicSplatBlob {
+    0%    { transform: scale(0);   opacity: 0; }
+    52%   { transform: scale(0);   opacity: 0; }   /* espera el impacto */
+    56%   { transform: scale(0.2); opacity: 1; }   /* explota: splat instantáneo */
+    65%   { transform: scale(1.0); opacity: 0.7; }
+    85%   { transform: scale(1.1); opacity: 0.3; } /* chorrea lentamente */
+    100%  { transform: scale(1.15);opacity: 0; }
+}
+
+.border-bio-3 { background: transparent !important; backdrop-filter: none !important; border: none !important; box-shadow: none !important; animation: none !important; }
+.border-bio-3 .smc-title { text-shadow: 0 0 25px rgba(46,204,113,0.9); }
+
+/* --- Sector 4: Orbit Friction --- */
+.bg-bio-4 { background: #0d0d0d; }
+.bg-bio-4::before {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 65vh; height: 65vh;
+    transform: translate(-50%, -50%); border-radius: 50%;
+    background: conic-gradient(from 0deg, rgba(231,76,60,0.15) 0deg, rgba(231,76,60,0.15) 180deg, rgba(46,204,113,0.15) 180deg, rgba(46,204,113,0.15) 360deg);
+    border: 2px dashed rgba(255,255,255,0.15);
+    box-shadow: 0 0 50px rgba(0,0,0,0.8) inset;
+}
+.bg-bio-4::after {
+    content: ''; position: absolute; top: 50%; left: 50%; 
+    width: 24px; height: 24px; margin-top: -12px; margin-left: -12px; 
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 20px #f1c40f, 0 0 40px #f1c40f;
+    animation: frictionOrbit 6s infinite linear;
+}
+
+@keyframes frictionOrbit {
+    0% { transform: rotate(0deg) translateY(-32.5vh); }
+    80% { transform: rotate(180deg) translateY(-32.5vh); } 
+    100% { transform: rotate(360deg) translateY(-32.5vh); } 
+}
+
+.border-bio-4 { background: transparent !important; backdrop-filter: none !important; border: none !important; box-shadow: none !important; animation: none !important; }
+.border-bio-4 .smc-title { text-shadow: 0 0 20px rgba(241,196,15,0.8); }
+
+/* --- Sector 5: Water Sweep --- */
+.bg-bio-5 { background: radial-gradient(circle at center, #00121a 0%, #000408 100%); overflow: hidden; }
+.bg-bio-5::before {
+    content: ''; position: absolute; top: -10vh; left: 0; width: 100vw; height: 12vh;
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 151, 167, 0.4) 50%, rgba(0, 229, 255, 0.8) 100%);
+    box-shadow: 0 10px 40px rgba(0, 229, 255, 0.6);
+    animation: macroWaterSweep 4.5s infinite linear; pointer-events: none;
+}
+@keyframes macroWaterSweep {
+    0% { transform: translateY(-20vh); opacity: 0; }
+    5% { opacity: 1; }
+    95% { opacity: 1; }
+    100% { transform: translateY(120vh); opacity: 0; }
+}
+
+.border-bio-5 { background: transparent !important; backdrop-filter: none !important; border: none !important; box-shadow: none !important; animation: none !important; }
+.border-bio-5 .smc-title { text-shadow: 0 0 20px rgba(0,229,255,0.8); }
+
+/* --- Sector 6: Prisiones — Rayos Solares Barredores --- */
+.bg-bio-6 { background: radial-gradient(ellipse at 50% 60%, #120800 0%, #050200 100%); overflow: hidden; }
+
+/* Rayo 1: barre de izquierda a derecha, ciclo lento */
+.bg-bio-6::before {
+    content: '';
+    position: absolute;
+    top: 28%;
+    left: -120%;
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, rgba(255,180,0,0.9) 40%, rgba(255,255,200,1) 50%, rgba(255,180,0,0.9) 60%, transparent);
+    box-shadow: 0 0 20px rgba(255,160,0,0.8), 0 0 50px rgba(255,120,0,0.4);
+    border-radius: 50%;
+    animation: solarSweep 5s infinite linear;
+}
+
+/* Rayo 2: barre en sentido contrario, más rápido, posición diferente */
+.bg-bio-6::after {
+    content: '';
+    position: absolute;
+    top: 58%;
+    right: -120%;
+    width: 55px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(255,200,80,0.9) 40%, rgba(255,255,220,1) 50%, rgba(255,200,80,0.9) 60%, transparent);
+    box-shadow: 0 0 16px rgba(255,180,60,0.7), 0 0 40px rgba(255,120,0,0.3);
+    border-radius: 50%;
+    animation: solarSweepReverse 3.5s infinite linear 1.2s;
+}
+
+@keyframes solarSweep {
+    0%   { left: -120px; }
+    100% { left: 110vw;  }
+}
+@keyframes solarSweepReverse {
+    0%   { right: -120px; }
+    100% { right: 110vw; }
+}
+
+.border-bio-6 { background: transparent !important; backdrop-filter: none !important; border: none !important; box-shadow: none !important; animation: none !important; }
+.border-bio-6 .smc-title { text-shadow: 0 0 20px rgba(255,160,0,0.9); color: #ffe0a0; }
+
+/* --- Sector 7: El Ecosistema Supremo — Vórtice del Abismo --- */
+.bg-bio-7 { background: radial-gradient(circle at center, #0a0004 0%, #000 70%); overflow: hidden; }
+
+/* Espiral / vortice giratorio: anillo cónico que rota */
+.bg-bio-7::before {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    width: 80vh; height: 80vh;
+    margin-top: -40vh; margin-left: -40vh;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        rgba(180,0,0,0) 0deg,
+        rgba(180,0,0,0.15) 60deg,
+        rgba(255,30,30,0.35) 90deg,
+        rgba(180,0,0,0.15) 120deg,
+        rgba(180,0,0,0) 180deg,
+        rgba(80,0,0,0.08) 240deg,
+        rgba(180,0,0,0) 360deg
+    );
+    animation: vortexSpin 10s infinite linear;
+}
+
+/* Anillo de contención que pulsa */
+.bg-bio-7::after {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    width: 55vh; height: 55vh;
+    margin-top: -27.5vh; margin-left: -27.5vh;
+    border-radius: 50%;
+    border: 1px solid rgba(200,0,0,0.25);
+    box-shadow:
+        0 0 0   8px rgba(180,0,0,0.08),
+        0 0 0  20px rgba(140,0,0,0.05),
+        0 0 0  40px rgba(100,0,0,0.04),
+        0 0 80px rgba(80,0,0,0.15) inset;
+    animation: vortexPulse 3s infinite ease-in-out;
+}
+
+@keyframes vortexSpin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+@keyframes vortexPulse {
+    0%, 100% { transform: scale(1);   opacity: 0.6; }
+    50%       { transform: scale(1.08); opacity: 1; }
+}
+
+.border-bio-7 { background: transparent !important; backdrop-filter: none !important; border: none !important; box-shadow: none !important; animation: none !important; }
+.border-bio-7 .smc-title { text-shadow: 0 0 30px rgba(255,40,40,0.9), 0 0 60px rgba(180,0,0,0.5); color: #ff6060; }
+
+.smc-content {
+    position: relative;
+    z-index: 2;
+    max-width: 700px;
+}
+
+.smc-title {
+    font-size: 3.5rem;
+    color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    letter-spacing: 3px;
+    margin-bottom: 25px;
+    transition: transform 0.3s;
+    text-transform: uppercase;
+    font-weight: 900;
+}
+
+.sector-macro-card:hover .smc-title {
+    transform: scale(1.03);
+}
+
+.smc-desc {
+    font-size: 1.1rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+    font-family: monospace;
+    background: rgba(0,0,0,0.5);
+    padding: 20px;
+    border-radius: 8px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.smc-levels-badge {
+    margin-top: 30px;
+    padding: 10px 25px;
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    font-family: monospace;
+    font-weight: bold;
+    letter-spacing: 2px;
+    display: inline-block;
+    border-radius: 30px;
+    border: 1px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(4px);
+}
+
+/* Radar / Anchas Inferiores */
+.fast-travel-radar {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    z-index: 100;
+    background: rgba(0,0,0,0.4);
+    padding: 10px 20px;
+    border-radius: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.ft-node {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    border: 2px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.ft-node:hover, .ft-node.active {
+    border-color: #5dade2;
+    color: #fff;
+    background: rgba(93,173,226,0.25);
+    box-shadow: 0 0 15px rgba(93,173,226,0.6);
+    transform: scale(1.15);
+}
+
+/* ══════════════════════════════════════════
+   VISOR MICROSCOPICO (RUTA DE NIVELES)
+   ══════════════════════════════════════════ */
+.levels-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(10,10,15,0.95);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s ease;
+    transform: scale(1.1);
+}
+
+.levels-container.active {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+.btn-back-macro {
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 10px 25px;
+    font-family: monospace;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-radius: 6px;
+    z-index: 60;
+}
+.btn-back-macro:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.pheromone-trail {
+    position: relative;
+    width: 80vw;
+    height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+/* Dibuja la línea conectora por detrás */
+.pheromone-trail::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 3px;
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-50%);
+    box-shadow: 0 0 10px rgba(255,255,255,0.1);
+    z-index: 0;
+}
+
+.level-node-wrapper {
+    position: relative;
+    z-index: 10;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.level-node-wrapper:hover {
+    transform: scale(1.2);
+}
+
+.level-node {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #111;
+    border: 3px solid rgba(255,255,255,0.3);
+    margin: 0 auto 15px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-family: monospace;
+    font-size: 1.2rem;
+    font-weight: bold;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    transition: all 0.3s;
+}
+
+.level-node-wrapper:hover .level-node {
+    border-color: #5dade2;
+    background: rgba(93, 173, 226, 0.2);
+    box-shadow: 0 0 30px rgba(93, 173, 226, 0.6);
+}
+
+.level-info {
+    position: absolute;
+    width: 250px;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 80px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.level-node-wrapper:hover .level-info {
+    opacity: 1;
+    transform: translateX(-50%) translateY(10px);
+}
+
+.level-info-title {
+    font-size: 1.2rem;
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+    text-shadow: 0 2px 5px #000;
+    margin-bottom: 5px;
+}
+
+.level-info-desc {
+    font-size: 0.8rem;
+    color: #aaa;
+    font-family: monospace;
+    background: rgba(0,0,0,0.8);
+    padding: 8px;
+    border-radius: 4px;
+    border-bottom: 2px solid #5dade2;
 }

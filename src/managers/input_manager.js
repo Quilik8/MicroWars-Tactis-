@@ -655,6 +655,10 @@ export class InputManager {
     // ═══════════════════════════════════════════════════════════════
     showEvolutionMenu(node) {
         if (!this.evoMenu) return;
+        if (this.world.allowEvolutions === false) {
+            // Rechaza abrir menú de evolución silenciosamente para indicar bloqueo del sector.
+            return;
+        }
         this.selectedNode = node;
         this.evoMenu.classList.remove('hidden');
 

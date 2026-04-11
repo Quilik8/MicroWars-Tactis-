@@ -7,7 +7,7 @@ import { LevelManager } from './src/managers/level_manager.js';
 import { CampaignCore } from './src/campaign/campaign_core.js';
 import { SFX, resumeAudio, startMusic, stopMusic } from './src/managers/audio.js';
 import { FACTIONS } from './src/campaign/faction_data.js';
-import { LEVELS } from './src/data/levels.js';
+import { SECTORS } from './src/data/levels.js';
 
 // ══════════════════════════════════════════════════════════════
 // CONFIGURACIÓN Y BOOTSTRAP
@@ -22,14 +22,14 @@ const CONFIG = {
 let gameSpeed = 1;
 
 // ── Dificultad ────────────────────────────────────────────────
-// 'easy' | 'normal' | 'hard' | 'brutal'
+// 'easy' | 'normal' | 'hard'
 // Se persiste en localStorage para recordarla entre sesiones.
 let currentDifficulty = _loadDifficulty();
 
 function _loadDifficulty() {
     try {
         const saved = localStorage.getItem('microwars_difficulty');
-        if (['easy', 'normal', 'hard', 'brutal'].includes(saved)) return saved;
+        if (['easy', 'normal', 'hard'].includes(saved)) return saved;
     } catch (e) {}
     return 'normal';
 }
@@ -39,7 +39,7 @@ function _saveDifficulty(d) {
 }
 
 function setDifficulty(d) {
-    if (!['easy', 'normal', 'hard', 'brutal'].includes(d)) return;
+    if (!['easy', 'normal', 'hard'].includes(d)) return;
     currentDifficulty = d;
     _saveDifficulty(d);
     ai.setDifficulty(d);
@@ -55,7 +55,7 @@ let world;
 
 const ui = new UIManager({
     onTogglePause:        (p) => togglePause(p),
-    onStartLevel:         (idx) => level.loadLevel(idx),
+    onStartLevel:         (sectorIdx, levelIdx) => level.loadLevel(sectorIdx, levelIdx),
     onResetCamera:        () => {
         if (game.world) {
             game.world.position.set(0, 0);
@@ -70,8 +70,8 @@ const ui = new UIManager({
     onVictory:            () => SFX.victory(),
     onGameOver:           () => SFX.gameover(),
     onSendPercentChange:  (val) => input.setSendPercent(val),
-    onRestartLevel:       () => level.loadLevel(level.currentLevelIndex),
-    onNextLevel:          () => level.loadLevel(level.currentLevelIndex + 1),
+    onRestartLevel:       () => level.loadLevel(level.currentSectorIndex, level.currentLevelIndex),
+    onNextLevel:          () => level.loadNextLevel(),
     onZoom:               (factor) => input.doZoom(factor),
     onStartCampaign:      () => campaign.start(),
     onStopCampaign:       () => campaign.stop(),
@@ -162,10 +162,9 @@ window.addEventListener('load', async () => {
     world.init(game.app);
     input.init();
     campaign.init();
-    ui.renderLevelGrid(LEVELS, level.unlockedLevels, (idx) => {
-        // Aplicar dificultad actual justo antes de cargar el nivel
+    ui.renderSectorGrid(SECTORS, level.state, (sectorIdx, levelIdx) => {
         ai.setDifficulty(currentDifficulty);
-        level.loadLevel(idx);
+        level.loadLevel(sectorIdx, levelIdx);
     });
     ui.setGameState('MENU');
 
@@ -186,13 +185,13 @@ window.addEventListener('pointerdown', () => {
 
 // ── Puentes globales (Legacy / HTML buttons) ──────────────────
 window.togglePause    = () => togglePause();
-window.restartLevel   = () => { setGameSpeed(1); level.loadLevel(level.currentLevelIndex); };
+window.restartLevel   = () => { setGameSpeed(1); level.loadLevel(level.currentSectorIndex, level.currentLevelIndex); };
 window.backToMenu     = () => { setGameSpeed(1); togglePause(false); ui.setGameState('MENU'); };
 window.surrender      = () => {
     setGameSpeed(1);
     if (ui.callbacks.onClearLevel) ui.callbacks.onClearLevel();
     togglePause(false);
-    ui.setGameState('MENU');
+    ui.setGameState('LEVELS', { returnToSector: true });
 };
-window.startLevel     = (idx) => level.loadLevel(idx);
+window.startLevel     = (sectorIdx, levelIdx) => level.loadLevel(sectorIdx, levelIdx);
 window.setDifficulty  = setDifficulty;   // acceso global para botones HTML si hiciera falta

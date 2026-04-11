@@ -88,47 +88,39 @@ export const WEIGHT_VECTOR_SIZE = 26;
 // ═══════════════════════════════════════════════════════════════════
 //  ARCHETYPE WEIGHT MATRICES
 //  Cada fila es un Float32Array de WEIGHT_VECTOR_SIZE floats.
-//  Índice:  0:easy  1:normal  2:hard  3:brutal
+//  Índice:  0:easy  1:normal  2:hard
 // ═══════════════════════════════════════════════════════════════════
-const ARCHETYPE_COUNT = 4;
+const ARCHETYPE_COUNT = 3;
 const _archetypeStore = new Float32Array(WEIGHT_VECTOR_SIZE * ARCHETYPE_COUNT);
 
 //                     AtkN  AtkP  EvoT  EvoTh EvoAr Reinf Tunnel Wait
 //                     P4Urg SimTr Aggr  Econ  CtrEv MPrng Hzrd  MinEv
 //                     SndR  DmpR  EvoC  AtkI  CullT BCap  Flank Timing
-// ── EASY ──  (RearGuard=0, Doomsday=0 → desactivados)
-_archetypeStore.set([
-    1.0,  0.7,  0.5,  0.6,  0.4,  0.3,  0.5,  0.4,
-    0.0,  0.0,  0.62, 0.6,  0.0,  1,    0.0,  65,
-    0.55, 0.75, 0.55, 5.0,  12.0, 0.0,  0.0,  0.0,
-    0.0,  0.0
-], 0);
-
-// ── NORMAL ──  (RearGuard=0, Doomsday=0 → desactivados)
+// ── EASY ──  (Old Normal - RearGuard=0, Doomsday=0 → desactivados)
 _archetypeStore.set([
     1.0,  1.0,  0.8,  0.7,  0.7,  0.6,  0.7,  0.3,
     0.0,  0.7,  0.78, 0.8,  0.3,  1,    0.3,  40,
     0.65, 0.82, 0.75, 3.0,  10.0, 0.0,  0.0,  0.0,
     0.0,  0.0
-], WEIGHT_VECTOR_SIZE);
+], 0);
 
-// ── HARD ──  (RearGuard=0.7, Doomsday=0.8 → activos)
+// ── NORMAL ──  (Old Hard - RearGuard=0.7, Doomsday=0.8 → activos)
 _archetypeStore.set([
     0.9,  1.2,  1.0,  0.9,  1.0,  0.8,  0.8,  0.2,
     0.3,  1.0,  0.85, 0.9,  0.7,  2,    0.7,  25,
     0.90, 0.88, 0.90, 0.5,  8.0,  0.5,  0.5,  0.5,
     0.7,  0.8
-], WEIGHT_VECTOR_SIZE * 2);
+], WEIGHT_VECTOR_SIZE);
 
-// ── BRUTAL ──  (RearGuard=1.0, Doomsday=1.0 → máximos)
+// ── HARD ──  (Old Brutal - RearGuard=1.0, Doomsday=1.0 → máximos)
 _archetypeStore.set([
     0.8,  1.5,  1.2,  1.0,  1.1,  1.0,  0.9,  0.1,
     0.5,  1.0,  0.90, 1.0,  1.0,  3,    1.0,  15,
     1.00, 0.95, 1.00, 0.2,  6.0,  1.0,  1.0,  1.0,
     1.0,  1.0
-], WEIGHT_VECTOR_SIZE * 3);
+], WEIGHT_VECTOR_SIZE * 2);
 
-const _difficultyToIndex = { easy: 0, normal: 1, hard: 2, brutal: 3 };
+const _difficultyToIndex = { easy: 0, normal: 1, hard: 2 };
 
 // ═══════════════════════════════════════════════════════════════════
 //  COMMAND BUFFER LAYOUT
@@ -255,7 +247,7 @@ export class UtilityEngine {
 
     /**
      * Set the active archetype from difficulty string.
-     * @param {string} difficulty — 'easy'|'normal'|'hard'|'brutal'
+     * @param {string} difficulty — 'easy'|'normal'|'hard'
      */
     setArchetype(difficulty) {
         const idx = _difficultyToIndex[difficulty] || 0;

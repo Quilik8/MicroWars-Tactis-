@@ -111,18 +111,18 @@ export class UIManager {
         const btnSurrender = document.getElementById('btnSurrender');
         if (btnSurrender) btnSurrender.onclick = () => {
             if (this.callbacks.onClearLevel) this.callbacks.onClearLevel();
-            this.setGameState('MENU');
+            this.setGameState('LEVELS', { returnToSector: true });
         };
         const btnMenuFromWin = document.getElementById('btnMenuFromWin');
         if (btnMenuFromWin) btnMenuFromWin.onclick = () => {
             if (this.callbacks.onClearLevel) this.callbacks.onClearLevel();
-            this.setGameState('MENU');
+            this.setGameState('LEVELS', { returnToSector: true });
         };
 
         const btnMenuFromLoss = document.getElementById('btnMenuFromLoss');
         if (btnMenuFromLoss) btnMenuFromLoss.onclick = () => {
             if (this.callbacks.onClearLevel) this.callbacks.onClearLevel();
-            this.setGameState('MENU');
+            this.setGameState('LEVELS', { returnToSector: true });
         };
 
         const btnRestart = document.getElementById('btnRestart');
@@ -155,10 +155,9 @@ export class UIManager {
     updateDifficultyButtons(activeDifficulty) {
         if (!this.difficultyBtns) return;
         const DESCS = {
-            easy:   'Conciencia táctica: evalúa tropas, reconoce evoluciones y expande con criterio.',
-            normal: 'Conciencia estratégica: planifica rutas, refuerza momentum y evita sobreextensión.',
-            hard:   'Inteligencia enjambre: coordinación de pinzas, ataques precisos y sniping oportunista.',
-            brutal: 'Dominio absoluto: back-capping, flanqueos letales, conciencia de peligros del mapa.'
+            easy:   'Conciencia estratégica: planifica rutas, refuerza momentum y evita sobreextensión.',
+            normal: 'Inteligencia enjambre: coordinación de pinzas, ataques precisos y sniping oportunista.',
+            hard:   'Dominio absoluto: back-capping, flanqueos letales, conciencia de peligros del mapa.'
         };
         const desc = document.getElementById('difficultyDesc');
         if (desc) desc.textContent = DESCS[activeDifficulty] || '';
@@ -222,9 +221,28 @@ export class UIManager {
             ${factionHtml}
         `;
 
+        this.nodeTooltip.classList.remove('hidden');
+        
+        // Asignar temporalmente para obtener el tamaño real
         this.nodeTooltip.style.left = `${screenX + node.radius * world.scale.x + 10}px`;
         this.nodeTooltip.style.top = `${screenY - 40}px`;
-        this.nodeTooltip.classList.remove('hidden');
+
+        // Calcular colisión con bordes del window
+        const rect = this.nodeTooltip.getBoundingClientRect();
+        let left = screenX + node.radius * world.scale.x + 10;
+        let top = screenY - 40;
+
+        if (left + rect.width > window.innerWidth) {
+            left = screenX - node.radius * world.scale.x - 10 - rect.width;
+        }
+        if (top + rect.height > window.innerHeight) {
+            top = window.innerHeight - rect.height - 10;
+        }
+        if (left < 0) left = 10;
+        if (top < 0) top = 10;
+
+        this.nodeTooltip.style.left = `${left}px`;
+        this.nodeTooltip.style.top = `${top}px`;
     }
 
     hideNodeTooltip() {
@@ -245,30 +263,200 @@ export class UIManager {
         }
     }
 
-    renderLevelGrid(levels, unlockedCount, onSelect) {
-        const grid = document.querySelector('.level-grid');
-        if (!grid) return;
-        grid.innerHTML = '';
+    renderSectorGrid(sectors, levelState, onSelectLevel, autoOpenSectorIndex = null) {
+        const root = document.getElementById('levelSelection');
+        if (!root) return;
+        
+        let grid = root.querySelector('.level-grid');
+        if (grid) grid.style.display = 'none';
 
-        levels.forEach((level, i) => {
-            const isUnlocked = i < unlockedCount;
+        let gallery = root.querySelector('.sector-gallery');
+        if (!gallery) {
+            gallery = document.createElement('div');
+            gallery.className = 'sector-gallery';
+            root.appendChild(gallery);
+        }
+        gallery.innerHTML = '';
+
+        let levelContainer = root.querySelector('.levels-container');
+        if (!levelContainer) {
+            levelContainer = document.createElement('div');
+            levelContainer.className = 'levels-container';
+            root.appendChild(levelContainer);
+        }
+        levelContainer.innerHTML = '';
+
+        let radar = root.querySelector('.fast-travel-radar');
+        if (!radar) {
+            radar = document.createElement('div');
+            radar.className = 'fast-travel-radar';
+            root.appendChild(radar);
+        }
+        radar.innerHTML = '';
+
+        // Botón de retorno al macro
+        const backBtn = document.createElement('button');
+        backBtn.className = 'btn-back-macro';
+        backBtn.innerText = '← VISTA DE SECTORES';
+        backBtn.onclick = () => {
+            levelContainer.classList.remove('active');
+        };
+        levelContainer.appendChild(backBtn);
+
+        const trail = document.createElement('div');
+        trail.className = 'pheromone-trail';
+        levelContainer.appendChild(trail);
+
+        const renderLevels = (sector, sIdx) => {
+            trail.innerHTML = ''; // reset nodes
+            sector.levels.forEach((lvl, lIdx) => {
+                const nodeWrap = document.createElement('div');
+                nodeWrap.className = 'level-node-wrapper';
+                nodeWrap.innerHTML = `
+                    <div class="level-node">${lIdx + 1}</div>
+                    <div class="level-info">
+                        <div class="level-info-title">${lvl.name}</div>
+                        <div class="level-info-desc">${lvl.description}</div>
+                    </div>
+                `;
+                nodeWrap.onclick = () => onSelectLevel(sIdx, lIdx);
+                trail.appendChild(nodeWrap);
+            });
+            levelContainer.classList.add('active');
+        };
+
+        const RomanToSector = ["I","II","III","IV","V","VI","VII"];
+
+        sectors.forEach((sector, sIdx) => {
             const card = document.createElement('div');
-            card.className = `level-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+            card.className = `sector-macro-card`;
+            card.dataset.idx = sIdx;
+            
+            // Elegir un bio background basado en el index (+1 o específico al sector)
+            const bgClass = `bg-bio-${(sIdx % 7) + 1}`;
+            const borderClass = `border-bio-${(sIdx % 7) + 1}`;
+
             card.innerHTML = `
-                <div class="level-card-header">NIVEL ${String(i + 1).padStart(2, '0')}</div>
-                <div class="level-card-body">
-                    <div class="level-card-title">${level.name}</div>
+                <div class="smc-bg ${bgClass}"></div>
+                <div class="smc-shape ${borderClass}">
+                    <div class="smc-content">
+                        <h2 class="smc-title">${sector.name}</h2>
+                        <div class="smc-desc">${sector.description}</div>
+                        <div class="smc-levels-badge">${sector.levels.length} REDES IDENTIFICADAS</div>
+                    </div>
                 </div>
-                <div class="level-card-footer">${isUnlocked ? 'DISPONIBLE' : 'BLOQUEADO'}</div>
             `;
-            if (isUnlocked) {
-                card.onclick = () => onSelect(i);
+
+            // Sector 3: Inyectar gotas tóxicas que GOLPEAN la pantalla (como lente mojada)
+            if (sIdx === 2) {
+                const bg = card.querySelector('.smc-bg');
+                const drops = [
+                    { left: '12%',  top: '25%', delay: '0s',    dur: '4.0s', size: 8,  splashSize: 55 },
+                    { left: '28%',  top: '60%', delay: '1.2s',  dur: '3.5s', size: 6,  splashSize: 40 },
+                    { left: '47%',  top: '38%', delay: '0.5s',  dur: '4.5s', size: 11, splashSize: 70 },
+                    { left: '63%',  top: '72%', delay: '2.0s',  dur: '3.8s', size: 7,  splashSize: 48 },
+                    { left: '79%',  top: '20%', delay: '0.8s',  dur: '4.2s', size: 9,  splashSize: 58 },
+                    { left: '20%',  top: '80%', delay: '2.8s',  dur: '3.6s', size: 8,  splashSize: 52 },
+                    { left: '55%',  top: '55%', delay: '1.5s',  dur: '4.8s', size: 6,  splashSize: 44 },
+                    { left: '88%',  top: '45%', delay: '0.3s',  dur: '3.9s', size: 10, splashSize: 62 },
+                    { left: '38%',  top: '15%', delay: '3.2s',  dur: '4.1s', size: 7,  splashSize: 50 },
+                    { left: '72%',  top: '85%', delay: '1.8s',  dur: '3.7s', size: 9,  splashSize: 56 },
+                ];
+                drops.forEach(d => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'toxic-drop-wrap';
+                    wrap.style.cssText = `left:${d.left}; top:${d.top}; animation-delay:${d.delay}; animation-duration:${d.dur};`;
+                    wrap.innerHTML = `
+                        <div class="toxic-drop" style="width:${d.size}px; height:${d.size}px; animation-delay:${d.delay}; animation-duration:${d.dur};"></div>
+                        <div class="toxic-splash" style="width:${d.splashSize}px; height:${d.splashSize}px; animation-delay:${d.delay}; animation-duration:${d.dur};"></div>
+                    `;
+                    bg.appendChild(wrap);
+                });
             }
-            grid.appendChild(card);
+
+            gallery.appendChild(card);
+            
+            // Radar node
+            const rNode = document.createElement('div');
+            rNode.className = 'ft-node';
+            rNode.innerText = RomanToSector[sIdx] || String(sIdx + 1);
+            rNode.onclick = () => {
+                if (gallery.children[sIdx]) {
+                    gallery.children[sIdx].scrollIntoView({behavior: 'smooth', inline: 'center'});
+                }
+            };
+            radar.appendChild(rNode);
         });
+
+        // ── LÓGICA DE RATÓN (DRAG-TO-SCROLL) ──
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        let dragged = false;
+
+        gallery.onmousedown = (e) => {
+            isDown = true;
+            dragged = false;
+            gallery.style.scrollSnapType = 'none'; // desactiva snap rigido mientras arrastra
+            gallery.style.cursor = 'grabbing';
+            startX = e.pageX - gallery.offsetLeft;
+            scrollLeft = gallery.scrollLeft;
+        };
+
+        gallery.onmouseleave = () => {
+            isDown = false;
+            gallery.style.scrollSnapType = 'x mandatory';
+            gallery.style.cursor = 'grab';
+        };
+
+        gallery.onmouseup = (e) => {
+            isDown = false;
+            gallery.style.scrollSnapType = 'x mandatory';
+            gallery.style.cursor = 'grab';
+            
+            if (!dragged) {
+                // Fue un click real, abrir niveles
+                const card = e.target.closest('.sector-macro-card');
+                if (card) {
+                    const idx = parseInt(card.dataset.idx);
+                    renderLevels(sectors[idx], idx);
+                }
+            } else {
+                // Forzar resnap al contenedor más cercano tras haber soltado el ratón
+                const snapNode = Math.round(gallery.scrollLeft / window.innerWidth);
+                if (gallery.children[snapNode]) {
+                    gallery.children[snapNode].scrollIntoView({behavior: 'smooth', inline: 'center'});
+                }
+            }
+        };
+
+        gallery.onmousemove = (e) => {
+            if (!isDown) return;
+            const x = e.pageX - gallery.offsetLeft;
+            const walk = (x - startX) * 1.5; // multiplicador de scroll
+            if (Math.abs(walk) > 5) {
+                dragged = true;
+            }
+            gallery.scrollLeft = scrollLeft - walk;
+        };
+        // ─────────────────────────────────────
+
+        if (autoOpenSectorIndex !== null && autoOpenSectorIndex !== undefined) {
+            if (sectors[autoOpenSectorIndex]) {
+                renderLevels(sectors[autoOpenSectorIndex], autoOpenSectorIndex);
+                // Mover scroll instantaneo para que quede en contexto
+                setTimeout(() => {
+                    if (gallery.children[autoOpenSectorIndex]) {
+                        gallery.children[autoOpenSectorIndex].scrollIntoView({behavior: 'instant', inline: 'center'});
+                    }
+                }, 50);
+            }
+        } else {
+            levelContainer.classList.remove('active');
+        }
     }
 
-    setGameState(state) {
+    setGameState(state, options = {}) {
         this.gameState = state;
 
         const isIngame = (state === 'PLAYING' || state === 'VICTORY' || state === 'GAMEOVER');
@@ -291,6 +479,16 @@ export class UIManager {
             this.hideNodeTooltip();
             if (this.callbacks.onClearMenuAnts) this.callbacks.onClearMenuAnts();
             if (this.callbacks.onClearLevel)    this.callbacks.onClearLevel();
+            
+            // Forzar actualización si hay callback global de repintado de sectores
+            // Utilizando options.returnToSector
+            if (window.level && window.SECTORS) {
+                let sIdx = options.returnToSector ? window.level.currentSectorIndex : null;
+                this.renderSectorGrid(window.SECTORS, window.level.state, (s, l) => {
+                    if (window.ai) window.ai.setDifficulty(currentDifficulty);
+                    window.level.loadLevel(s, l);
+                }, sIdx);
+            }
         } else if (state === 'CAMPAIGN') {
             this.showScreen('campaignScreen');
             this.hideNodeTooltip();
