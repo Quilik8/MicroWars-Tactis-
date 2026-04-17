@@ -6,6 +6,10 @@
  * y delega el esfuerzo pesado a los simuladores con time-slicing.
  *
  * ZERO-ALLOCATION pipeline en la evaluación.
+ *
+ * Capa 1.1: Timers per-facción aislados — cada facción enemiga tiene
+ *           su propio evalTimer/evoTimer/simTime para evitar la
+ *           acumulación ×N que aceleraba artificialmente la IA.
  */
 
 import { UtilityEngine } from '../simulation/utility_engine.js';
@@ -42,12 +46,16 @@ export class AIManager {
         this._navScoreResult = new PathEvaluationResult();
         this._navExecResult = new PathEvaluationResult();
 
+        // ── Capa 1.1: Timers per-facción ────────────────────────────
+        // Cada facción enemiga tiene sus propios timers para que la
+        // cadencia real no se multiplique al evaluar N facciones/frame.
+        this._factionTimers = Object.create(null);
+
         // Configurar arquetipo inicial
         this.setDifficulty(this.difficulty);
 
         if (config.attackInterval != null) {
             // Retro-compatibilidad si algún test fuerza el intervalo
-            // (El motor internamente usa los pesos del arquetipo, pero dejamos sto stubbed)
         }
     }
 
@@ -60,11 +68,35 @@ export class AIManager {
     // Compatibilidad en caso de que otros módulos intenten resetear el estado
     reset() {
         this._engine.reset();
+        // Limpiar timers de todas las facciones
+        for (const key in this._factionTimers) {
+            delete this._factionTimers[key];
+        }
+    }
+
+    /**
+     * Capa 1.1: Obtiene o crea el bloque de timers para una facción.
+     * @private
+     */
+    _getTimers(faction) {
+        let t = this._factionTimers[faction];
+        if (!t) {
+            t = { evalTimer: 0, evoTimer: 0, simTime: 0, lastCaptureTime: 0 };
+            this._factionTimers[faction] = t;
+        }
+        return t;
     }
 
     // === MAIN LOOP ===
     update(dt, nodes, allUnits, aiFaction = 'enemy', playerFaction = 'player') {
         if (!this.world || nodes.length === 0) return;
+
+        // Capa 1.1: Filtrar facciones que no tienen nodos (ahorra CPU)
+        let hasNodesForFaction = false;
+        for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].owner === aiFaction) { hasNodesForFaction = true; break; }
+        }
+        if (!hasNodesForFaction) return;
 
         // 1. Pilar 2: Siempre requiere snapshot actualizado del tablero
         if (this._mentalSandbox) {
@@ -72,12 +104,14 @@ export class AIManager {
         }
 
         // 2. Pilar 4: Analizador de Oportunidades
-        // (el UtilityEngine lo consultará para el multiplicador de urgencia)
         if (this._opportunityAnalyzer) {
             this._opportunityAnalyzer.update(dt, this.world, playerFaction, aiFaction);
         }
 
-        // 3. Pilar 5: Evaluar estado global y escribir decisiones en el Command Buffer
+        // 3. Capa 1.1: Obtener timers aislados para esta facción
+        const timers = this._getTimers(aiFaction);
+
+        // 4. Pilar 5: Evaluar estado global con timers per-facción
         const cmdsWritten = this._engine.evaluate(
             dt,
             this.world,
@@ -88,10 +122,11 @@ export class AIManager {
             this.world.navigation,
             this._navStateView,
             this._navScoreResult,
-            this._navExecResult
+            this._navExecResult,
+            timers     // ← Capa 1.1: timers per-facción
         );
 
-        // 4. Transformar Comandos en Acciones
+        // 5. Transformar Comandos en Acciones
         if (cmdsWritten > 0) {
             this._engine.executeCommands(
                 allUnits,

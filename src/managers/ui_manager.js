@@ -384,6 +384,9 @@ export class UIManager {
                 if (gallery.children[sIdx]) {
                     gallery.children[sIdx].scrollIntoView({behavior: 'smooth', inline: 'center'});
                 }
+                if (levelContainer.classList.contains('active')) {
+                    renderLevels(sector, sIdx);
+                }
             };
             radar.appendChild(rNode);
         });

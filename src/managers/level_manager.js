@@ -46,12 +46,34 @@ export class LevelManager {
     loadNextLevel() {
         let sIdx = this.currentSectorIndex;
         let lIdx = this.currentLevelIndex + 1;
+        let gameFinished = false;
+
+        // Si se nos acabaron los niveles del sector actual
         if (lIdx >= SECTORS[sIdx].levels.length) {
             lIdx = 0;
             sIdx++;
-            if (sIdx >= SECTORS.length) sIdx = 0;
         }
-        this.loadLevel(sIdx, lIdx);
+
+        // Validar si el siguiente sector/nivel realmente existe y tiene datos
+        let nextLevelExists = (sIdx < SECTORS.length && SECTORS[sIdx].levels && SECTORS[sIdx].levels.length > 0 && SECTORS[sIdx].levels[lIdx]);
+
+        if (!nextLevelExists) {
+            // Ya no hay más niveles en el juego (ej. Sector 7 está vacío o se completó todo)
+            gameFinished = true;
+            
+            // Regresamos al menú de sectores
+            this.ui.setGameState('LEVELS', { returnToSector: true });
+            
+            if (!localStorage.getItem('microwars_game_beaten')) {
+                localStorage.setItem('microwars_game_beaten', 'true');
+                setTimeout(() => {
+                    alert("¡FELICIDADES COMPANDANTE!\n\nHas conquistado todos los sectores, doblegado a las especies rivales y asegurado la supervivencia absoluta de tu colonia.\n\nEl enjambre perdurará gracias a tus increíbles tácticas.\n\n¡Gracias por jugar MicroWars Tactics!");
+                }, 200);
+            }
+        } else {
+            // Si el nivel existe, simplemente lo cargamos
+            this.loadLevel(sIdx, lIdx);
+        }
     }
 
     loadLevel(sectorIndex, levelIndex) {

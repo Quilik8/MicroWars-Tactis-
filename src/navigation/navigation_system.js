@@ -738,13 +738,31 @@ export class TemporalHazardEvaluator {
         const fromIndex = store.edgeFrom[edgeIndex];
         const toIndex = store.edgeTo[edgeIndex];
         const x1 = store.nodeX[fromIndex];
+        const y1 = store.nodeY[fromIndex];
         const x2 = store.nodeX[toIndex];
+        const y2 = store.nodeY[toIndex];
         const unitVx = (x2 - x1) / Math.max(0.01, transitTime);
         let unsafeUntil = -1;
 
         for (let i = 0; i < sweeps.length; i++) {
             const sweep = sweeps[i];
             if (!sweep) continue;
+
+            if (typeof sweep.predictUnsafeUntil === 'function') {
+                const predicted = sweep.predictUnsafeUntil(
+                    x1,
+                    y1,
+                    x2,
+                    y2,
+                    departureAbs,
+                    transitTime,
+                    now,
+                    state.worldWidth,
+                    state.worldHeight
+                );
+                if (predicted > unsafeUntil) unsafeUntil = predicted;
+                continue;
+            }
 
             const barWidth = sweep._barWorldWidth || ((sweep.widthFrac || 0) * state.worldWidth);
             for (let b = 0; b < sweep._activeBars.length; b++) {

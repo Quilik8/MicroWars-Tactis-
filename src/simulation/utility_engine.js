@@ -83,7 +83,8 @@ const W_FLANK_BONUS          = 22;
 const W_TIMING_AWARENESS     = 23;
 const W_REARGUARD_CHECK      = 24;
 const W_DOOMSDAY_AWARENESS   = 25;
-export const WEIGHT_VECTOR_SIZE = 26;
+const W_EVOLUTION_INTERVAL   = 26;  // Capa 1.2: intervalo independiente para evoluciones
+export const WEIGHT_VECTOR_SIZE = 27;
 
 // ═══════════════════════════════════════════════════════════════════
 //  ARCHETYPE WEIGHT MATRICES
@@ -96,28 +97,29 @@ const _archetypeStore = new Float32Array(WEIGHT_VECTOR_SIZE * ARCHETYPE_COUNT);
 //                     AtkN  AtkP  EvoT  EvoTh EvoAr Reinf Tunnel Wait
 //                     P4Urg SimTr Aggr  Econ  CtrEv MPrng Hzrd  MinEv
 //                     SndR  DmpR  EvoC  AtkI  CullT BCap  Flank Timing
-// ── EASY ──  (Old Normal - RearGuard=0, Doomsday=0 → desactivados)
+//                     RGrd  Doom  EvoI
+// ── EASY ──  (Doctrina: acumula, refuerza, ataca poco, evoluciona lento)
 _archetypeStore.set([
-    1.0,  1.0,  0.8,  0.7,  0.7,  0.6,  0.7,  0.3,
-    0.0,  0.7,  0.78, 0.8,  0.3,  1,    0.3,  40,
+    1.0,  1.0,  0.8,  0.7,  0.7,  1.2,  0.7,  0.8,
+    0.0,  0.7,  0.50, 0.8,  0.3,  1,    0.3,  50,
     0.65, 0.82, 0.75, 3.0,  10.0, 0.0,  0.0,  0.0,
-    0.0,  0.0
+    0.0,  0.0,  6.0
 ], 0);
 
-// ── NORMAL ──  (Old Hard - RearGuard=0.7, Doomsday=0.8 → activos)
+// ── NORMAL ──  (Doctrina: equilibrado, refuerzo suave, oportunismo parcial)
 _archetypeStore.set([
-    0.9,  1.2,  1.0,  0.9,  1.0,  0.8,  0.8,  0.2,
-    0.3,  1.0,  0.85, 0.9,  0.7,  2,    0.7,  25,
-    0.90, 0.88, 0.90, 0.5,  8.0,  0.5,  0.5,  0.5,
-    0.7,  0.8
+    0.9,  1.2,  1.0,  0.9,  1.0,  0.9,  0.8,  0.3,
+    0.3,  1.0,  0.75, 0.9,  0.7,  2,    0.7,  30,
+    0.90, 0.88, 0.90, 1.5,  8.0,  0.3,  0.5,  0.5,
+    0.7,  0.8,  3.0
 ], WEIGHT_VECTOR_SIZE);
 
-// ── HARD ──  (Old Brutal - RearGuard=1.0, Doomsday=1.0 → máximos)
+// ── HARD ──  (Doctrina: inteligente y agresivo, doctrina completa)
 _archetypeStore.set([
-    0.8,  1.5,  1.2,  1.0,  1.1,  1.0,  0.9,  0.1,
-    0.5,  1.0,  0.90, 1.0,  1.0,  3,    1.0,  15,
-    1.00, 0.95, 1.00, 0.2,  6.0,  1.0,  1.0,  1.0,
-    1.0,  1.0
+    0.8,  1.5,  1.2,  1.0,  1.1,  0.6,  0.9,  0.1,
+    0.5,  1.0,  0.90, 1.0,  1.0,  3,    1.0,  20,
+    1.00, 0.95, 1.00, 0.5,  6.0,  1.0,  1.0,  1.0,
+    1.0,  1.0,  1.5
 ], WEIGHT_VECTOR_SIZE * 2);
 
 const _difficultyToIndex = { easy: 0, normal: 1, hard: 2 };
@@ -187,7 +189,8 @@ export class UtilityEngine {
         this._evalQueue   = new Uint8Array(MAX_NODES);
         this._evalHead    = 0;
         this._evalCount   = 0;
-        this._evalTimer   = 0;
+        // Capa 1.1: _evalTimer y _simTime ya NO viven aquí.
+        //           Se pasan externamente por AIManager per-facción.
 
         // ── Command buffer ──────────────────────────────────────
         this._cmdBuffer   = new Float32Array(CMD_MAX * CMD_STRIDE);
@@ -211,6 +214,7 @@ export class UtilityEngine {
         this._deployResult    = new Float32Array(OptimalDeploymentSolver.RESULT_BUFFER_SIZE);
 
         // ── Stagnation tracking ─────────────────────────────────
+        // Capa 1.1: estos se reciben externamente per-facción
         this._lastCaptureTime = 0;
         this._simTime         = 0;
 
@@ -225,8 +229,14 @@ export class UtilityEngine {
         // ── Attackers-used bitfield (max 32 nodes) ──────────────
         this._attackersUsed = 0;
 
+        // ── Capa 2.1: Evolvers-used bitfield (mutex evolve/attack) ──
+        this._evolversUsed = 0;
+
         // ── Phase cache ─────────────────────────────────────────
         this._currentPhase = PHASE_MID;
+
+        // ── Capa 4.1: Average node distance (resolution-independent thresholds) ──
+        this._avgNodeDistance = 300; // default, recalculated each cycle
 
         // ── Rearguard Reverse Sandbox scratch (Módulo 1) ────────
         // Reuses this._simResult for the reverse sim output.
@@ -266,16 +276,20 @@ export class UtilityEngine {
     reset() {
         this._evalHead    = 0;
         this._evalCount   = 0;
-        this._evalTimer   = 0;
         this._cmdCount    = 0;
         this._lastCaptureTime = 0;
         this._simTime     = 0;
         this._attackersUsed = 0;
+        this._evolversUsed  = 0;
+        this._avgNodeDistance = 300;
     }
 
     /**
      * Main evaluation tick. Called from AIManager.update() after
      * Pilar 4 has been updated and the FutureLedger rebuilt.
+     *
+     * Capa 1.1: evalTimer, evoTimer y simTime se reciben/retornan externamente
+     * para evitar acumulación al llamar N facciones por frame.
      *
      * @param {number}  dt
      * @param {object}  world        — WorldManager
@@ -287,17 +301,25 @@ export class UtilityEngine {
      * @param {object}  navStateView — pre-allocated NavigationGameStateView
      * @param {object}  navScoreResult — pre-allocated PathEvaluationResult
      * @param {object}  navExecResult  — pre-allocated PathEvaluationResult
+     * @param {object}  timers       — { evalTimer, evoTimer, simTime, lastCaptureTime } per-faction
      * @returns {number} number of commands written
      */
     evaluate(dt, world, nodes, allUnits, aiFaction, playerFaction,
-             navSystem, navStateView, navScoreResult, navExecResult) {
+             navSystem, navStateView, navScoreResult, navExecResult, timers) {
 
-        this._simTime += dt;
-        this._evalTimer += dt;
+        // ── Capa 1.1: Timers per-facción (no se acumulan entre facciones) ──
+        if (timers) {
+            this._simTime         = timers.simTime + dt;
+            this._lastCaptureTime = timers.lastCaptureTime;
+            timers.simTime        = this._simTime;
+            timers.evalTimer     += dt;
+            timers.evoTimer      += dt;
+        }
 
-        const interval = this._weights[W_ATTACK_INTERVAL];
-        if (this._evalTimer < interval) return 0;
-        this._evalTimer -= interval;
+        const evalTimer = timers ? timers.evalTimer : dt;
+        const interval  = this._weights[W_ATTACK_INTERVAL];
+        if (evalTimer < interval) return 0;
+        if (timers) timers.evalTimer -= interval;
 
         // ── 1. Classify nodes ────────────────────────────────────
         this._classifyNodes(nodes, aiFaction, playerFaction);
@@ -307,7 +329,7 @@ export class UtilityEngine {
         this._currentPhase = this._detectPhase(nodes);
 
         // ── 3. Track stagnation (via Pilar 4 flags) ──────────────
-        this._updateStagnation(world);
+        this._updateStagnation(world, timers);
 
         // ── 4. Build idle unit index ─────────────────────────────
         this._buildIdleIndex(allUnits, aiFaction);
@@ -318,10 +340,15 @@ export class UtilityEngine {
         // ── 6. Clear command buffer ──────────────────────────────
         this._cmdCount = 0;
         this._attackersUsed = 0;
+        this._evolversUsed  = 0;  // Capa 2.1: reset mutex
+
+        // ── Capa 1.2: Determinar si evolución está habilitada este tick ──
+        const evoInterval = this._weights[W_EVOLUTION_INTERVAL];
+        const evoTimer    = timers ? timers.evoTimer : 0;
+        const evoAllowed  = evoTimer >= evoInterval;
+        if (evoAllowed && timers) timers.evoTimer -= evoInterval;
 
         // ── 6.5. Doomsday Scan (Módulo 3) ────────────────────────
-        // Compute per-node Time-To-Intercept from environmental threats.
-        // Only runs if the archetype has W_DOOMSDAY_AWARENESS > 0.
         this._scanDoomsdayThreats(nodes, aiFaction, world);
 
         // ── 7. Time-sliced evaluation ────────────────────────────
@@ -339,31 +366,31 @@ export class UtilityEngine {
             if (ownCount < 1) continue;
 
             // ── Módulo 3.a: Lethal Doomsday Panic Override (Water Sweep) ─
-            // If this node is about to be destroyed by an environmental
-            // event, skip all normal logic and force panic evacuation.
             const dTTI = this._doomsdayTTI[sourceWorldIdx];
             if (dTTI >= 0 && dTTI < DOOMSDAY_HORIZON) {
                 this._executePanicEvacuation(
                     sourceNode, sourceWorldIdx, ownCount,
                     aiFaction, nodes, world
                 );
-                continue; // Skip evolutions and normal attacks
+                continue;
             }
 
             // ── Módulo 3.b: Brace for Impact (Light Sweep) ────────────────
             const nTTI = this._neutralizeTTI[sourceWorldIdx];
             if (nTTI >= 0 && nTTI < DOOMSDAY_HORIZON) {
-                // The node is about to turn neutral but troops will survive. 
-                // Do NOT send troops out to attack, because we need them here
-                // to instantly re-capture the node after the sweep passes!
-                continue; // Skip evolutions and attacks (effectively ACTION_WAIT)
+                continue;
             }
 
-            // A. Self-management: evolutions
-            this._evaluateEvolution(
-                sourceNode, sourceWorldIdx, ownCount,
-                aiFaction, playerFaction, nodes, allUnits
-            );
+            // A. Self-management: evolutions (Capa 1.2: gated por evoTimer)
+            if (evoAllowed && (!world || world.allowEvolutions !== false)) {
+                this._evaluateEvolution(
+                    sourceNode, sourceWorldIdx, ownCount,
+                    aiFaction, playerFaction, nodes, allUnits, world
+                );
+            }
+
+            // Capa 2.1: Si este nodo decidió evolucionar, NO atacar
+            if ((this._evolversUsed >> sourceWorldIdx) & 1) continue;
 
             // B. Attack scoring (dual-phase)
             this._evaluateAttacks(
@@ -371,6 +398,14 @@ export class UtilityEngine {
                 aiFaction, playerFaction, nodes, allUnits, world,
                 navSystem, navStateView, navScoreResult, navExecResult
             );
+
+            // C. Capa 3.1: Refuerzo (solo si no atacó ni evolucionó)
+            if (!((this._attackersUsed >> sourceWorldIdx) & 1)) {
+                this._evaluateReinforcement(
+                    sourceNode, sourceWorldIdx, ownCount,
+                    aiFaction, nodes
+                );
+            }
         }
 
         return this._cmdCount;
@@ -399,7 +434,8 @@ export class UtilityEngine {
             const srcNode = nodes[srcIdx];
             const tgtNode = nodes[tgtIdx];
 
-            if (action === ACTION_ATTACK) {
+            if (action === ACTION_ATTACK || action === ACTION_REINFORCE) {
+                // Capa 3.1: REINFORCE usa el mismo dispatch que ATTACK (hacia nodo aliado)
                 this._dispatchUnits(srcNode, tgtNode, light, heavy,
                                     allUnits, aiFaction, world, navExecResult);
             } else if (action === ACTION_EVOLVE_TANK) {
@@ -411,6 +447,7 @@ export class UtilityEngine {
             } else if (action === ACTION_TUNNEL) {
                 srcNode.tunnelTo = tgtNode;
             }
+            // ACTION_WAIT: no-op (no command emitted, handled implicitly)
         }
     }
 
@@ -447,6 +484,22 @@ export class UtilityEngine {
             if (n.owner === playerFaction) {
                 this._playerNodeIndices[this._playerNodeCount++] = i;
             }
+        }
+
+        // ── Capa 4.1: Calcular distancia media entre nodos ────────
+        if (nodes.length > 1) {
+            let totalDist = 0;
+            let pairCount = 0;
+            const sampleLimit = Math.min(nodes.length, 16); // cap para performance
+            for (let i = 0; i < sampleLimit; i++) {
+                for (let j = i + 1; j < sampleLimit; j++) {
+                    const dx = nodes[i].x - nodes[j].x;
+                    const dy = nodes[i].y - nodes[j].y;
+                    totalDist += Math.sqrt(dx * dx + dy * dy);
+                    pairCount++;
+                }
+            }
+            this._avgNodeDistance = pairCount > 0 ? (totalDist / pairCount) : 300;
         }
     }
 
@@ -523,12 +576,13 @@ export class UtilityEngine {
     //  STAGNATION TRACKING
     // ═══════════════════════════════════════════════════════════════
 
-    _updateStagnation(world) {
+    _updateStagnation(world, timers) {
         if (!this._oppAnalyzer) return;
         // Check if any node changed owner recently (FLAG_OWNER_CHANGED = 0x04)
         for (let i = 0; i < Math.min(world.nodes.length, MAX_NODES); i++) {
             if (this._oppAnalyzer.getNodeFlags(i) & 0x04) {
                 this._lastCaptureTime = this._simTime;
+                if (timers) timers.lastCaptureTime = this._simTime;
                 return;
             }
         }
@@ -539,16 +593,13 @@ export class UtilityEngine {
     // ═══════════════════════════════════════════════════════════════
 
     _evaluateEvolution(sourceNode, sourceIndex, ownCount,
-                       aiFaction, playerFaction, nodes, allUnits) {
+                       aiFaction, playerFaction, nodes, allUnits, world) {
         const w = this._weights;
 
         // Already evolved or evolving?
         if (sourceNode.evolution || sourceNode.pendingEvolution) return;
         if (sourceNode.type === 'tunel') return;
         if (ownCount < w[W_MIN_EVOLUTION_COUNT]) return;
-
-        // Evolution chance gate (deterministic via node position hash)
-        // We skip this for now — the utility score handles priority
 
         // Safety check: is this node under attack?
         let incomingThreat = 0;
@@ -568,7 +619,8 @@ export class UtilityEngine {
         const timeSinceCapture = this._simTime - this._lastCaptureTime;
         const stagnationMult = 1.0 + Math.min(2.0, timeSinceCapture / STAGNATION_REF);
 
-        // Is this node frontline?
+        // ── Capa 4.1: Frontline via distancia normalizada ────────
+        const avgD = this._avgNodeDistance;
         let minDistPlayer = Infinity;
         for (let i = 0; i < this._playerNodeCount; i++) {
             const pn = nodes[this._playerNodeIndices[i]];
@@ -577,7 +629,18 @@ export class UtilityEngine {
             const d = Math.sqrt(dx * dx + dy * dy);
             if (d < minDistPlayer) minDistPlayer = d;
         }
-        const isFrontline = minDistPlayer < 450;
+        const isFrontline = minDistPlayer < avgD * 1.2;
+
+        // ── Capa 3.3: Doctrina — soporte (línea de fuego) ────────
+        let nearbyEnemyNodes = 0;
+        for (let i = 0; i < this._targetNodeCount; i++) {
+            const tn = nodes[this._targetNodeIndices[i]];
+            if (tn.owner === 'neutral') continue;
+            const dx = tn.x - sourceNode.x;
+            const dy = tn.y - sourceNode.y;
+            if (dx * dx + dy * dy < (avgD * 1.5) * (avgD * 1.5)) nearbyEnemyNodes++;
+        }
+        const isSupportNode = nearbyEnemyNodes >= 2;
 
         // Player evolution census
         let playerEspinoso = 0, playerTanque = 0, playerArt = 0;
@@ -595,23 +658,24 @@ export class UtilityEngine {
         // Score each evolution type
         const counterW = w[W_COUNTER_EVOLUTION];
 
-        // Tank
+        // Tank — Capa 3.3: retaguardia bonus (no frontline)
         let scoreTank = 800 * w[W_EVOLVE_TANK] * stagnationMult * safetyMult;
-        if (!isFrontline) scoreTank *= 1.3; // retaguardia bonus
+        if (!isFrontline) scoreTank *= 1.5;
         if (mapControl > 0.6) scoreTank *= 1.2;
         if (playerEspinoso > 1 && counterW > 0) scoreTank *= (1.0 + 0.6 * counterW);
         if (ownCount < EVO_COSTS.tanque) scoreTank = -Infinity;
 
-        // Thorn (Espinoso)
+        // Thorn (Espinoso) — Capa 3.3: frontline/cuello de botella
         let scoreThorn = 700 * w[W_EVOLVE_THORN] * stagnationMult * safetyMult;
-        if (isFrontline) scoreThorn *= 1.3;
+        if (isFrontline) scoreThorn *= 1.5;
         if (this._playerNodeCount > this._aiNodeCount) scoreThorn *= 1.2;
         if (playerTanque > 1 && counterW > 0) scoreThorn *= (1.0 + 0.5 * counterW);
         if (ownCount < EVO_COSTS.espinoso) scoreThorn = -Infinity;
 
-        // Artillery
+        // Artillery — Capa 3.3: soporte (cobertura + línea de fuego)
         let scoreArt = 750 * w[W_EVOLVE_ART] * stagnationMult * safetyMult;
-        if (isFrontline) scoreArt *= 1.2;
+        if (isSupportNode) scoreArt *= 1.6;
+        else if (isFrontline) scoreArt *= 1.1;
         if (playerEspinoso > 1 && counterW > 0) scoreArt *= (1.0 + 0.5 * counterW);
         if (ownCount < EVO_COSTS.artilleria) scoreArt = -Infinity;
 
@@ -626,7 +690,7 @@ export class UtilityEngine {
                 const dx = tn.x - sourceNode.x;
                 const dy = tn.y - sourceNode.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 350) {
+                if (dist < avgD * 0.9) {
                     const ns = (1000 + (tn.productionRate || 1) * 200) * (K_DIST / (K_DIST + dist / 75));
                     if (ns > bestNeutralScore) bestNeutralScore = ns;
                 }
@@ -640,14 +704,128 @@ export class UtilityEngine {
 
         // Find best evolution
         let bestEvoAction = -1;
-        let bestEvoScore  = 0; // threshold: must be positive
+        let bestEvoScore  = 0;
+        let bestEvoCost   = 0;
 
-        if (scoreTank > bestEvoScore)  { bestEvoScore = scoreTank;  bestEvoAction = ACTION_EVOLVE_TANK; }
-        if (scoreThorn > bestEvoScore) { bestEvoScore = scoreThorn; bestEvoAction = ACTION_EVOLVE_THORN; }
-        if (scoreArt > bestEvoScore)   { bestEvoScore = scoreArt;   bestEvoAction = ACTION_EVOLVE_ART; }
+        if (scoreTank > bestEvoScore)  { bestEvoScore = scoreTank;  bestEvoAction = ACTION_EVOLVE_TANK;  bestEvoCost = EVO_COSTS.tanque; }
+        if (scoreThorn > bestEvoScore) { bestEvoScore = scoreThorn; bestEvoAction = ACTION_EVOLVE_THORN; bestEvoCost = EVO_COSTS.espinoso; }
+        if (scoreArt > bestEvoScore)   { bestEvoScore = scoreArt;   bestEvoAction = ACTION_EVOLVE_ART;   bestEvoCost = EVO_COSTS.artilleria; }
 
         if (bestEvoAction >= 0) {
+            // ── Capa 2.2: Prueba de supervivencia (Pilar 2) ──────────
+            const remainingAfterEvo = ownCount - bestEvoCost;
+            if (remainingAfterEvo < 5) return; // No podemos pagar sin vaciarnos
+
+            // Buscar la amenaza más cercana (nodo enemigo/player con fuerza)
+            let nearestThreatNode = null;
+            let nearestThreatDistSq = Infinity;
+            let nearestThreatForce = 0;
+            for (let i = 0; i < this._targetNodeCount; i++) {
+                const tn = nodes[this._targetNodeIndices[i]];
+                if (tn.owner === 'neutral') continue;
+                const tForce = _countNonFaction(tn, aiFaction);
+                if (tForce < 10) continue;
+                const dx = tn.x - sourceNode.x;
+                const dy = tn.y - sourceNode.y;
+                const dSq = dx * dx + dy * dy;
+                if (dSq < nearestThreatDistSq) {
+                    nearestThreatDistSq = dSq;
+                    nearestThreatNode = tn;
+                    nearestThreatForce = tForce;
+                }
+            }
+
+            // Si hay amenaza cercana, simular si nos destruyen post-evolución
+            if (nearestThreatNode && nearestThreatDistSq < (avgD * 2.0) * (avgD * 2.0)) {
+                // Temporalmente reducir las tropas del nodo para la simulación
+                const origCount = sourceNode.counts ? (sourceNode.counts[aiFaction] || 0) : 0;
+                if (sourceNode.counts) sourceNode.counts[aiFaction] = remainingAfterEvo;
+
+                const simCode = this._simulator.evaluateAttack(
+                    world, nearestThreatNode, sourceNode, nearestThreatForce,
+                    nearestThreatNode.owner, null, this._rearguardSimResult
+                );
+
+                if (sourceNode.counts) sourceNode.counts[aiFaction] = origCount;
+
+                // Si el atacante nos ganaría, vetar la evolución
+                if (simCode >= RESULT_VICTORIA_PIRRICA) return;
+            }
+
             this._writeCommand(sourceIndex, sourceIndex, bestEvoAction, 0, 0, bestEvoScore);
+            // Capa 2.1: Marcar nodo como evolucionando → no atacar este ciclo
+            this._evolversUsed |= (1 << sourceIndex);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  REINFORCEMENT EVALUATION (Capa 3.1)
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * Capa 3.1: Evalúa si este nodo debería enviar tropas a un aliado cercano
+     * que esté débil o bajo presión. Solo se ejecuta si el nodo no atacó ni
+     * evolucionó este ciclo (tercer escalón de prioridad).
+     */
+    _evaluateReinforcement(sourceNode, sourceIndex, ownCount, aiFaction, nodes) {
+        const w = this._weights;
+        if (w[W_REINFORCE] < 0.01) return;
+        if (ownCount < 40) return; // necesita excedente para reforzar
+
+        const avgD = this._avgNodeDistance;
+        let bestIdx = -1;
+        let bestScore = 0;
+
+        for (let i = 0; i < this._aiNodeCount; i++) {
+            const allyWorldIdx = this._aiNodeIndices[i];
+            if (allyWorldIdx === sourceIndex) continue;
+
+            const allyNode = nodes[allyWorldIdx];
+            const allyCount = _countAt(allyNode, aiFaction);
+
+            // Solo reforzar aliados en necesidad
+            if (allyCount > 25) continue;
+
+            const dx = allyNode.x - sourceNode.x;
+            const dy = allyNode.y - sourceNode.y;
+            const distSq = dx * dx + dy * dy;
+            if (distSq > (avgD * 1.5) * (avgD * 1.5)) continue; // muy lejos
+
+            const dist = Math.sqrt(distSq);
+            const deficit = 30 - allyCount; // cuánto le falta
+            const excess  = ownCount - 40;   // cuánto nos sobra
+
+            // ¿Aliado tiene nodo enemigo/player cerca? (bajo presión)
+            let underPressure = 0;
+            for (let t = 0; t < this._targetNodeCount; t++) {
+                const tn = nodes[this._targetNodeIndices[t]];
+                if (tn.owner === 'neutral') continue;
+                const tdx = tn.x - allyNode.x;
+                const tdy = tn.y - allyNode.y;
+                if (tdx * tdx + tdy * tdy < avgD * avgD) {
+                    underPressure += _countNonFaction(tn, aiFaction);
+                }
+            }
+
+            const distMult = K_DIST / (K_DIST + dist / 75);
+            let score = deficit * 20 * distMult * w[W_REINFORCE];
+            if (underPressure > 10) score *= 1.5;
+            if (allyNode.evolution) score *= 1.3; // proteger nodos evolucionados
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestIdx = allyWorldIdx;
+            }
+        }
+
+        if (bestIdx >= 0 && bestScore > 200) {
+            // Enviar ~30% del excedente
+            const toSend = Math.max(5, Math.floor((ownCount - 40) * 0.3));
+            const light = Math.min(this._idleLightByNode[sourceIndex] || 0, toSend);
+            const heavy = Math.min(this._idleHeavyByNode[sourceIndex] || 0, Math.max(0, toSend - light));
+            if (light + heavy > 0) {
+                this._writeCommand(sourceIndex, bestIdx, ACTION_REINFORCE, light, heavy, bestScore);
+            }
         }
     }
 
@@ -672,7 +850,9 @@ export class UtilityEngine {
         this._candScores[2] = -Infinity;
 
         const baseSpeed   = world.unitBaseSpeed || 75;
-        const maxReachSq  = (baseSpeed * w[W_SPATIAL_CULLING_MAX]) * (baseSpeed * w[W_SPATIAL_CULLING_MAX]);
+        // Garantizar que la IA siempre vea al menos hasta 3 veces la distancia promedio, vital para mapas dispersos
+        const maxReach    = Math.max(baseSpeed * w[W_SPATIAL_CULLING_MAX], this._avgNodeDistance * 3.0);
+        const maxReachSq  = maxReach * maxReach;
 
         for (let t = 0; t < this._targetNodeCount; t++) {
             const targetIdx = this._targetNodeIndices[t];
@@ -918,14 +1098,15 @@ export class UtilityEngine {
             else if (emigrants > 15) score += 2000 * w[W_BACK_CAP_BONUS];
         }
 
-        // ── Flanking bonus ───────────────────────────────────────
+        // ── Flanking bonus (Capa 4.1: normalizado a distancia media) ──
         if (w[W_FLANK_BONUS] > 0.01 && target.owner === playerFaction) {
             let adjacentAI = 0;
+            const flankRangeSq = (this._avgNodeDistance * 1.0) * (this._avgNodeDistance * 1.0);
             for (let a = 0; a < this._aiNodeCount; a++) {
                 const an = nodes[this._aiNodeIndices[a]];
                 const adx = an.x - target.x;
                 const ady = an.y - target.y;
-                if (adx * adx + ady * ady < 400 * 400) adjacentAI++;
+                if (adx * adx + ady * ady < flankRangeSq) adjacentAI++;
             }
             if (adjacentAI >= 2) score += 1500 * adjacentAI * w[W_FLANK_BONUS];
         }
@@ -935,11 +1116,27 @@ export class UtilityEngine {
             score -= 2000 * w[W_HAZARD_AVOIDANCE];
         }
 
-        // ── Timing awareness (water sweep post-pass) ─────────────
-        if (w[W_TIMING_AWARENESS] > 0.01 && nodes.length > 0) {
-            // Bonus if water sweep just passed (safe window)
-            // Penalty if barrier blocks route
-            // (Simplified — full version reads sweep/barrier state)
+        // ── Capa 5.2: Timing awareness real (water sweep post-pass) ──
+        if (w[W_TIMING_AWARENESS] > 0.01 && world && world.waterSweeps && world.waterSweeps.length > 0) {
+            const ws = world.waterSweeps[0];
+            const dx_sw = ws.dirX !== undefined ? ws.dirX : 1;
+            const dy_sw = ws.dirY !== undefined ? ws.dirY : 0;
+            const targetProj = target.x * dx_sw + target.y * dy_sw;
+
+            // Verificar si hay una barra activa que ya pasó el target
+            let sweepJustPassed = false;
+            let sweepIncoming = false;
+            for (const bar of (ws._activeBars || [])) {
+                const barProj = bar.worldX;
+                if (barProj > targetProj && barProj < targetProj + 250) {
+                    sweepJustPassed = true; // barra acaba de pasar el nodo
+                }
+                if (barProj < targetProj && targetProj - barProj < 400) {
+                    sweepIncoming = true; // barra viene hacia el nodo
+                }
+            }
+            if (sweepJustPassed) score += 800 * w[W_TIMING_AWARENESS];
+            if (sweepIncoming)   score -= 500 * w[W_TIMING_AWARENESS];
         }
 
         return score;
@@ -1082,12 +1279,13 @@ export class UtilityEngine {
 
     _dispatchUnits(srcNode, tgtNode, lightToSend, heavyToSend,
                    allUnits, aiFaction, world, navExecResult) {
-        // Get first-hop for multi-hop routing
+        // ── Capa 4.2: Multi-hop routing real ─────────────────────
         let hopTarget = tgtNode;
-        if (world && world.navigation) {
-            const hopIdx = world.navigation.peekFirstHop
-                ? world.navigation.peekFirstHop(-1) : -1;
-            // Simplified: route directly (full hop resolution in AIManager wrapper)
+        if (world && world.navigation && navExecResult && navExecResult.queryHandle >= 0) {
+            const hopIdx = world.navigation.peekFirstHop(navExecResult.queryHandle);
+            if (hopIdx >= 0 && hopIdx < world.nodes.length) {
+                hopTarget = world.nodes[hopIdx];
+            }
         }
 
         let sentHeavy = 0;

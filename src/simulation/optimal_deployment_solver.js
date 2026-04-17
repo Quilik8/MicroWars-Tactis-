@@ -181,12 +181,16 @@ export class OptimalDeploymentSolver {
      * Calcula el poder máximo extraíble del nodo de origen sin dejarlo
      * vulnerable ante amenazas en tránsito.
      *
+     * Capa 5.3: Ahora acepta `nearbyEnemyPressure` (poder total de nodos
+     *           enemigos cercanos) para una reserva defensiva multi-frente.
+     *
      * @param {object} originNode
      * @param {string} aiFaction
      * @param {object} world
+     * @param {number} [nearbyEnemyPressure=0] — poder total de nodos enemigos a ≤1.5× distancia media
      * @returns {number} poder máximo que se puede enviar
      */
-    computeMaxAllocatable(originNode, aiFaction, world) {
+    computeMaxAllocatable(originNode, aiFaction, world, nearbyEnemyPressure = 0) {
         const bodies = originNode.counts ? (originNode.counts[aiFaction] || 0) : 0;
         const power  = originNode.power  ? (originNode.power[aiFaction]  || bodies) : bodies;
         if (bodies <= 0) return 0;
@@ -220,8 +224,14 @@ export class OptimalDeploymentSolver {
             const requiredDefense = Math.ceil(incomingThreatPower * 1.3);
             maxAllocatable = Math.max(0, power - requiredDefense + reactionProduction);
         } else {
-            // Sin amenaza: guarnición mínima
+            // Sin amenaza en tránsito: guarnición mínima + presión latente
+            // Capa 5.3: Considerar presión de nodos enemigos cercanos
             let minReserve = Math.max(5, Math.floor(power * 0.10));
+
+            // Presión latente: retener 15% del poder enemigo cercano
+            if (nearbyEnemyPressure > 0) {
+                minReserve = Math.max(minReserve, Math.floor(nearbyEnemyPressure * 0.15));
+            }
 
             // Nodos con evoluciones defensivas valen más, retener un poco más
             if (originNode.evolution === 'espinoso' || originNode.evolution === 'artilleria') {

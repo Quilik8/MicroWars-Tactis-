@@ -1395,3 +1395,90 @@ html {
     border-radius: 4px;
     border-bottom: 2px solid #5dade2;
 }
+
+/* ══════════════════════════════════════════
+   MEDIA QUERIES PARA ESCALADO RESPONSIVE
+   ══════════════════════════════════════════ */
+@media (max-width: 1200px) {
+    html { font-size: 14px; }
+    .faction-grid { grid-template-columns: repeat(2, 1fr); width: 95%; gap: 20px; }
+    .smc-title { font-size: 3rem; }
+    .smc-levels-badge { font-size: 0.9rem; padding: 8px 20px;}
+    #levelGrid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    .screen h1 { font-size: 2.5rem; }
+}
+
+@media (max-width: 800px) {
+    html { font-size: 12px; }
+    #hud { font-size: 11px; padding: 4px 8px; top: 10px; left: 10px; }
+    #topControls { top: 10px; right: 10px; gap: 4px; }
+    #pauseBtn { font-size: 12px; padding: 6px 12px; }
+    .speed-btn { font-size: 10px; padding: 4px 6px; }
+    #sendBar { height: 44px; padding: 0 10px; font-size: 11px; }
+    .hud-btn { font-size: 11px; padding: 4px 10px; }
+    #sendLabel { min-width: 80px; }
+    .faction-grid { grid-template-columns: 1fr; width: 90%; gap: 15px; }
+    .smc-title { font-size: 2.2rem; margin-bottom: 15px; }
+    .smc-desc { font-size: 1rem; padding: 15px; }
+    .smc-levels-badge { font-size: 0.8rem; margin-top: 15px; }
+    .level-card { min-height: 140px; }
+    .fast-travel-radar { bottom: 20px; gap: 10px; }
+    .ft-node { width: 30px; height: 30px; font-size: 12px; }
+    .screen h1 { font-size: 2rem; }
+    .screen h2 { font-size: 1rem; margin-bottom: 25px; }
+    .primary-btn, .secondary-btn { font-size: 1rem; padding: 12px 30px; }
+    .evo-btn { width: 40px; height: 40px; font-size: 18px; }
+    .evo-btn.cancel { width: 28px; height: 28px; font-size: 12px; }
+}
+
+@media (max-width: 480px) {
+    html { font-size: 10px; }
+    #hud { transform: scale(0.85); transform-origin: top left; }
+    #topControls { transform: scale(0.85); transform-origin: top right; }
+    #sendBar { height: 38px; transform: scale(0.9); transform-origin: bottom center; gap: 5px; }
+    #sendLabel strong { font-size: 13px; }
+    .smc-title { font-size: 1.8rem; }
+    .smc-desc { font-size: 0.9rem; padding: 10px; }
+    .faction-card { padding: 20px; }
+    .faction-icon { width: 50px; height: 50px; }
+    .level-card-title { font-size: 1.2rem; }
+    .level-grid { grid-template-columns: 1fr; }
+    .pheromone-trail { flex-direction: column; height: auto; width: 100vw; gap: 30px; margin-top: 60px; overflow-y: auto;}
+    .pheromone-trail::before { left: 50%; top: 10%; bottom: 10%; width: 3px; height: auto; transform: translateX(-50%); }
+    .level-info { left: 80px; top: 50%; transform: translateY(-50%); width: 200px; }
+    .level-node-wrapper:hover .level-info { transform: translateX(0) translateY(-50%); }
+}
+
+@media (min-width: 1800px) {
+    html { font-size: 18px; }
+    #hud { transform: scale(1.25); transform-origin: top left; margin: 10px; }
+    #topControls { transform: scale(1.25); transform-origin: top right; margin: 10px; }
+    #sendBar { transform: scale(1.25); transform-origin: bottom center; }
+    .node-tooltip { font-size: 14px; padding: 14px; }
+    .tooltip-header { font-size: 16px; }
+    .evo-btn { width: 56px; height: 56px; font-size: 26px; }
+    .evo-btn.cancel { width: 36px; height: 36px; font-size: 16px; }
+}
+
+@media (min-width: 2500px) {
+    html { font-size: 24px; }
+    #hud { transform: scale(1.6); transform-origin: top left; margin: 25px; }
+    #topControls { transform: scale(1.6); transform-origin: top right; margin: 25px; }
+    #sendBar { transform: scale(1.6); transform-origin: bottom center; }
+    .node-tooltip { font-size: 20px; padding: 20px; }
+    .tooltip-header { font-size: 22px; }
+    .evo-btn { width: 72px; height: 72px; font-size: 34px; }
+    .evo-btn.cancel { width: 48px; height: 48px; font-size: 24px; }
+}
+
+@media (min-width: 3800px) {
+    html { font-size: 32px; }
+    #hud { transform: scale(2.2); transform-origin: top left; margin: 40px; }
+    #topControls { transform: scale(2.2); transform-origin: top right; margin: 40px; }
+    #sendBar { transform: scale(2.2); transform-origin: bottom center; }
+    .node-tooltip { font-size: 26px; padding: 26px; }
+    .tooltip-header { font-size: 28px; }
+    .evo-btn { width: 96px; height: 96px; font-size: 48px; }
+    .evo-btn.cancel { width: 64px; height: 64px; font-size: 36px; }
+}
+
