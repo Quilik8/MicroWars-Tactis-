@@ -308,12 +308,15 @@ export class UIManager {
         levelContainer.appendChild(trail);
 
         const renderLevels = (sector, sIdx) => {
+            let absoluteStart = 0;
+            for (let i = 0; i < sIdx; i++) absoluteStart += sectors[i].levels.length;
+
             trail.innerHTML = ''; // reset nodes
             sector.levels.forEach((lvl, lIdx) => {
                 const nodeWrap = document.createElement('div');
                 nodeWrap.className = 'level-node-wrapper';
                 nodeWrap.innerHTML = `
-                    <div class="level-node">${lIdx + 1}</div>
+                    <div class="level-node">${absoluteStart + lIdx + 1}</div>
                     <div class="level-info">
                         <div class="level-info-title">${lvl.name}</div>
                         <div class="level-info-desc">${lvl.description}</div>

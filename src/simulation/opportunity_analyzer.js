@@ -291,7 +291,7 @@ export class OpportunityAnalyzer {
 
                 if (currOwner === OWNER_PLAYER) {
                     const evoCost = node.pendingEvolution === 'artilleria' ? 40
-                        : (node.pendingEvolution === 'tanque' ? 35 : 30);
+                        : (node.pendingEvolution === 'tanque' ? 45 : 30);
                     const urgency     = evoCost / 20;
                     const evoDuration = node.pendingEvolutionDurationSec || 3.5;
                     this._emitOpportunity(
@@ -378,12 +378,51 @@ export class OpportunityAnalyzer {
                 if (!u || u.pendingRemoval) continue;
                 if (u.faction !== playerFaction || u.state !== 'traveling') continue;
 
-                const dx = u.x - hx;
-                const dy = (u.y - hy) / sy;
-                if (dx * dx + dy * dy >= hRSq) continue;
+                let inHazard = false;
 
-                // Semicircle shape check
-                if (hz.shape === 'semicircle' && dx < 0) continue;
+                if (hz.shape === 'flood') {
+                    const sdxOuter = u.x - hx;
+                    const sdyOuter = (u.y - hy) / sy;
+                    if (sdxOuter * sdxOuter + sdyOuter * sdyOuter < hRSq) {
+                        inHazard = true;
+                        if (hz.safeZones) {
+                            for (let s = 0; s < hz.safeZones.length; s++) {
+                                const sz = hz.safeZones[s];
+                                const sx = sz.x * gw;
+                                const szy = sz.y * gh;
+                                const sR = sz.radius * gw;
+                                const sdx = u.x - sx;
+                                const sdy = u.y - szy;
+                                if (sdx * sdx + sdy * sdy < sR * sR) {
+                                    inHazard = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } else if (hz.shape === 'rect_puddle') {
+                    const left   = hz.x * gw;
+                    const top    = hz.y * gh;
+                    const right  = left + (hz.width * gw);
+                    const bottom = top  + (hz.height * gh);
+                    inHazard = (u.x >= left && u.x <= right && u.y >= top && u.y <= bottom);
+                } else {
+                    const dx = u.x - hx;
+                    const dy = (u.y - hy) / sy;
+                    const distSq = dx * dx + dy * dy;
+                    if (distSq < hRSq) {
+                        if (hz.shape === 'semicircle' && dx < 0) {
+                            // skip
+                        } else if (hz.shape === 'ring' && hz.innerRadius) {
+                            const iR = hz.innerRadius * gw;
+                            inHazard = (distSq >= iR * iR);
+                        } else {
+                            inHazard = true;
+                        }
+                    }
+                }
+
+                if (!inHazard) continue;
 
                 bodiesInHazard++;
                 if (!firstTargetNode && u.targetNode) firstTargetNode = u.targetNode;

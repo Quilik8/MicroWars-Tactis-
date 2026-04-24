@@ -101,8 +101,8 @@ const _archetypeStore = new Float32Array(WEIGHT_VECTOR_SIZE * ARCHETYPE_COUNT);
 // ── EASY ──  (Doctrina: acumula, refuerza, ataca poco, evoluciona lento)
 _archetypeStore.set([
     1.0,  1.0,  0.8,  0.7,  0.7,  1.2,  0.7,  0.8,
-    0.0,  0.7,  0.50, 0.8,  0.3,  1,    0.3,  50,
-    0.65, 0.82, 0.75, 3.0,  10.0, 0.0,  0.0,  0.0,
+    0.0,  0.7,  0.50, 0.8,  0.3,  1,    0.3,  60,
+    0.45, 0.82, 0.75, 5.0,  10.0, 0.0,  0.0,  0.0,
     0.0,  0.0,  6.0
 ], 0);
 
@@ -118,7 +118,7 @@ _archetypeStore.set([
 _archetypeStore.set([
     0.8,  1.5,  1.2,  1.0,  1.1,  0.6,  0.9,  0.1,
     0.5,  1.0,  0.90, 1.0,  1.0,  3,    1.0,  20,
-    1.00, 0.95, 1.00, 0.5,  6.0,  1.0,  1.0,  1.0,
+    0.75, 0.95, 1.00, 0.5,  6.0,  1.0,  1.0,  1.0,
     1.0,  1.0,  1.5
 ], WEIGHT_VECTOR_SIZE * 2);
 
@@ -133,7 +133,8 @@ const CMD_ACTION   = 2;
 const CMD_LIGHT    = 3;
 const CMD_HEAVY    = 4;
 const CMD_PRIORITY = 5;
-const CMD_STRIDE   = 6;
+const CMD_FIRST_HOP = 6;
+const CMD_STRIDE   = 7;
 const CMD_MAX      = 32;
 
 // ═══════════════════════════════════════════════════════════════════
@@ -144,8 +145,11 @@ const NODES_PER_TICK       = 3;     // time-slice budget
 const MAX_NODES            = 32;
 const TOP_K                = 3;     // candidates to keep per source
 const STAGNATION_REF       = 15.0;  // seconds before stagnation bonus kicks
-const EVO_COSTS            = { espinoso: 30, artilleria: 40, tanque: 35 };
+const EVO_COSTS            = { espinoso: 30, artilleria: 40, tanque: 50 };
 const MIN_ATTACK_FORCE     = 15;
+const BASE_CAPTURE_GARRISON = 20;
+const HAZARD_GARRISON_BONUS = 8;
+const HAZARD_FATALITY_RATIO = 0.35;
 
 // ── Módulo 1: Rearguard Reverse Sandbox ─────────────────────────
 const REARGUARD_PENALTY    = 0.01;  // Utility multiplier when rearguard is vulnerable
@@ -200,6 +204,18 @@ export class UtilityEngine {
         this._candIndices = new Uint8Array(TOP_K);
         this._candScores  = new Float32Array(TOP_K);
         this._candCount   = 0;
+        this._candHasRoute = new Uint8Array(TOP_K);
+        this._candTransitTimes = new Float32Array(TOP_K);
+        this._candCasualties = new Float32Array(TOP_K);
+        this._candDelays = new Float32Array(TOP_K);
+        this._candFirstHop = new Int16Array(TOP_K);
+        this._candRouteResult = {
+            isViable: true,
+            projectedTransitTime: 0,
+            projectedCasualties: 0,
+            suggestedDelay: 0,
+            queryHandle: -1,
+        };
 
         // ── Evolution scoring scratch ───────────────────────────
         this._evoScores   = new Float32Array(4); // none, thorn, art, tank
@@ -249,6 +265,14 @@ export class UtilityEngine {
         this._doomsdayTTI = new Float32Array(MAX_NODES);
         this._neutralizeTTI = new Float32Array(MAX_NODES);
         this._doomsdayActive = false;
+
+        this._strategyFocus = null;
+        this._strategyPrefEvo = null;
+        this._strategyMinEvolutionGarrison = null;
+        this._strategyAggressionMult = null;
+        this._strategyMinPostCaptureGarrison = null;
+        this._strategyHazardGarrisonBonus = null;
+        this._strategyHazardFatalityRatio = null;
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -260,7 +284,8 @@ export class UtilityEngine {
      * @param {string} difficulty — 'easy'|'normal'|'hard'
      */
     setArchetype(difficulty) {
-        const idx = _difficultyToIndex[difficulty] || 0;
+        this.difficulty = difficulty || 'normal';
+        const idx = _difficultyToIndex[this.difficulty] || 0;
         const offset = idx * WEIGHT_VECTOR_SIZE;
         this._weights.set(
             _archetypeStore.subarray(offset, offset + WEIGHT_VECTOR_SIZE)
@@ -330,6 +355,7 @@ export class UtilityEngine {
 
         // ── 3. Track stagnation (via Pilar 4 flags) ──────────────
         this._updateStagnation(world, timers);
+        this._resolveAIStrategy(world);
 
         // ── 4. Build idle unit index ─────────────────────────────
         this._buildIdleIndex(allUnits, aiFaction);
@@ -403,7 +429,7 @@ export class UtilityEngine {
             if (!((this._attackersUsed >> sourceWorldIdx) & 1)) {
                 this._evaluateReinforcement(
                     sourceNode, sourceWorldIdx, ownCount,
-                    aiFaction, nodes
+                    aiFaction, nodes, world
                 );
             }
         }
@@ -429,6 +455,7 @@ export class UtilityEngine {
             const action = this._cmdBuffer[base + CMD_ACTION] | 0;
             const light  = this._cmdBuffer[base + CMD_LIGHT]  | 0;
             const heavy  = this._cmdBuffer[base + CMD_HEAVY]  | 0;
+            const firstHopIdx = this._cmdBuffer[base + CMD_FIRST_HOP] | 0;
 
             if (srcIdx >= nodes.length || tgtIdx >= nodes.length) continue;
             const srcNode = nodes[srcIdx];
@@ -436,8 +463,8 @@ export class UtilityEngine {
 
             if (action === ACTION_ATTACK || action === ACTION_REINFORCE) {
                 // Capa 3.1: REINFORCE usa el mismo dispatch que ATTACK (hacia nodo aliado)
-                this._dispatchUnits(srcNode, tgtNode, light, heavy,
-                                    allUnits, aiFaction, world, navExecResult);
+                this._dispatchUnitsResolved(srcNode, tgtNode, light, heavy,
+                                            allUnits, aiFaction, world, firstHopIdx);
             } else if (action === ACTION_EVOLVE_TANK) {
                 this._buyEvolution(srcNode, 'tanque', EVO_COSTS.tanque, aiFaction, allUnits, world);
             } else if (action === ACTION_EVOLVE_THORN) {
@@ -463,6 +490,7 @@ export class UtilityEngine {
         out[3] = this._cmdBuffer[base + CMD_LIGHT];
         out[4] = this._cmdBuffer[base + CMD_HEAVY];
         out[5] = this._cmdBuffer[base + CMD_PRIORITY];
+        out[6] = this._cmdBuffer[base + CMD_FIRST_HOP];
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -588,6 +616,40 @@ export class UtilityEngine {
         }
     }
 
+    _resolveAIStrategy(world) {
+        this._strategyFocus = null;
+        this._strategyPrefEvo = null;
+        this._strategyMinEvolutionGarrison = null;
+        this._strategyAggressionMult = null;
+        this._strategyMinPostCaptureGarrison = null;
+        this._strategyHazardGarrisonBonus = null;
+        this._strategyHazardFatalityRatio = null;
+
+        if (!world || !world.aiStrategy) return;
+
+        const strategy = world.aiStrategy;
+        this._strategyFocus = strategy.focus ?? null;
+        this._strategyPrefEvo = strategy.preferredEvolution ?? null;
+        this._strategyMinEvolutionGarrison = strategy.minEvolutionGarrison ?? null;
+        this._strategyAggressionMult = strategy.aggressionMult ?? null;
+        this._strategyMinPostCaptureGarrison = strategy.minPostCaptureGarrison ?? null;
+        this._strategyHazardGarrisonBonus = strategy.hazardGarrisonBonus ?? null;
+        this._strategyHazardFatalityRatio = strategy.hazardFatalityRatio ?? null;
+
+        if (!strategy.difficultyOverrides || !strategy.difficultyOverrides[this.difficulty]) {
+            return;
+        }
+
+        const diffOvr = strategy.difficultyOverrides[this.difficulty];
+        if (diffOvr.focus !== undefined) this._strategyFocus = diffOvr.focus;
+        if (diffOvr.preferredEvolution !== undefined) this._strategyPrefEvo = diffOvr.preferredEvolution;
+        if (diffOvr.minEvolutionGarrison !== undefined) this._strategyMinEvolutionGarrison = diffOvr.minEvolutionGarrison;
+        if (diffOvr.aggressionMult !== undefined) this._strategyAggressionMult = diffOvr.aggressionMult;
+        if (diffOvr.minPostCaptureGarrison !== undefined) this._strategyMinPostCaptureGarrison = diffOvr.minPostCaptureGarrison;
+        if (diffOvr.hazardGarrisonBonus !== undefined) this._strategyHazardGarrisonBonus = diffOvr.hazardGarrisonBonus;
+        if (diffOvr.hazardFatalityRatio !== undefined) this._strategyHazardFatalityRatio = diffOvr.hazardFatalityRatio;
+    }
+
     // ═══════════════════════════════════════════════════════════════
     //  EVOLUTION EVALUATION
     // ═══════════════════════════════════════════════════════════════
@@ -598,8 +660,8 @@ export class UtilityEngine {
 
         // Already evolved or evolving?
         if (sourceNode.evolution || sourceNode.pendingEvolution) return;
-        if (sourceNode.type === 'tunel') return;
-        if (ownCount < w[W_MIN_EVOLUTION_COUNT]) return;
+        if (sourceNode.type === 'tunel') return false;
+        if (ownCount < w[W_MIN_EVOLUTION_COUNT]) return false;
 
         // Safety check: is this node under attack?
         let incomingThreat = 0;
@@ -613,7 +675,7 @@ export class UtilityEngine {
 
         const safetyMult = incomingThreat > ownCount * 0.5 ? 0.0
             : (incomingThreat > 0 ? 0.5 : 1.0);
-        if (safetyMult < 0.01) return;
+        if (safetyMult < 0.01) return false;
 
         // Stagnation multiplier
         const timeSinceCapture = this._simTime - this._lastCaptureTime;
@@ -655,6 +717,11 @@ export class UtilityEngine {
         const totalCtrl = this._aiNodeCount + this._playerNodeCount + 1;
         const mapControl = this._aiNodeCount / totalCtrl;
 
+        // ── Capa Estratégica Inyectada (AI Directives) ──
+        const directiveFocus = this._strategyFocus;
+        const directivePrefEvo = this._strategyPrefEvo;
+        const directiveMinGarrison = this._strategyMinEvolutionGarrison;
+        
         // Score each evolution type
         const counterW = w[W_COUNTER_EVOLUTION];
 
@@ -679,6 +746,32 @@ export class UtilityEngine {
         if (playerEspinoso > 1 && counterW > 0) scoreArt *= (1.0 + 0.5 * counterW);
         if (ownCount < EVO_COSTS.artilleria) scoreArt = -Infinity;
 
+        const earlyExpansionTax = this._currentPhase === PHASE_EARLY
+            ? (mapControl < 0.45 ? 0.45 : 0.65)
+            : 1.0;
+        scoreTank *= earlyExpansionTax;
+        scoreThorn *= earlyExpansionTax;
+        scoreArt *= earlyExpansionTax;
+
+        // Apply Focus overrides
+        if (directiveFocus === 'turtle') {
+            scoreThorn *= 2.0;
+            scoreArt *= 1.5;
+            scoreTank *= 0.5;
+        } else if (directiveFocus === 'rush') {
+            scoreThorn *= 0.1;
+            scoreTank *= 0.1;
+            scoreArt *= 0.1;
+        } else if (directiveFocus === 'expansion') {
+            scoreTank *= 0.45;
+            scoreThorn *= 0.35;
+            scoreArt *= 0.35;
+        }
+        
+        if (directivePrefEvo === 'espinoso') scoreThorn *= 3.0;
+        if (directivePrefEvo === 'tanque') scoreTank *= 3.0;
+        if (directivePrefEvo === 'artilleria') scoreArt *= 3.0;
+
         // Opportunity cost: best nearby neutral attack
         let bestNeutralScore = 0;
         if (this._currentPhase === PHASE_EARLY) {
@@ -696,7 +789,7 @@ export class UtilityEngine {
                 }
             }
         }
-        const oppCost = bestNeutralScore * 0.6;
+        const oppCost = bestNeutralScore * (this._currentPhase === PHASE_EARLY ? 1.1 : 0.6);
 
         scoreTank  -= oppCost;
         scoreThorn -= oppCost;
@@ -712,14 +805,32 @@ export class UtilityEngine {
         if (scoreArt > bestEvoScore)   { bestEvoScore = scoreArt;   bestEvoAction = ACTION_EVOLVE_ART;   bestEvoCost = EVO_COSTS.artilleria; }
 
         if (bestEvoAction >= 0) {
-            // ── Capa 2.2: Prueba de supervivencia (Pilar 2) ──────────
+            if (directiveFocus === 'expansion'
+                && bestNeutralScore > 0
+                && bestNeutralScore >= bestEvoScore * 0.85) {
+                return false;
+            }
+            // ── Capa 2.2: Prueba de supervivencia Dinámica (Pilar 2) ──────────
             const remainingAfterEvo = ownCount - bestEvoCost;
-            if (remainingAfterEvo < 5) return; // No podemos pagar sin vaciarnos
+            
+            // Lógica Central Orgánica (Si no hay directiva forzada)
+            let safeGarrisonThreshold = directiveMinGarrison;
+            if (safeGarrisonThreshold === null || safeGarrisonThreshold === undefined) {
+                // Cálculo adaptativo: en early game requerimos mucho más remanente para no estancar la expansión
+                if (this._currentPhase === PHASE_EARLY) {
+                    safeGarrisonThreshold = isFrontline ? 40 : 25;
+                } else {
+                    safeGarrisonThreshold = isFrontline ? 25 : 15;
+                }
+            }
+            
+            if (remainingAfterEvo < safeGarrisonThreshold) return false;
 
-            // Buscar la amenaza más cercana (nodo enemigo/player con fuerza)
+            // Análisis de Amenaza: Calcular la suma TOTAL de fuerzas enemigas en radio de despliegue
             let nearestThreatNode = null;
             let nearestThreatDistSq = Infinity;
-            let nearestThreatForce = 0;
+            let totalNearbyThreatForce = 0;
+            
             for (let i = 0; i < this._targetNodeCount; i++) {
                 const tn = nodes[this._targetNodeIndices[i]];
                 if (tn.owner === 'neutral') continue;
@@ -728,34 +839,48 @@ export class UtilityEngine {
                 const dx = tn.x - sourceNode.x;
                 const dy = tn.y - sourceNode.y;
                 const dSq = dx * dx + dy * dy;
-                if (dSq < nearestThreatDistSq) {
-                    nearestThreatDistSq = dSq;
-                    nearestThreatNode = tn;
-                    nearestThreatForce = tForce;
+                // Consideramos un perímetro amplio para amasar la amenaza conjunta
+                if (dSq < (avgD * 2.5) * (avgD * 2.5)) {
+                    totalNearbyThreatForce += tForce;
+                    if (dSq < nearestThreatDistSq) {
+                        nearestThreatDistSq = dSq;
+                        nearestThreatNode = tn;
+                    }
                 }
             }
 
-            // Si hay amenaza cercana, simular si nos destruyen post-evolución
-            if (nearestThreatNode && nearestThreatDistSq < (avgD * 2.0) * (avgD * 2.0)) {
-                // Temporalmente reducir las tropas del nodo para la simulación
-                const origCount = sourceNode.counts ? (sourceNode.counts[aiFaction] || 0) : 0;
-                if (sourceNode.counts) sourceNode.counts[aiFaction] = remainingAfterEvo;
+            // Validar garantías matemáticas de supervivencia
+            if (totalNearbyThreatForce > 0) {
+                // A) Si la amenaza acumulada supera brutalmente el remanente, prohibir de cuajo.
+                if (totalNearbyThreatForce > remainingAfterEvo * 1.5) return false;
 
-                const simCode = this._simulator.evaluateAttack(
-                    world, nearestThreatNode, sourceNode, nearestThreatForce,
-                    nearestThreatNode.owner, null, this._rearguardSimResult
-                );
+                // B) Si la amenaza está muy cerca, simular si aguantaríamos toda su furia concentrada.
+                if (nearestThreatNode && nearestThreatDistSq < (avgD * 1.8) * (avgD * 1.8)) {
+                    // Temporalmente reducir las tropas del nodo para la simulación
+                    const origCount = sourceNode.counts ? (sourceNode.counts[aiFaction] || 0) : 0;
+                    if (sourceNode.counts) sourceNode.counts[aiFaction] = remainingAfterEvo;
 
-                if (sourceNode.counts) sourceNode.counts[aiFaction] = origCount;
+                    const simCode = this._simulator.evaluateAttack(
+                        world, nearestThreatNode, sourceNode, totalNearbyThreatForce,
+                        nearestThreatNode.owner, null, this._rearguardSimResult
+                    );
 
-                // Si el atacante nos ganaría, vetar la evolución
-                if (simCode >= RESULT_VICTORIA_PIRRICA) return;
+                    if (sourceNode.counts) sourceNode.counts[aiFaction] = origCount;
+
+                    // Si con el remanente no sacamos una Victoria Segura (o al menos logramos resistir contundentemente), vetar.
+                    // Para defensas estáticas, un EMPATE_ESTANCADO significa que nos destrozan o capturan a la larga.
+                    if (simCode >= RESULT_EMPATE_ESTANCADO) return false;
+                }
             }
 
             this._writeCommand(sourceIndex, sourceIndex, bestEvoAction, 0, 0, bestEvoScore);
             // Capa 2.1: Marcar nodo como evolucionando → no atacar este ciclo
             this._evolversUsed |= (1 << sourceIndex);
+            
+            return true;
         }
+        
+        return false;
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -767,7 +892,7 @@ export class UtilityEngine {
      * que esté débil o bajo presión. Solo se ejecuta si el nodo no atacó ni
      * evolucionó este ciclo (tercer escalón de prioridad).
      */
-    _evaluateReinforcement(sourceNode, sourceIndex, ownCount, aiFaction, nodes) {
+    _evaluateReinforcement(sourceNode, sourceIndex, ownCount, aiFaction, nodes, world) {
         const w = this._weights;
         if (w[W_REINFORCE] < 0.01) return;
         if (ownCount < 40) return; // necesita excedente para reforzar
@@ -782,6 +907,11 @@ export class UtilityEngine {
 
             const allyNode = nodes[allyWorldIdx];
             const allyCount = _countAt(allyNode, aiFaction);
+
+            // ── Validación de Bloqueo Absoluta (Alineado con el jugador) ──
+            if (world && world.isPathBlocked && world.isPathBlocked(sourceNode, allyNode)) {
+                continue;
+            }
 
             // Solo reforzar aliados en necesidad
             if (allyCount > 25) continue;
@@ -864,14 +994,26 @@ export class UtilityEngine {
             const distSq = dx * dx + dy * dy;
             if (distSq > maxReachSq) continue;
 
+            // ── Validación de Bloqueo Absoluta (Alineado con el jugador) ──
+            if (world && world.isPathBlocked && world.isPathBlocked(sourceNode, target)) {
+                continue;
+            }
+
             // ── Etapa 2: Topological viability ──
             let routeResult = null;
+            let firstHopIdx = targetIdx;
             if (navSystem && navSystem.store) {
                 navSystem.populateGameStateView(world, ownCount, baseSpeed, navStateView);
                 routeResult = navSystem.evaluatePath(
                     sourceNode.navIndex, target.navIndex, navStateView, navScoreResult
                 );
                 if (routeResult && !routeResult.isViable) continue;
+                if (routeResult && routeResult.queryHandle >= 0) {
+                    const hopIdx = navSystem.peekFirstHop(routeResult.queryHandle);
+                    if (hopIdx >= 0 && hopIdx < nodes.length) {
+                        firstHopIdx = hopIdx;
+                    }
+                }
             }
 
             // ── Etapa 3: Economy threshold ──
@@ -895,7 +1037,7 @@ export class UtilityEngine {
             if (score <= -Infinity) continue;
 
             // Insert into Top-K (K=3, insertion inline)
-            this._insertCandidate(targetIdx, score);
+            this._insertCandidate(targetIdx, score, routeResult, firstHopIdx);
         }
 
         if (this._candCount === 0) return;
@@ -906,22 +1048,45 @@ export class UtilityEngine {
         for (let k = 0; k < this._candCount; k++) {
             const candIdx    = this._candIndices[k];
             const candTarget = nodes[candIdx];
+            const candRoute = this._getCandidateRoute(k);
+            const firstHopIdx = this._candFirstHop[k] >= 0 ? this._candFirstHop[k] : candIdx;
+            const defenders = _countNonFaction(candTarget, aiFaction);
+            const minGarrison = this._getRequiredPostCaptureGarrison(candRoute, candTarget, needsDump);
+            const simBodies = this._estimateAttackBodies(
+                sourceNode, sourceIndex, ownCount, aiFaction, needsDump, world
+            );
+
+            if (!needsDump
+                && simBodies < defenders + (candRoute ? candRoute.projectedCasualties : 0) + minGarrison) {
+                continue;
+            }
 
             // Low-trust archetype: skip simulation, attack blindly
             if (trustSim < 0.01) {
-                this._writeAttackCmd(sourceNode, sourceIndex, candIdx, ownCount,
-                                     aiFaction, needsDump, world, navExecResult);
-                this._attackersUsed |= (1 << sourceIndex);
-                return;
+                if (this._writeAttackCmd(
+                    sourceNode, sourceIndex, candIdx, ownCount,
+                    aiFaction, needsDump, world, candRoute, firstHopIdx
+                )) {
+                    this._attackersUsed |= (1 << sourceIndex);
+                    return;
+                }
+                continue;
             }
 
             // Invoke Pilar 2
             const simCode = this._simulator.evaluateAttack(
-                world, sourceNode, candTarget, ownCount,
-                aiFaction, null, this._simResult
+                world, sourceNode, candTarget, simBodies,
+                aiFaction, candRoute, this._simResult
             );
 
             if (simCode >= RESULT_VICTORIA_PIRRICA) {
+                // ── Módulo 0: Garrison de Retención ────────────────────
+                // El índice 1 de _simResult tiene la cantidad de supervivientes (RESULT_SURVIVORS_BODIES)
+                const survivors = this._simResult[1] || 0;
+                if (survivors < minGarrison && !needsDump) {
+                    continue; // Vetar asalto: Ganamos pero no quedan tropas para retener el nodo.
+                }
+
                 // ── Módulo 1: Rearguard Reverse Sandbox ─────────────────
                 const wRG = w[W_REARGUARD_CHECK];
                 if (wRG > 0.01 && !needsDump) {
@@ -935,12 +1100,14 @@ export class UtilityEngine {
                 }
 
                 // Victory confirmed, issue attack via Pilar 3
-                this._writeAttackCmdOptimal(
+                if (this._writeAttackCmdResolved(
                     sourceNode, candTarget, sourceIndex, candIdx,
-                    ownCount, aiFaction, needsDump, world, navExecResult
-                );
-                this._attackersUsed |= (1 << sourceIndex);
-                return;
+                    ownCount, aiFaction, needsDump, world, candRoute,
+                    firstHopIdx, minGarrison
+                )) {
+                    this._attackersUsed |= (1 << sourceIndex);
+                    return;
+                }
             }
             // Defeat → try next candidate
         }
@@ -949,9 +1116,14 @@ export class UtilityEngine {
         if (needsDump && this._candCount > 0) {
             // Forced dump to best heuristic candidate
             const dumpIdx = this._candIndices[0];
-            this._writeAttackCmd(sourceNode, sourceIndex, dumpIdx, ownCount,
-                                 aiFaction, true, world, navExecResult);
-            this._attackersUsed |= (1 << sourceIndex);
+            const dumpRoute = this._getCandidateRoute(0);
+            const dumpFirstHop = this._candFirstHop[0] >= 0 ? this._candFirstHop[0] : dumpIdx;
+            if (this._writeAttackCmd(
+                sourceNode, sourceIndex, dumpIdx, ownCount,
+                aiFaction, true, world, dumpRoute, dumpFirstHop
+            )) {
+                this._attackersUsed |= (1 << sourceIndex);
+            }
         }
     }
 
@@ -964,15 +1136,27 @@ export class UtilityEngine {
                           aiFaction, playerFaction, nodes, allUnits, needsDump, world) {
         const w = this._weights;
         const phase = this._currentPhase;
+        const estimatedSend = this._estimateAttackBodies(
+            sourceNode, sourceIndex, ownCount, aiFaction, needsDump, world
+        );
+        const requiredGarrison = this._getRequiredPostCaptureGarrison(routeResult, target, needsDump);
 
         // ── HAZARD HARD-VETO (Módulo 2) ──────────────────────────
         // Prevent suicide through terrain hazards. If projected route 
         // casualties exceed the estimated sending forces, veto immediately.
         if (routeResult && routeResult.projectedCasualties > 0 && w[W_HAZARD_AVOIDANCE] > 0.01) {
-            const sendPowerEstimate = needsDump ? ownCount : Math.max(MIN_ATTACK_FORCE, ownCount * w[W_SEND_RATIO]);
-            if (routeResult.projectedCasualties >= sendPowerEstimate * 0.8) {
+            const fatalityRatio = this._strategyHazardFatalityRatio ?? HAZARD_FATALITY_RATIO;
+            if (routeResult.projectedCasualties >= estimatedSend * fatalityRatio) {
                 return -Infinity;
             }
+            if (!needsDump
+                && estimatedSend < defenders + routeResult.projectedCasualties + requiredGarrison) {
+                return -Infinity;
+            }
+        }
+
+        if (!needsDump && estimatedSend < defenders + requiredGarrison) {
+            return -Infinity;
         }
 
         // ── Base Value ───────────────────────────────────────────
@@ -1036,6 +1220,25 @@ export class UtilityEngine {
 
         // ── Cumulative Score ─────────────────────────────────────
         let score = base * oppMult * distMult * phaseMult * typeMult;
+
+        // ── Capa Estratégica Inyectada (AI Directives) ──
+        const directiveFocus = this._strategyFocus;
+        const directiveAggroMult = this._strategyAggressionMult;
+
+        if (directiveFocus === 'turtle') {
+            if (target.owner === 'neutral') score *= 0.4;
+            if (target.owner === playerFaction) score *= 0.6;
+        } else if (directiveFocus === 'rush') {
+            if (target.owner === playerFaction) score *= 2.0;
+            if (target.owner === 'neutral') score *= 0.5;
+        } else if (directiveFocus === 'expansion') {
+            if (target.owner === 'neutral') score *= 2.5;
+            if (target.owner === playerFaction) score *= 0.5;
+        }
+
+        if (directiveAggroMult !== null && directiveAggroMult !== undefined) {
+             score *= directiveAggroMult;
+        }
 
         // ── Cost: Route (Pilar 1) ────────────────────────────────
         if (routeResult) {
@@ -1146,48 +1349,86 @@ export class UtilityEngine {
     //  TOP-K CANDIDATE MANAGEMENT (inline insertion sort, K=3)
     // ═══════════════════════════════════════════════════════════════
 
-    _insertCandidate(targetIndex, score) {
+    _insertCandidate(targetIndex, score, routeResult, firstHopIndex) {
         if (this._candCount < TOP_K) {
             // Fill slot
             const pos = this._candCount;
-            this._candIndices[pos] = targetIndex;
-            this._candScores[pos]  = score;
+            this._setCandidateSlot(pos, targetIndex, score, routeResult, firstHopIndex);
             this._candCount++;
             // Bubble up
             for (let i = pos; i > 0; i--) {
                 if (this._candScores[i] > this._candScores[i - 1]) {
-                    // swap
-                    const tmpI = this._candIndices[i];
-                    const tmpS = this._candScores[i];
-                    this._candIndices[i] = this._candIndices[i - 1];
-                    this._candScores[i]  = this._candScores[i - 1];
-                    this._candIndices[i - 1] = tmpI;
-                    this._candScores[i - 1]  = tmpS;
+                    this._swapCandidates(i, i - 1);
                 } else break;
             }
         } else if (score > this._candScores[TOP_K - 1]) {
             // Replace worst
-            this._candIndices[TOP_K - 1] = targetIndex;
-            this._candScores[TOP_K - 1]  = score;
+            this._setCandidateSlot(TOP_K - 1, targetIndex, score, routeResult, firstHopIndex);
             // Bubble up
             for (let i = TOP_K - 1; i > 0; i--) {
                 if (this._candScores[i] > this._candScores[i - 1]) {
-                    const tmpI = this._candIndices[i];
-                    const tmpS = this._candScores[i];
-                    this._candIndices[i] = this._candIndices[i - 1];
-                    this._candScores[i]  = this._candScores[i - 1];
-                    this._candIndices[i - 1] = tmpI;
-                    this._candScores[i - 1]  = tmpS;
+                    this._swapCandidates(i, i - 1);
                 } else break;
             }
         }
+    }
+
+    _setCandidateSlot(slot, targetIndex, score, routeResult, firstHopIndex) {
+        this._candIndices[slot] = targetIndex;
+        this._candScores[slot] = score;
+        this._candHasRoute[slot] = routeResult ? 1 : 0;
+        this._candTransitTimes[slot] = routeResult ? (routeResult.projectedTransitTime || 0) : 0;
+        this._candCasualties[slot] = routeResult ? (routeResult.projectedCasualties || 0) : 0;
+        this._candDelays[slot] = routeResult ? (routeResult.suggestedDelay || 0) : 0;
+        this._candFirstHop[slot] = firstHopIndex == null ? -1 : firstHopIndex;
+    }
+
+    _swapCandidates(a, b) {
+        let tmpIndex = this._candIndices[a];
+        this._candIndices[a] = this._candIndices[b];
+        this._candIndices[b] = tmpIndex;
+
+        let tmpScore = this._candScores[a];
+        this._candScores[a] = this._candScores[b];
+        this._candScores[b] = tmpScore;
+
+        let tmpFlag = this._candHasRoute[a];
+        this._candHasRoute[a] = this._candHasRoute[b];
+        this._candHasRoute[b] = tmpFlag;
+
+        tmpScore = this._candTransitTimes[a];
+        this._candTransitTimes[a] = this._candTransitTimes[b];
+        this._candTransitTimes[b] = tmpScore;
+
+        tmpScore = this._candCasualties[a];
+        this._candCasualties[a] = this._candCasualties[b];
+        this._candCasualties[b] = tmpScore;
+
+        tmpScore = this._candDelays[a];
+        this._candDelays[a] = this._candDelays[b];
+        this._candDelays[b] = tmpScore;
+
+        tmpIndex = this._candFirstHop[a];
+        this._candFirstHop[a] = this._candFirstHop[b];
+        this._candFirstHop[b] = tmpIndex;
+    }
+
+    _getCandidateRoute(slot) {
+        if (!this._candHasRoute[slot]) return null;
+        const route = this._candRouteResult;
+        route.isViable = true;
+        route.projectedTransitTime = this._candTransitTimes[slot];
+        route.projectedCasualties = this._candCasualties[slot];
+        route.suggestedDelay = this._candDelays[slot];
+        route.queryHandle = -1;
+        return route;
     }
 
     // ═══════════════════════════════════════════════════════════════
     //  COMMAND BUFFER WRITES
     // ═══════════════════════════════════════════════════════════════
 
-    _writeCommand(srcIdx, tgtIdx, action, light, heavy, priority) {
+    _writeCommand(srcIdx, tgtIdx, action, light, heavy, priority, firstHop = -1) {
         if (this._cmdCount >= CMD_MAX) return;
         const base = this._cmdCount * CMD_STRIDE;
         this._cmdBuffer[base + CMD_SOURCE]   = srcIdx;
@@ -1196,11 +1437,12 @@ export class UtilityEngine {
         this._cmdBuffer[base + CMD_LIGHT]    = light;
         this._cmdBuffer[base + CMD_HEAVY]    = heavy;
         this._cmdBuffer[base + CMD_PRIORITY] = priority;
+        this._cmdBuffer[base + CMD_FIRST_HOP] = firstHop;
         this._cmdCount++;
     }
 
     _writeAttackCmd(sourceNode, sourceIndex, targetIndex, ownCount,
-                    aiFaction, isDump, world, navExecResult) {
+                    aiFaction, isDump, world, routeResult, firstHopIndex) {
         const w = this._weights;
         let ratio = isDump ? w[W_DUMP_RATIO] : w[W_SEND_RATIO];
 
@@ -1214,18 +1456,22 @@ export class UtilityEngine {
         const light = this._idleLightByNode[sourceIndex] || 0;
         const heavy = this._idleHeavyByNode[sourceIndex] || 0;
         const total = light + heavy;
-        if (total < 1) return;
+        if (total < 1) return false;
         const sendLight = Math.min(light, Math.ceil(toSend * (light / Math.max(1, total))));
         const sendHeavy = Math.min(heavy, toSend - sendLight);
-        this._writeCommand(sourceIndex, targetIndex, ACTION_ATTACK, sendLight, sendHeavy, 0);
+        if (sendLight + sendHeavy < 1) return false;
+        this._writeCommand(sourceIndex, targetIndex, ACTION_ATTACK, sendLight, sendHeavy, 0, firstHopIndex);
+        return true;
     }
 
     _writeAttackCmdOptimal(sourceNode, targetNode, sourceIndex, targetIndex,
-                           ownCount, aiFaction, isDump, world, navExecResult) {
+                           ownCount, aiFaction, isDump, world, routeResult,
+                           firstHopIndex, minSurvivors) {
         if (!this._solver) {
-            this._writeAttackCmd(sourceNode, sourceIndex, targetIndex, ownCount,
-                                 aiFaction, isDump, world, navExecResult);
-            return;
+            return this._writeAttackCmd(
+                sourceNode, sourceIndex, targetIndex, ownCount,
+                aiFaction, isDump, world, routeResult, firstHopIndex
+            );
         }
 
         const isWaterSweep = (world && world.waterSweeps && world.waterSweeps.length > 0);
@@ -1234,16 +1480,16 @@ export class UtilityEngine {
             ? ownCount
             : this._solver.computeMaxAllocatable(sourceNode, aiFaction, world);
 
-        if (maxAllocatable < 5 && !isDump && !isWaterSweep) return;
+        if (maxAllocatable < 5 && !isDump && !isWaterSweep) return false;
 
         const maxLight = Math.min(this._idleLightByNode[sourceIndex] || 0, maxAllocatable);
         const maxHeavy = Math.min(this._idleHeavyByNode[sourceIndex] || 0, maxAllocatable);
 
         // Módulo 3 (AI Modifier): Water Sweep Override (All-in dump)
         if (isWaterSweep) {
-            if (maxLight + maxHeavy < 1) return;
-            this._writeCommand(sourceIndex, targetIndex, ACTION_ATTACK, maxLight, maxHeavy, 0);
-            return;
+            if (maxLight + maxHeavy < 1) return false;
+            this._writeCommand(sourceIndex, targetIndex, ACTION_ATTACK, maxLight, maxHeavy, 0, firstHopIndex);
+            return true;
         }
 
         const w = this._weights;
@@ -1277,6 +1523,135 @@ export class UtilityEngine {
     //  COMMAND EXECUTION
     // ═══════════════════════════════════════════════════════════════
 
+    _writeAttackCmdResolved(sourceNode, targetNode, sourceIndex, targetIndex,
+                            ownCount, aiFaction, isDump, world, routeResult,
+                            firstHopIndex, minSurvivors) {
+        if (!this._solver) {
+            return this._writeAttackCmd(
+                sourceNode, sourceIndex, targetIndex, ownCount,
+                aiFaction, isDump, world, routeResult, firstHopIndex
+            );
+        }
+
+        const isWaterSweep = (world && world.waterSweeps && world.waterSweeps.length > 0);
+        const maxAllocatable = isDump || isWaterSweep
+            ? ownCount
+            : this._solver.computeMaxAllocatable(sourceNode, aiFaction, world);
+
+        if (maxAllocatable < 5 && !isDump && !isWaterSweep) return false;
+
+        const maxLight = Math.min(this._idleLightByNode[sourceIndex] || 0, maxAllocatable);
+        const maxHeavy = Math.min(this._idleHeavyByNode[sourceIndex] || 0, maxAllocatable);
+
+        if (isWaterSweep) {
+            if (maxLight + maxHeavy < 1) return false;
+            this._writeCommand(sourceIndex, targetIndex, ACTION_ATTACK, maxLight, maxHeavy, 0, firstHopIndex);
+            return true;
+        }
+
+        const w = this._weights;
+        const successCond = isDump ? SUCCESS_VICTORIA : SUCCESS_SEGURA;
+        const margin = isDump ? 1.0 : (w[W_SIMULATOR_TRUST] >= 1.0 ? 1.15 : 1.25);
+        const valid = this._solver.calculateOptimalDeployment(
+            world, sourceNode, targetNode,
+            maxLight, maxHeavy,
+            aiFaction, successCond, margin,
+            routeResult,
+            this._deployResult
+        );
+
+        let sendLight, sendHeavy;
+        if (valid) {
+            const expectedSurvivors = this._deployResult[3] || 0;
+            if (!isDump && expectedSurvivors < minSurvivors) {
+                return false;
+            }
+            sendLight = this._deployResult[OUT_RECOMMENDED_LIGHT] | 0;
+            sendHeavy = this._deployResult[OUT_RECOMMENDED_HEAVY] | 0;
+        } else if (isDump) {
+            sendLight = maxLight;
+            sendHeavy = maxHeavy;
+        } else {
+            return false;
+        }
+
+        if (sendLight + sendHeavy < 1) return false;
+        this._writeCommand(sourceIndex, targetIndex, ACTION_ATTACK, sendLight, sendHeavy, 0, firstHopIndex);
+        return true;
+    }
+
+    _dispatchUnitsResolved(srcNode, tgtNode, lightToSend, heavyToSend,
+                           allUnits, aiFaction, world, firstHopIndex) {
+        let hopTarget = tgtNode;
+        if (firstHopIndex >= 0 && firstHopIndex < world.nodes.length) {
+            hopTarget = world.nodes[firstHopIndex];
+        }
+
+        if (world && world.isPathBlocked && world.isPathBlocked(srcNode, hopTarget)) {
+            return;
+        }
+
+        let sentHeavy = 0;
+        let sentLight = 0;
+
+        for (let i = allUnits.length - 1; i >= 0 && sentHeavy < heavyToSend; i--) {
+            const u = allUnits[i];
+            if (u.pendingRemoval || u.faction !== aiFaction || u.state !== 'idle') continue;
+            if (u.targetNode !== srcNode) continue;
+            if ((u.power || 1) <= 1) continue;
+            u.targetNode = hopTarget;
+            u.state = 'traveling';
+            sentHeavy++;
+        }
+
+        for (let i = allUnits.length - 1; i >= 0 && sentLight < lightToSend; i--) {
+            const u = allUnits[i];
+            if (u.pendingRemoval || u.faction !== aiFaction || u.state !== 'idle') continue;
+            if (u.targetNode !== srcNode) continue;
+            if ((u.power || 1) > 1) continue;
+            u.targetNode = hopTarget;
+            u.state = 'traveling';
+            sentLight++;
+        }
+    }
+
+    _estimateAttackBodies(sourceNode, sourceIndex, ownCount, aiFaction, needsDump, world) {
+        if (needsDump) return ownCount;
+
+        const idleBodies =
+            (this._idleLightByNode[sourceIndex] || 0) +
+            (this._idleHeavyByNode[sourceIndex] || 0);
+
+        if (idleBodies < 1) return 0;
+
+        if (!this._solver) {
+            return Math.max(
+                MIN_ATTACK_FORCE,
+                Math.min(idleBodies, Math.floor(ownCount * this._weights[W_SEND_RATIO]))
+            );
+        }
+
+        const allocatable = this._solver.computeMaxAllocatable(sourceNode, aiFaction, world);
+        const budget = Math.max(MIN_ATTACK_FORCE, Math.floor(allocatable));
+        return Math.min(ownCount, idleBodies, budget);
+    }
+
+    _getRequiredPostCaptureGarrison(routeResult, targetNode, needsDump) {
+        if (needsDump) return 0;
+
+        let garrison = this._strategyMinPostCaptureGarrison ?? BASE_CAPTURE_GARRISON;
+        if (this._currentPhase === PHASE_EARLY) garrison += 4;
+        if (targetNode && targetNode.type === 'gigante') garrison += 4;
+
+        if (routeResult && routeResult.projectedCasualties > 0) {
+            const hazardBonus = this._strategyHazardGarrisonBonus ?? HAZARD_GARRISON_BONUS;
+            garrison += Math.min(12, Math.ceil(routeResult.projectedCasualties * 0.5));
+            garrison += hazardBonus;
+        }
+
+        return garrison;
+    }
+
     _dispatchUnits(srcNode, tgtNode, lightToSend, heavyToSend,
                    allUnits, aiFaction, world, navExecResult) {
         // ── Capa 4.2: Multi-hop routing real ─────────────────────
@@ -1286,6 +1661,11 @@ export class UtilityEngine {
             if (hopIdx >= 0 && hopIdx < world.nodes.length) {
                 hopTarget = world.nodes[hopIdx];
             }
+        }
+
+        // ── Validación de Bloqueo Absoluta ──
+        if (world && world.isPathBlocked && world.isPathBlocked(srcNode, hopTarget)) {
+            return;
         }
 
         let sentHeavy = 0;
@@ -1456,6 +1836,11 @@ export class UtilityEngine {
             const target = nodes[i];
             if (target.type === 'tunel' && !target.tunnelTo) continue;
 
+            // ── Validación de Bloqueo ──
+            if (world && world.isPathBlocked && world.isPathBlocked(sourceNode, target)) {
+                continue;
+            }
+
             const distSq = (target.x - sourceNode.x)**2 + (target.y - sourceNode.y)**2;
             const dist = Math.sqrt(distSq);
             if (dist < 1) continue;
@@ -1498,7 +1883,9 @@ export class UtilityEngine {
             let minDistSq = Infinity;
             for (let i = 0; i < nodes.length; i++) {
                 if (i === sourceWorldIdx) continue;
-                const d = (nodes[i].x - sourceNode.x)**2 + (nodes[i].y - sourceNode.y)**2;
+                const target = nodes[i];
+                if (world && world.isPathBlocked && world.isPathBlocked(sourceNode, target)) continue;
+                const d = (target.x - sourceNode.x)**2 + (target.y - sourceNode.y)**2;
                 if (d < minDistSq) { minDistSq = d; bestTarget = i; }
             }
         }

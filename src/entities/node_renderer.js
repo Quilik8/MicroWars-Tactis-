@@ -44,7 +44,7 @@ export class NodeRenderer {
         // ── Evoluciones Visuales ──
         if (node.evolution === 'espinoso') {
             const numSpikes = 20;
-            const spikeMaxDist = node.radius + (node.artilleryRange * 0.25);
+            const spikeMaxDist = node.radius + Node.ESPINOSO_AURA_EXTRA;
             for (let i = 0; i < numSpikes; i++) {
                 const ang = (i / numSpikes) * Math.PI * 2;
                 const rx = node.x + Math.cos(ang) * (r + 2);

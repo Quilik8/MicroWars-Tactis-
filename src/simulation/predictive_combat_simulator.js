@@ -337,9 +337,9 @@ export class PredictiveCombatSimulator {
 
         const contactTime = Math.max(0, transitTime - ((targetNode.radius * 2.5) / Math.max(1, effectiveSpeed)));
         const idleTime = Math.max(contactTime, transitTime - ((targetNode.radius * 1.5) / Math.max(1, effectiveSpeed)));
-        const defenseRadius = targetNode.radius + ((targetNode.artilleryRange || 180) * 0.25);
+        const defenseRadius = targetNode.radius + 45; // ESPINOSO_AURA_EXTRA (fixed, no longer tied to artilleryRange)
         const defenseInTime = Math.max(0, transitTime - (defenseRadius / Math.max(1, effectiveSpeed)));
-        const artilleryInTime = Math.max(0, transitTime - ((targetNode.artilleryRange || 180) / Math.max(1, effectiveSpeed)));
+        const artilleryInTime = Math.max(0, transitTime - ((targetNode.artilleryRange || 320) / Math.max(1, effectiveSpeed)));
 
         this.attackerDataBuffer[ATT_CONTACT_TIME] = contactTime;
         this.attackerDataBuffer[ATT_IDLE_TIME] = idleTime;
@@ -402,7 +402,7 @@ export class PredictiveCombatSimulator {
         this.defenderStateBuffer[DEF_ATTACKER_TUNNEL_ACTIVE] = (targetNode.tunnelTo && targetNode.tunnelTo.owner === attackerFactionId && targetNode.type !== 'tunel') ? 1 : 0;
         this.defenderStateBuffer[DEF_CURRENT_WORLD_UNITS] = world.allUnits ? world.allUnits.length : 0;
         this.defenderStateBuffer[DEF_ARTILLERY_INTERVAL] = targetNode.artilleryInterval || 1.8;
-        this.defenderStateBuffer[DEF_ARTILLERY_RANGE] = targetNode.artilleryRange || 180;
+        this.defenderStateBuffer[DEF_ARTILLERY_RANGE] = targetNode.artilleryRange || 320;
         this.defenderStateBuffer[DEF_RADIUS] = targetNode.radius || 25;
         this.defenderStateBuffer[DEF_ATTACK_DAMAGE_CARRY] = attackDamageCarry;
         this.defenderStateBuffer[DEF_DEFENSE_DAMAGE_CARRY] = defenseDamageCarry;
@@ -468,7 +468,7 @@ export class PredictiveCombatSimulator {
         const attackerTunnelActive = (defenderStateBuffer[DEF_ATTACKER_TUNNEL_ACTIVE] | 0) === 1;
         const currentWorldUnits = defenderStateBuffer[DEF_CURRENT_WORLD_UNITS] | 0;
         const artilleryIntervalBase = defenderStateBuffer[DEF_ARTILLERY_INTERVAL] || 1.8;
-        const artilleryRange = defenderStateBuffer[DEF_ARTILLERY_RANGE] || 180;
+        const artilleryRange = defenderStateBuffer[DEF_ARTILLERY_RANGE] || 320;
         const nodeRadius = defenderStateBuffer[DEF_RADIUS] || 25;
         const combatInterval = defenderStateBuffer[DEF_COMBAT_INTERVAL] || COMBAT_INTERVAL_DEFAULT;
         let currentOwnerFactionIndex = ownerSide === SIDE_ATTACK ? attackerFactionIndex : ownerFactionIndex;
@@ -777,7 +777,10 @@ export class PredictiveCombatSimulator {
             }
 
             if (travelingWindowOpen && currentEvolutionCode === EVOLUTION_ESPINOSO && currentTime + SIM_EPSILON >= nextEspinosoTime) {
-                applyBodyLosses(attackerTravelLight, attackerTravelHeavy, 1, bodyScratch);
+                // Daño proporcional a la densidad: 1 base + 5% de atacantes en tránsito
+                const travelingBodies = getTotalBodies(attackerTravelLight, attackerTravelHeavy);
+                const killCount = Math.min(travelingBodies, 1 + Math.floor(travelingBodies * 0.05));
+                applyBodyLosses(attackerTravelLight, attackerTravelHeavy, killCount, bodyScratch);
                 const killedLight = bodyScratch.killedLight | 0;
                 const killedHeavy = bodyScratch.killedHeavy | 0;
 

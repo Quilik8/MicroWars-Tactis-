@@ -1362,15 +1362,20 @@ html {
     box-shadow: 0 0 30px rgba(93, 173, 226, 0.6);
 }
 
+.level-node-wrapper:hover {
+    z-index: 50; /* Bring hovered node to front */
+}
+
 .level-info {
     position: absolute;
-    width: 250px;
+    width: 380px; /* Wider to prevent text cut-off on long descriptions */
     left: 50%;
     transform: translateX(-50%);
     top: 80px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s, transform 0.3s;
+    z-index: 100;
 }
 
 .level-node-wrapper:hover .level-info {

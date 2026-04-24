@@ -243,6 +243,10 @@ export class InputManager {
             return true;
         }
 
+        if (this.world.isPathBlocked && this.world.isPathBlocked(src, dst)) {
+            return false;
+        }
+
         if (this.world.popAt(src, 'player') < TUNNEL_COST) return false;
 
         CombatManager.killNPower(this.world, src, 'player', TUNNEL_COST);
@@ -467,8 +471,10 @@ export class InputManager {
             // Drag LMB: envío de tropas (nunca crea túnel).
             // Condición: player tiene tropas en src (puede estar conquistando el nodo).
             if (clicked && clicked !== src && this.world.popAt(src, 'player') > 0) {
-                this.world.sendTroops(src, clicked, this.sendPercent);
-                if (this.sfx) this.sfx.move();
+                if (!this.world.isPathBlocked || !this.world.isPathBlocked(src, clicked)) {
+                    this.world.sendTroops(src, clicked, this.sendPercent);
+                    if (this.sfx) this.sfx.move();
+                }
             }
             if (!clicked) this._deselect();
         } else {
@@ -535,8 +541,10 @@ export class InputManager {
         if (this.selectedNode && this.selectedNode !== clicked) {
             // Condición: player tiene tropas en selectedNode (puede estar conquistando).
             if (this.world.popAt(this.selectedNode, 'player') > 0) {
-                this.world.sendTroops(this.selectedNode, clicked, this.sendPercent);
-                if (this.sfx) this.sfx.move();
+                if (!this.world.isPathBlocked || !this.world.isPathBlocked(this.selectedNode, clicked)) {
+                    this.world.sendTroops(this.selectedNode, clicked, this.sendPercent);
+                    if (this.sfx) this.sfx.move();
+                }
             }
             this._deselect();
             return;

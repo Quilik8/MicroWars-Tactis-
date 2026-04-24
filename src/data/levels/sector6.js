@@ -7,7 +7,7 @@ export const sector6 = {
     config: { allowEvolutions: true },
     levels: [
         {
-            name: 'Nivel 1: El Latido de la Espiral',
+            name: 'Nivel 27: El Latido de la Espiral',
             description: 'Las barreras pulsan hacia afuera desde el centro como un latido.\nSincroniza el avance a traves de las capas mientras evitas el rayo solar.',
             nodes: [
                 node('p_base', 0.1, 0.5, 'player', 'gigante', 150),
@@ -28,7 +28,7 @@ export const sector6 = {
             ]
         },
         {
-            name: 'Nivel 2: Las Tres Eclusas',
+            name: 'Nivel 28: Las Tres Eclusas',
             description: 'Tres barreras masivas cruzan el mapa. Sus compuertas se abren en momentos distintos.\nAcumula tropas entre eclusas y avanza en el momento exacto.',
             nodes: [
                 node('p_base', 0.08, 0.5, 'player', 'gigante', 150),
@@ -47,7 +47,7 @@ export const sector6 = {
             ]
         },
         {
-            name: 'Nivel 3: La Prision de Sombras',
+            name: 'Nivel 29: La Prision de Sombras',
             description: 'Los nodos neurales mas ricos estan protegidos en celdas temporales.\nEl Rayo Solar los resetea periodicamente. Entra y refuerza justo despues del barrido.',
             nodes: [
                 node('p_base', 0.1, 0.8, 'player', 'gigante', 150),
@@ -66,7 +66,7 @@ export const sector6 = {
             ]
         },
         {
-            name: 'Nivel 4: Laberinto de Espejos Desfasados',
+            name: 'Nivel 30: Laberinto de Espejos Desfasados',
             description: 'Dos opciones: la ruta central es rapida pero esta plagada de muros parpadeantes mortales.\nLa ruta exterior es un paseo largo y lento.',
             nodes: [
                 node('p_base', 0.1, 0.5, 'player', 'gigante', 150),
@@ -94,7 +94,7 @@ export const sector6 = {
             ]
         },
         {
-            name: 'Nivel 5: El Gran Engranaje',
+            name: 'Nivel 31: El Gran Engranaje',
             description: 'El nucleo del engranaje se hace accesible cada 25 segundos.\nLos rieles solares limpian formaciones.',
             nodes: [
                 node('p_base', 0.1, 0.5, 'player', 'gigante', 170),

@@ -86,6 +86,11 @@ export class LevelManager {
 
         this.ui.setGameState('PLAYING');
         this.world.clearLevel();
+        
+        // clearLevel() destroys all layerNodes children, including _barrierGfx.
+        // We must drop the reference so it can be re-created if the new level needs it.
+        this._barrierGfx = null;
+
         if (this.ui.callbacks && this.ui.callbacks.onResetCamera) {
             this.ui.callbacks.onResetCamera();
         }
@@ -101,10 +106,14 @@ export class LevelManager {
         // Actualizar título global de intro si existe el callback
         const sectorName = currentSector.name;
         
+
         if (!levelData || !levelData.nodes) {
             console.error("Nivel vacío o no implementado");
             return;
         }
+        
+        // ── Directrices Estratégicas IA (AI Strategy) ──
+        this.world.aiStrategy = this._mergeAIStrategy(currentSector.aiStrategy, levelData.aiStrategy);
 
         this.world.nodes = levelData.nodes.map((nData, nodeIndex) => {
             let n = new Node(nData.x * cx, nData.y * cy, nData.owner, nData.type);
@@ -216,7 +225,21 @@ export class LevelManager {
                 }
                 this.world.barriers.push({ ...b });
             }
+            this._currentBarriers = levelData.barriers;
             this._drawBarriers(levelData.barriers, cx, cy);
+
+            // Registrar resize para redibujar barreras con el viewport correcto.
+            // Eliminamos el handler anterior primero para evitar duplicados.
+            if (this._barrierResizeHandler) {
+                window.removeEventListener('resize', this._barrierResizeHandler);
+            }
+            this._barrierResizeHandler = () => this.redrawBarriers();
+            window.addEventListener('resize', this._barrierResizeHandler);
+        } else {
+            this._currentBarriers = null;
+            if (this._barrierGfx) {
+                this._barrierGfx.clear();
+            }
         }
 
         if (levelData.zones) {
@@ -268,7 +291,7 @@ export class LevelManager {
 
         // ── Encuadre dinámico de cámara ──────────────────────────────
         if (this.game.world && this.world.nodes.length > 0) {
-            const padding   = 150;
+            const padding   = levelData.cameraPadding !== undefined ? levelData.cameraPadding : 150;
             const mapWidth  = (maxX - minX) + padding * 2;
             const mapHeight = (maxY - minY) + padding * 2;
             let idealScale  = Math.min(cx / mapWidth, cy / mapHeight);
@@ -281,10 +304,16 @@ export class LevelManager {
             this.game.world.position.y = (cy / 2) - (mapCenterY * idealScale);
         }
 
+        let absoluteLevelNumber = 0;
+        for (let i = 0; i < sectorIndex; i++) {
+            absoluteLevelNumber += SECTORS[i].levels.length;
+        }
+        absoluteLevelNumber += levelIndex + 1;
+
         const introTitle  = document.getElementById('introTitle');
         const introDesc   = document.getElementById('introDesc');
         const introScreen = document.getElementById('levelIntro');
-        if (introTitle) introTitle.innerText = levelData.name || `SECTOR ${sectorIndex + 1} - NIVEL ${levelIndex + 1}`;
+        if (introTitle) introTitle.innerText = levelData.name || `SECTOR ${sectorIndex + 1} - NIVEL ${absoluteLevelNumber}`;
         if (introDesc)  introDesc.innerText  = levelData.description || "Acaba con el nido enemigo.";
         if (introScreen) {
             introScreen.classList.remove('hidden');
@@ -300,6 +329,31 @@ export class LevelManager {
         }
 
         if (this.startMusic) this.startMusic('LEVEL', sectorIndex);
+    }
+
+    _mergeAIStrategy(sectorStrategy, levelStrategy) {
+        if (!sectorStrategy && !levelStrategy) return null;
+
+        const merged = JSON.parse(JSON.stringify(sectorStrategy || {}));
+        const levelClone = levelStrategy ? JSON.parse(JSON.stringify(levelStrategy)) : null;
+        if (!levelClone) return merged;
+
+        Object.assign(merged, levelClone);
+
+        if (sectorStrategy && sectorStrategy.difficultyOverrides) {
+            merged.difficultyOverrides = JSON.parse(JSON.stringify(sectorStrategy.difficultyOverrides));
+        }
+        if (levelClone.difficultyOverrides) {
+            if (!merged.difficultyOverrides) merged.difficultyOverrides = {};
+            for (const diff in levelClone.difficultyOverrides) {
+                merged.difficultyOverrides[diff] = {
+                    ...(merged.difficultyOverrides[diff] || {}),
+                    ...levelClone.difficultyOverrides[diff],
+                };
+            }
+        }
+
+        return merged;
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -348,13 +402,24 @@ export class LevelManager {
     // _drawBarriers — dibuja las paredes de cristal azul en layerNodes.
     //
     // Visual: Campo de fuerza de energía luminosa (sin mallas complejas).
-    //   1. Relleno azul cian semitransparente con glow
-    //   2. Borde exterior brillante
-    //   3. Destello interior
+    //   1. Relleno azul cian semitransparente
+    //   2. Borde interior brillante (alignment:1 para que el stroke
+    //      quede DENTRO del AABB de colisión, sin sobresalir)
+    //   3. Núcleo interior (destello extra si la barrera es ancha)
+    //
+    // ⚠️  PixiJS v8: NO crear un Graphics por barrera — se usa UN único
+    //     Graphics compartido para todo el draw (patrón batch v8).
+    //     El clear() se hace UNA sola vez antes de dibujar todas.
     // ─────────────────────────────────────────────────────────────────
     _drawBarriers(barriers, cx, cy) {
-        const gfx = new PIXI.Graphics();
-        
+        if (!this._barrierGfx) {
+            this._barrierGfx = new PIXI.Graphics();
+            this.game.layerNodes.addChild(this._barrierGfx);
+        }
+
+        const gfx = this._barrierGfx;
+        gfx.clear();
+
         for (const b of barriers) {
             const rx = b.x * cx;
             const ry = b.y * cy;
@@ -365,20 +430,27 @@ export class LevelManager {
             gfx.rect(rx, ry, rw, rh);
             gfx.fill({ color: 0x0088ff, alpha: 0.25 });
 
-            // 2. Borde exterior brillante (glow azul eléctrico)
+            // 2. Borde interior — alignment:1 significa que el trazo se
+            //    dibuja DENTRO del rect, respetando el AABB de colisión.
             gfx.rect(rx, ry, rw, rh);
-            gfx.stroke({ color: 0x00e5ff, alpha: 0.85, width: 2.5 });
+            gfx.stroke({ color: 0x00e5ff, alpha: 0.90, width: 2.5, alignment: 1 });
 
-            // 3. Highlight interior / núcleo central de la barrera
-            if (rw > 6 && rh > 6) {
-                // Dibujamos un núcleo sólido ligeramente más pequeño en el centro
-                const inset = 4;
+            // 3. Highlight interior (solo si hay espacio suficiente)
+            if (rw > 10 && rh > 10) {
+                const inset = 3;
                 gfx.rect(rx + inset, ry + inset, rw - inset * 2, rh - inset * 2);
-                gfx.fill({ color: 0x4dd0e1, alpha: 0.15 });
-                gfx.stroke({ color: 0x84ffff, alpha: 0.4, width: 1.5 });
+                gfx.fill({ color: 0x4dd0e1, alpha: 0.12 });
+                gfx.stroke({ color: 0x84ffff, alpha: 0.35, width: 1, alignment: 1 });
             }
         }
+    }
 
-        this.game.layerNodes.addChild(gfx);
+    // Redibujar barreras cuando el viewport cambie de tamaño.
+    // Llamado desde engine._resize() vía world.onResize.
+    redrawBarriers() {
+        if (!this._barrierGfx || !this._currentBarriers) return;
+        const cx = this.game.width;
+        const cy = this.game.height;
+        this._drawBarriers(this._currentBarriers, cx, cy);
     }
 }

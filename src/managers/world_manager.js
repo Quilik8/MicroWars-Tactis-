@@ -465,7 +465,8 @@ export class WorldManager {
         const node = this.nodes[nodeIdx];
         if (node.pendingEvolution) {
             node.pendingEvolutionEtaSec -= dt;
-            if (node.pendingEvolutionEtaSec <= 0) {
+            if (node.pendingEvolutionEtaSec < 0) node.pendingEvolutionEtaSec = 0;
+            if (node.pendingEvolutionEtaSec <= 0 && node.owner !== 'neutral') {
                 node.completeEvolution();
             }
         }
@@ -573,7 +574,236 @@ export class WorldManager {
             const hy = hz.y * cy;
             const hR = hz.radius * cx;
 
-            if (hz.shape === 'puddle') {
+            // Initialize a stable per-hazard seed for animation variation
+            if (hz.seed === undefined) hz.seed = (hz.x * 1000 + hz.y * 777) | 0;
+
+            if (hz.shape === 'flood') {
+                // ── FLOOD: entire map is toxic, with organic safe-zone holes ──
+                const alphaPulse = 0.20 + Math.sin(t * 2.0 + hz.seed) * 0.05;
+                const margin = 40;
+
+                // 1) CONSTRUIR EL LAGO COLOSAL DE VENENO Y PERFORAR LOS HUECOS
+                this.hazardGraphics.beginPath();
+                const outerSegs = 64;
+                const fSy = hz.scaleY || 1.0;
+                for (let i = 0; i <= outerSegs; i++) {
+                    const angle = (i / outerSegs) * Math.PI * 2;
+                    const ripple = Math.sin(angle * 6 + t * 1.5 + hz.seed) * 12
+                                 + Math.cos(angle * 4 - t * 1.2 + hz.seed * 0.8) * 8
+                                 + Math.sin(angle * 9 + t * 2.0) * 5;
+                    const r = hR + ripple;
+                    const px = hx + Math.cos(angle) * r;
+                    const py = hy + Math.sin(angle) * (r * fSy);
+                    if (i === 0) this.hazardGraphics.moveTo(px, py);
+                    else this.hazardGraphics.lineTo(px, py);
+                }
+                this.hazardGraphics.closePath();
+
+                if (hz.safeZones) {
+                    const holeSegs = 36;
+                    for (let s = 0; s < hz.safeZones.length; s++) {
+                        const sz = hz.safeZones[s];
+                        const sx = sz.x * cx;
+                        const sy = sz.y * cy;
+                        const sR = sz.radius * cx;
+                        const holeSeed = (s * 137 + hz.seed) | 0;
+
+                        for (let i = holeSegs; i >= 0; i--) {
+                            const angle = (i / holeSegs) * Math.PI * 2;
+                            const ripple = Math.sin(angle * 4 + holeSeed) * 6
+                                         + Math.cos(angle * 6 + holeSeed * 0.3) * 4;
+                            const r = sR + ripple;
+                            const px = sx + Math.cos(angle) * r;
+                            const py = sy + Math.sin(angle) * r;
+                            if (i === holeSegs) this.hazardGraphics.moveTo(px, py);
+                            else this.hazardGraphics.lineTo(px, py);
+                        }
+                        this.hazardGraphics.closePath();
+                    }
+                }
+
+                this.hazardGraphics.fill({ color: hz.color || 0x2ecc71, alpha: alphaPulse });
+
+                // 2) DIBUJAR TODAS LAS SUPERFICIES DE TIERRA MARRÓN ENCIMA (para tapar fugas del charco)
+                if (hz.safeZones) {
+                    const holeSegs = 36;
+                    for (let s = 0; s < hz.safeZones.length; s++) {
+                        const sz = hz.safeZones[s];
+                        const sx = sz.x * cx;
+                        const sy = sz.y * cy;
+                        const sR = sz.radius * cx;
+                        const holeSeed = (s * 137 + hz.seed) | 0;
+
+                        this.hazardGraphics.beginPath();
+                        for (let i = 0; i <= holeSegs; i++) {
+                            const angle = (i / holeSegs) * Math.PI * 2;
+                            const ripple = Math.sin(angle * 4 + holeSeed) * 6
+                                         + Math.cos(angle * 6 + holeSeed * 0.3) * 4;
+                            const r = sR + ripple;
+                            const px = sx + Math.cos(angle) * r;
+                            const py = sy + Math.sin(angle) * r;
+                            if (i === 0) this.hazardGraphics.moveTo(px, py);
+                            else this.hazardGraphics.lineTo(px, py);
+                        }
+                        this.hazardGraphics.closePath();
+                        this.hazardGraphics.fill({ color: 0x2e1a10, alpha: 1.0 });
+                    }
+                }
+
+            } else if (hz.shape === 'rect_puddle') {
+                // ── RECT PUDDLE: rectangular hazard with organic wobbling edges ──
+                const rLeft   = hz.x * cx;
+                const rTop    = hz.y * cy;
+                const rWidth  = hz.width * cx;
+                const rHeight = hz.height * cy;
+                const segsH   = 24; // segments per horizontal edge
+                const segsV   = Math.max(8, Math.round(segsH * (rHeight / rWidth)));
+                const alphaPulse = 0.22 + Math.sin(t * 2.5 + hz.seed) * 0.05;
+
+                this.hazardGraphics.beginPath();
+
+                // Top edge (left to right)
+                for (let i = 0; i <= segsH; i++) {
+                    const frac = i / segsH;
+                    const baseX = rLeft + frac * rWidth;
+                    const ripple = Math.sin(frac * 8 + t * 2.0 + hz.seed) * 7
+                                 + Math.cos(frac * 5 - t * 1.4 + hz.seed * 0.6) * 4;
+                    const py = rTop + ripple;
+                    if (i === 0) this.hazardGraphics.moveTo(baseX, py);
+                    else this.hazardGraphics.lineTo(baseX, py);
+                }
+                // Right edge (top to bottom)
+                for (let i = 1; i <= segsV; i++) {
+                    const frac = i / segsV;
+                    const baseY = rTop + frac * rHeight;
+                    const ripple = Math.sin(frac * 7 + t * 1.8 + hz.seed * 1.3) * 7
+                                 + Math.cos(frac * 4 - t * 1.6 + hz.seed * 0.9) * 4;
+                    const px = rLeft + rWidth + ripple;
+                    this.hazardGraphics.lineTo(px, baseY);
+                }
+                // Bottom edge (right to left)
+                for (let i = segsH - 1; i >= 0; i--) {
+                    const frac = i / segsH;
+                    const baseX = rLeft + frac * rWidth;
+                    const ripple = Math.sin(frac * 6 - t * 2.2 + hz.seed * 0.8) * 7
+                                 + Math.cos(frac * 9 + t * 1.3 + hz.seed * 1.5) * 4;
+                    const py = rTop + rHeight + ripple;
+                    this.hazardGraphics.lineTo(baseX, py);
+                }
+                // Left edge (bottom to top)
+                for (let i = segsV - 1; i >= 1; i--) {
+                    const frac = i / segsV;
+                    const baseY = rTop + frac * rHeight;
+                    const ripple = Math.sin(frac * 5 + t * 1.9 + hz.seed * 1.7) * 7
+                                 + Math.cos(frac * 8 - t * 1.1 + hz.seed * 0.4) * 4;
+                    const px = rLeft + ripple;
+                    this.hazardGraphics.lineTo(px, baseY);
+                }
+                this.hazardGraphics.closePath();
+                this.hazardGraphics.fill({ color: hz.color || 0x2ecc71, alpha: alphaPulse });
+                this.hazardGraphics.stroke({ color: 0x27ae60, alpha: 0.55 + Math.sin(t * 4 + hz.seed) * 0.15, width: 3 });
+
+                // 2) DIBUJAR TODAS LAS SUPERFICIES DE TIERRA MARRÓN ENCIMA
+                this.nodes.forEach(n => {
+                    if (n.type === 'tunel' || n.isMobile) return;
+                    
+                    // Comprobar intersección simple del centro del nodo con el rectángulo del charco
+                    if (n.x >= rLeft && n.x <= rLeft + rWidth && n.y >= rTop && n.y <= rTop + rHeight) {
+                        const holeSegs = 36;
+                        // Radio dinámico! Extraído de las propiedades reales del nodo colisionado
+                        const sR = n.radius * 1.5; 
+                        const holeSeed = (n.x * 137 + hz.seed) | 0;
+
+                        this.hazardGraphics.beginPath();
+                        for (let i = 0; i <= holeSegs; i++) {
+                            const angle = (i / holeSegs) * Math.PI * 2;
+                            const ripple = Math.sin(angle * 4 + holeSeed) * 6
+                                         + Math.cos(angle * 6 + holeSeed * 0.3) * 4;
+                            const r = sR + ripple;
+                            const px = n.x + Math.cos(angle) * r;
+                            const py = n.y + Math.sin(angle) * r;
+                            if (i === 0) this.hazardGraphics.moveTo(px, py);
+                            else this.hazardGraphics.lineTo(px, py);
+                        }
+                        this.hazardGraphics.closePath();
+                        this.hazardGraphics.fill({ color: 0x2e1a10, alpha: 1.0 });
+                    }
+                });
+
+            } else if (hz.shape === 'ring') {
+                // ── RING: annular hazard with organic wobbling borders ──
+                const sy = hz.scaleY || 1.0;
+                const iR = (hz.innerRadius || hz.radius * 0.5) * cx;
+                const segments = 48;
+                const alphaPulse = 0.22 + Math.sin(t * 2.5 + hz.seed) * 0.06;
+
+                // 1) CONSTRUIR EL ANILLO DE VENENO Y PERFORAR EL HUECO
+                
+                // Outer contour (organic wobble)
+                this.hazardGraphics.beginPath();
+                for (let i = 0; i <= segments; i++) {
+                    const angle = (i / segments) * Math.PI * 2;
+                    const ripple = Math.sin(angle * 6 + t * 1.8 + hz.seed) * 8
+                                 + Math.cos(angle * 4 - t * 1.3 + hz.seed * 0.7) * 5
+                                 + Math.sin(angle * 9 + t * 2.6) * 3;
+                    const r = hR + ripple;
+                    const px = hx + Math.cos(angle) * r;
+                    const py = hy + Math.sin(angle) * (r * sy);
+                    if (i === 0) this.hazardGraphics.moveTo(px, py);
+                    else this.hazardGraphics.lineTo(px, py);
+                }
+                this.hazardGraphics.closePath();
+
+                // Inner contour (the hole)
+                for (let i = segments; i >= 0; i--) {
+                    const angle = (i / segments) * Math.PI * 2;
+                    const ripple = Math.sin(angle * 5 + hz.seed * 1.3) * 6
+                                 + Math.cos(angle * 7 + hz.seed * 0.5) * 4
+                                 + Math.sin(angle * 3 + hz.seed * 0.9) * 3;
+                    const r = iR + ripple;
+                    const px = hx + Math.cos(angle) * r;
+                    const py = hy + Math.sin(angle) * (r * sy);
+                    if (i === segments) this.hazardGraphics.moveTo(px, py);
+                    else this.hazardGraphics.lineTo(px, py);
+                }
+                this.hazardGraphics.closePath();
+
+                // Fill with evenodd to create the donut hole
+                this.hazardGraphics.fill({ color: hz.color || 0x2ecc71, alpha: alphaPulse });
+
+                // 2) DIBUJAR LA ISLA DE TIERRA MARRÓN ENCIMA (tapa fugas)
+                this.hazardGraphics.beginPath();
+                for (let i = 0; i <= segments; i++) {
+                    const angle = (i / segments) * Math.PI * 2;
+                    const ripple = Math.sin(angle * 5 + hz.seed * 1.3) * 6
+                                 + Math.cos(angle * 7 + hz.seed * 0.5) * 4
+                                 + Math.sin(angle * 3 + hz.seed * 0.9) * 3;
+                    const r = iR + ripple;
+                    const px = hx + Math.cos(angle) * r;
+                    const py = hy + Math.sin(angle) * (r * sy);
+                    if (i === 0) this.hazardGraphics.moveTo(px, py);
+                    else this.hazardGraphics.lineTo(px, py);
+                }
+                this.hazardGraphics.closePath();
+                this.hazardGraphics.fill({ color: 0x2e1a10, alpha: 1.0 });
+
+                // Outer edge glow
+                this.hazardGraphics.beginPath();
+                for (let i = 0; i <= segments; i++) {
+                    const angle = (i / segments) * Math.PI * 2;
+                    const ripple = Math.sin(angle * 6 + t * 1.8 + hz.seed) * 8
+                                 + Math.cos(angle * 4 - t * 1.3 + hz.seed * 0.7) * 5
+                                 + Math.sin(angle * 9 + t * 2.6) * 3;
+                    const r = hR + ripple;
+                    const px = hx + Math.cos(angle) * r;
+                    const py = hy + Math.sin(angle) * (r * sy);
+                    if (i === 0) this.hazardGraphics.moveTo(px, py);
+                    else this.hazardGraphics.lineTo(px, py);
+                }
+                this.hazardGraphics.closePath();
+                this.hazardGraphics.stroke({ color: 0x27ae60, alpha: 0.55 + Math.sin(t * 4) * 0.15, width: 3 });
+
+            } else if (hz.shape === 'puddle') {
                 // Organic bubbling shape
                 this.hazardGraphics.beginPath();
                 const sy = hz.scaleY || 1.0;
@@ -617,5 +847,70 @@ export class WorldManager {
             this.grid.setSurfaceStore(store);
         }
         return store;
+    }
+
+    isPathBlocked(fromNode, toNode) {
+        if (fromNode.isMobile || toNode.isMobile) return false;
+
+        let allBarriers = this.barriers ? [...this.barriers] : [];
+        if (this.intermittentBarriers && this.intermittentBarriers.length > 0) {
+            for (let ib of this.intermittentBarriers) {
+                const activeBounds = ib.getActiveBounds();
+                if (activeBounds && activeBounds.length > 0) {
+                    allBarriers = allBarriers.concat(activeBounds);
+                }
+            }
+        }
+
+        if (allBarriers.length === 0) return false;
+
+        const cx = this.game ? this.game.width : (window.innerWidth || 1920);
+        const cy = this.game ? this.game.height : (window.innerHeight || 1080);
+
+        for (let b of allBarriers) {
+            const left = b.x * cx;
+            const top = b.y * cy;
+            const right = left + (b.width * cx);
+            const bottom = top + (b.height * cy);
+
+            if (this._segmentRectIntersect(fromNode.x, fromNode.y, toNode.x, toNode.y, left, top, right, bottom)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    _segmentRectIntersect(x1, y1, x2, y2, left, top, right, bottom) {
+        let tMin = 0;
+        let tMax = 1;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+
+        if (Math.abs(dx) < 1e-6) {
+            if (x1 < left || x1 > right) return false;
+        } else {
+            const tx1 = (left - x1) / dx;
+            const tx2 = (right - x1) / dx;
+            const txMin = tx1 < tx2 ? tx1 : tx2;
+            const txMax = tx1 > tx2 ? tx1 : tx2;
+            if (txMin > tMin) tMin = txMin;
+            if (txMax < tMax) tMax = txMax;
+            if (tMax < tMin) return false;
+        }
+
+        if (Math.abs(dy) < 1e-6) {
+            if (y1 < top || y1 > bottom) return false;
+        } else {
+            const ty1 = (top - y1) / dy;
+            const ty2 = (bottom - y1) / dy;
+            const tyMin = ty1 < ty2 ? ty1 : ty2;
+            const tyMax = ty1 > ty2 ? ty1 : ty2;
+            if (tyMin > tMin) tMin = tyMin;
+            if (tyMax < tMax) tMax = tyMax;
+            if (tMax < tMin) return false;
+        }
+
+        if (tMax < 0 || tMin > 1) return false;
+        return tMax >= tMin;
     }
 }

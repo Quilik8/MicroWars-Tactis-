@@ -124,32 +124,89 @@ export class PhysicsManager {
                 for (let u of world.allUnits) {
                     if (u.pendingRemoval) continue;
                     
-                    // Inmunidad: Si están dentro del Ferry Orbital (nodo móvil)
-                    if (u.state === 'idle' && u.targetNode && u.targetNode.isMobile) {
+                    // Inmunidad universal: Si están en la base (idle), el nodo / superficie de tierra las protege
+                    if (u.state === 'idle') {
                         continue;
                     }
-                    
-                    const dx = u.x - hx;
-                    const sy = hz.scaleY || 1.0;
-                    const dy = (u.y - hy) / sy;
-                    
-                    if (dx * dx + dy * dy < hR * hR) {
-                        if (hz.shape === "semicircle" && dx < 0) {
-                            continue; // Ignorar colisión en la mitad trasera/recta del arco
+
+                    // Inmunidad extra: Si están dentro del radio de cualquier nodo, no sufren daño
+                    let safeInNode = false;
+                    for (let n of world.nodes) {
+                        if (n.type === 'tunel') continue;
+                        let dnx = u.x - n.x;
+                        let dny = u.y - n.y;
+                        if (dnx * dnx + dny * dny <= n.radius * n.radius) {
+                            safeInNode = true;
+                            break;
                         }
+                    }
+                    if (safeInNode) continue;
 
-                        anyUnitsInHazard = true;
+                    // ── Shape-aware containment check ──
+                    let inHazard = false;
 
-                        if (killedThisFrame < killsPending) {
-                            // Deterministic damage: mark for exact removal
-                            u.pendingRemoval = true;
-                            killedThisFrame++;
-
-                            // Flash effect visual universal
-                            if (u.sprite && !u.sprite.destroyed) {
-                                u.sprite.alpha = 0.2; // Parpadeo casi invisible
-                                setTimeout(() => { if (u.sprite && !u.sprite.destroyed) u.sprite.alpha = 1.0; }, 80);
+                    if (hz.shape === 'flood') {
+                        // ── Verificar si estamos dentro del colosal contorno del lago ──
+                        const dx = u.x - hx;
+                        const sy = hz.scaleY || 1.0;
+                        const dy = (u.y - hy) / sy;
+                        if (dx * dx + dy * dy < hR * hR) {
+                            inHazard = true;
+                            // Revisar inmunidad en islas
+                            if (hz.safeZones) {
+                                for (let s = 0; s < hz.safeZones.length; s++) {
+                                    const sz = hz.safeZones[s];
+                                    const sx = sz.x * world.game.width;
+                                    const sy = sz.y * world.game.height;
+                                    const sR = sz.radius * world.game.width;
+                                    const sdx = u.x - sx;
+                                    const sdy = u.y - sy;
+                                    if (sdx * sdx + sdy * sdy < sR * sR) {
+                                        inHazard = false;
+                                        break;
+                                    }
+                                }
                             }
+                        }
+                    } else if (hz.shape === 'rect_puddle') {
+                        // Rectangular bounds check
+                        const left   = hz.x * world.game.width;
+                        const top    = hz.y * world.game.height;
+                        const right  = left + (hz.width * world.game.width);
+                        const bottom = top  + (hz.height * world.game.height);
+                        inHazard = (u.x >= left && u.x <= right && u.y >= top && u.y <= bottom);
+                    } else {
+                        // Circular / elliptical containment (puddle, ring, semicircle)
+                        const dx = u.x - hx;
+                        const sy = hz.scaleY || 1.0;
+                        const dy = (u.y - hy) / sy;
+                        const distSq = dx * dx + dy * dy;
+
+                        if (distSq < hR * hR) {
+                            if (hz.shape === "semicircle" && dx < 0) {
+                                // skip — behind the semicircle arc
+                            } else if (hz.shape === 'ring' && hz.innerRadius) {
+                                const iR = hz.innerRadius * world.game.width;
+                                inHazard = (distSq >= iR * iR); // safe inside inner radius
+                            } else {
+                                inHazard = true;
+                            }
+                        }
+                    }
+
+                    if (!inHazard) continue;
+
+                    anyUnitsInHazard = true;
+
+                    if (killedThisFrame < killsPending) {
+                        // Deterministic damage: mark for exact removal
+                        u.pendingRemoval = true;
+                        killedThisFrame++;
+
+                        // Flash effect visual universal
+                        if (u.sprite && !u.sprite.destroyed) {
+                            u.sprite.alpha = 0.2; // Parpadeo casi invisible
+                            setTimeout(() => { if (u.sprite && !u.sprite.destroyed) u.sprite.alpha = 1.0; }, 80);
                         }
                     }
                 }
@@ -264,10 +321,10 @@ export class PhysicsManager {
                 const dB = by + bh - u.y;
                 const m  = Math.min(dL, dR, dT, dB);
 
-                if      (m === dL) { u.x = bx - 1;       if (u.vx > 0) u.vx = 0; }
-                else if (m === dR) { u.x = bx + bw + 1;  if (u.vx < 0) u.vx = 0; }
-                else if (m === dT) { u.y = by - 1;        if (u.vy > 0) u.vy = 0; }
-                else               { u.y = by + bh + 1;  if (u.vy < 0) u.vy = 0; }
+                if (m === dL)      { u.x = bx - 2;       if (u.vx > 0) u.vx = 0; }
+                else if (m === dR) { u.x = bx + bw + 2;  if (u.vx < 0) u.vx = 0; }
+                else if (m === dT) { u.y = by - 2;       if (u.vy > 0) u.vy = 0; }
+                else               { u.y = by + bh + 2;  if (u.vy < 0) u.vy = 0; }
             }
         }
     }

@@ -84,7 +84,7 @@ export class Node {
         // ── Artillería v2 ──────────────────────────────────────────
         this.artilleryTimer    = ARTILLERY_BASE_INTERVAL;   // inicia listo para disparar de inmediato
         this.artilleryInterval = ARTILLERY_BASE_INTERVAL;
-        this.artilleryRange    = 180;
+        this.artilleryRange    = 320;
         this.splashRadius      = 38;    // radio de explosión al impactar
 
         // Proyectiles activos — cada elemento es un proyectil de ácido en vuelo o explosión
@@ -150,8 +150,11 @@ export class Node {
     static EVOLUTION_COSTS = {
         espinoso:   30,
         artilleria: 40,
-        tanque:     35,
+        tanque:     50,
     };
+
+    // Radio del aura de daño del Espinoso (px más allá del radio del nodo)
+    static ESPINOSO_AURA_EXTRA = 45;
 
     redraw(factionData = null) { NodeRenderer.redraw(this, factionData); }
 
@@ -170,6 +173,12 @@ export class Node {
     }
 
     completeEvolution(type = this.pendingEvolution) {
+        if (!type || this.owner === 'neutral') {
+            this.resetEvolutionState();
+            this.redraw();
+            return false;
+        }
+        
         this.evolution = type || null;
         this.pendingEvolution = null;
         this.pendingEvolutionEtaSec = 0;
@@ -230,6 +239,15 @@ export class Node {
             this.redraw();
         }
 
+        // ── Animación del arco de evolución pendiente ──
+        // Sin este redraw, el arco de progreso solo se dibuja UNA vez al iniciar
+        // la evolución y otra al completar — el usuario ve un anillo estático
+        // que salta de 0% a 100%. Con el redraw cada frame, el arco se anima
+        // continuamente mostrando el progreso real del temporizador.
+        if (this.pendingEvolution) {
+            this.redraw();
+        }
+
         // ── Flash visual del nodo ──
         if (this.flashTimer > 0) {
             this.flashTimer -= dt;
@@ -241,9 +259,10 @@ export class Node {
         }
 
         // ─────────────────────────────────────────────────────────
-        // 1. ESPINOSO: Aura de daño determinista (ráfaga temporizada)
-        //    Mata exactamente 1 unidad enemiga cada 0.33 s (~3/s).
-        //    Sin Math.random() → sin varianza, predecible, justo.
+        // 1. ESPINOSO: Aura de daño proporcional a la densidad
+        //    Base: 1 baja garantizada + 5% de enemigos en el aura.
+        //    Enviar 10 → mata 1. Enviar 200 → mata 11. Enviar 400 → mata 21.
+        //    Determinista, sin azar, escala con la densidad del enjambre atacante.
         // ─────────────────────────────────────────────────────────
         if (this.evolution === 'espinoso') {
             this.espinosoTimer += dt;
@@ -253,41 +272,47 @@ export class Node {
             while (this.espinosoTimer >= Node.ESPINOSO_KILL_INTERVAL) {
                 this.espinosoTimer -= Node.ESPINOSO_KILL_INTERVAL;
 
-                const espinosoRange = this.radius + (this.artilleryRange * 0.25);
+                const espinosoRange = this.radius + Node.ESPINOSO_AURA_EXTRA;
                 const rangeSq = espinosoRange * espinosoRange;
                 const radiusSq = this.radius * this.radius;
                 const neighbors = Node._neighborScratch;
                 neighbors.length = 0;
                 grid.findNear(this.x, this.y, espinosoRange, neighbors);
 
-                // Buscar la víctima más cercana al borde del aura (la primera que
-                // cruce es la primera que cae — FIFO espacial, predecible)
-                let victim = null;
-                let closestDist = Infinity;
-
+                // Paso 1: Recolectar TODOS los enemigos válidos en el aura
+                // y ordenarlos por cercanía (FIFO espacial, determinista)
+                const victims = [];
                 for (const idx of neighbors) {
                     const u = allUnits[idx];
                     if (!u || u.faction === this.owner || u.pendingRemoval || u.state !== 'traveling') continue;
                     const ddx = u.x - this.x;
                     const ddy = u.y - this.y;
                     const dSq = ddx * ddx + ddy * ddy;
-                    if (dSq < rangeSq && dSq > radiusSq && dSq < closestDist) {
-                        closestDist = dSq;
-                        victim = u;
+                    if (dSq < rangeSq && dSq > radiusSq) {
+                        victims.push({ unit: u, distSq: dSq });
                     }
                 }
 
-                if (victim) {
-                    victim.pendingRemoval = true;
-                    if (this.flashTimer <= 0) {
-                        this.flashTargetColor = 0xff6666;
-                        this.flashTimer = 0.15;
-                        this.redraw();
-                    }
-                } else {
+                if (victims.length === 0) {
                     // Sin víctimas en rango — resetear timer para no acumular ráfagas
                     this.espinosoTimer = 0;
                     break;
+                }
+
+                // Paso 2: Ordenar por cercanía (los más cercanos mueren primero)
+                victims.sort((a, b) => a.distSq - b.distSq);
+
+                // Paso 3: Calcular bajas = 1 base + 5% de la densidad
+                const killCount = Math.min(victims.length, 1 + Math.floor(victims.length * 0.05));
+
+                for (let k = 0; k < killCount; k++) {
+                    victims[k].unit.pendingRemoval = true;
+                }
+
+                if (this.flashTimer <= 0) {
+                    this.flashTargetColor = 0xff6666;
+                    this.flashTimer = 0.15;
+                    this.redraw();
                 }
             }
         }

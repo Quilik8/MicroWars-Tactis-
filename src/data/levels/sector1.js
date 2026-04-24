@@ -39,6 +39,14 @@ export const sector1 = {
         {
             name: 'Nivel 4: La Fortaleza de Cristal',
             description: 'Un muro de fuerza azul encierra el nido enemigo por tres lados.\nLas hormigas no pueden atravesar el muro y se acumulan en el borde.\nEl ferry movil central sube y baja cruzando la pared inferior.\nEmbarca tus tropas en el ferry para infiltrarte y atacar desde dentro.',
+            aiStrategy: {
+                focus: "turtle",
+                difficultyOverrides: {
+                    easy: { aggressionMult: 0.3 },
+                    normal: { aggressionMult: 0.6 },
+                    hard: { aggressionMult: 1.0 }
+                }
+            },
             nodes: [
                 node('p_base', 0.50, 0.92, 'player', 'gigante', 140),
                 node('p_left', 0.25, 0.92, 'player', 'normal', 45),
@@ -59,6 +67,14 @@ export const sector1 = {
         {
             name: 'Nivel 5: El Muro Infranqueable',
             description: 'Un bloqueo absoluto impide el paso directo entre tu nido inferior izquierdo y el del enemigo.\nDebes rodear su inmensa estructura de cristal conquistando los nodos superiores para flanquear.',
+            aiStrategy: {
+                focus: "expansion",
+                difficultyOverrides: {
+                    easy: { aggressionMult: 0.5 },
+                    normal: { aggressionMult: 1.0 },
+                    hard: { aggressionMult: 1.5 }
+                }
+            },
             nodes: [
                 node('p1', 0.20, 0.80, 'player', 'gigante', 150),
                 node('e1', 0.80, 0.80, 'enemy', 'gigante', 150),

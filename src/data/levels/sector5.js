@@ -7,7 +7,7 @@ export const sector5 = {
     config: { allowEvolutions: true },
     levels: [
         {
-            name: 'Nivel 1: El Arroyuelo',
+            name: 'Nivel 22: El Arroyuelo',
             description: 'Una corriente de agua barre el campo periodicamente.\nElimina todas las tropas a su paso, aliadas y enemigas.\nSincroniza tus ataques con el ciclo del agua para ganar.',
             nodes: [
                 node('p_base', 0.07, 0.5, 'player', 'gigante', 130),
@@ -26,7 +26,7 @@ export const sector5 = {
             ]
         },
         {
-            name: 'Nivel 2: Bombardeo desde el Centro',
+            name: 'Nivel 23: Bombardeo desde el Centro',
             description: 'Una rafaga circular nace en el centro y se expande hacia los bordes.\nExpandete primero por la periferia y empuja al nucleo despues del paso del anillo.',
             nodes: [
                 node('p_base', 0.10, 0.84, 'player', 'gigante', 150),
@@ -54,7 +54,7 @@ export const sector5 = {
             ]
         },
         {
-            name: 'Nivel 3: Mareas Impredecibles',
+            name: 'Nivel 24: Mareas Impredecibles',
             description: 'Las rafagas llegan desde arriba, la derecha y diagonales en una secuencia irregular.\nDebes adaptarte rapido y no dar por segura ninguna ruta demasiado tiempo.',
             nodes: [
                 node('p_base', 0.10, 0.82, 'player', 'gigante', 150),
@@ -84,7 +84,7 @@ export const sector5 = {
             ]
         },
         {
-            name: 'Nivel 4: El Embudo Inundado',
+            name: 'Nivel 25: El Embudo Inundado',
             description: 'Todo converge en el centro mientras rafagas desde abajo barren el embudo.\nReagrupa fuera de la marea y cruza solo cuando la ventana este limpia.',
             nodes: [
                 node('p_base', 0.10, 0.12, 'player', 'gigante', 150),
@@ -109,7 +109,7 @@ export const sector5 = {
             ]
         },
         {
-            name: 'Nivel 5: Ida y Vuelta',
+            name: 'Nivel 26: Ida y Vuelta',
             description: 'La rafaga funciona como un pendulo: cruza el mapa y luego regresa.\nDebes leer la oscilacion y atacar justo en el hueco correcto.',
             nodes: [
                 node('p_base', 0.10, 0.50, 'player', 'gigante', 150),

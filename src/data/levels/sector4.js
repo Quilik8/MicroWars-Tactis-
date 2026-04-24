@@ -7,7 +7,7 @@ export const sector4 = {
     config: { allowEvolutions: true },
     levels: [
         {
-            name: 'Nivel 1: Carreteras y Pantanos',
+            name: 'Nivel 16: Carreteras y Pantanos',
             description: 'El terreno afecta a tu velocidad. Las zonas verdes te aceleran el doble. Las zonas rojas te ralentizan a la mitad.',
             nodes: [
                 node('p1', 0.15, 0.35, 'player', 'gigante', 150),
@@ -29,7 +29,7 @@ export const sector4 = {
             ]
         },
         {
-            name: 'Nivel 2: El Oasis en el Desierto Pegajoso',
+            name: 'Nivel 17: El Oasis en el Desierto Pegajoso',
             description: 'El 90% del mapa es una zona lenta. Solo un oasis central ofrece movilidad real y nodos de gran valor.\nDebes decidir entre avanzar por los bordes o pelear por el centro.',
             nodes: [
                 node('p_base', 0.08, 0.84, 'player', 'gigante', 150),
@@ -46,7 +46,7 @@ export const sector4 = {
             ]
         },
         {
-            name: 'Nivel 3: Franjas de Interferencia',
+            name: 'Nivel 18: Franjas de Interferencia',
             description: 'El campo se alterna entre franjas rapidas y lentas.\nPlanifica tus rutas para vivir en las autopistas y no quedarte atrapado en el lodo.',
             nodes: [
                 node('p_base', 0.08, 0.52, 'player', 'gigante', 150),
@@ -67,7 +67,7 @@ export const sector4 = {
             ]
         },
         {
-            name: 'Nivel 4: El Delta de la Melaza',
+            name: 'Nivel 19: El Delta de la Melaza',
             description: 'Una gran zona viscosa cubre el centro, pero varios canales rapidos serpentean por dentro.\nDominar esos canales es la forma segura de cruzar.',
             nodes: [
                 node('p_base', 0.10, 0.82, 'player', 'gigante', 150),
@@ -88,7 +88,7 @@ export const sector4 = {
             ]
         },
         {
-            name: 'Nivel 5: Trampa de Succion',
+            name: 'Nivel 20: Trampa de Succion',
             description: 'Cruzar directo por el centro te atasca en una masa viscosa enorme.\nEl borde del mapa y la artilleria ofrecen soluciones mucho mas limpias.',
             nodes: [
                 node('p_base', 0.10, 0.52, 'player', 'gigante', 150),
@@ -106,7 +106,7 @@ export const sector4 = {
             ]
         },
         {
-            name: 'Nivel 6: Ajedrez de Friccion',
+            name: 'Nivel 21: Ajedrez de Friccion',
             description: 'Cada salto entre nodos exige escoger la ruta con menos resistencia.\nEs una prueba pura de microgestion y lectura del terreno.',
             nodes: [
                 node('p_base', 0.08, 0.88, 'player', 'gigante', 150),

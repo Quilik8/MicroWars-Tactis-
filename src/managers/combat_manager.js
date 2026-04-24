@@ -132,6 +132,7 @@ export class CombatManager {
 
         if (node.owner !== prevOwner) {
             node.combatDamageCarry = null;
+            node.resetEvolutionState();
             if (SFX) {
                 if (node.owner === 'player' || node.owner === 'carpinteras') SFX.capture();
                 else if (prevOwner === 'player' || prevOwner === 'carpinteras') SFX.lost();

@@ -89,5 +89,14 @@ export const FACTIONS = [
         difficulty: 'Especial',
         description: 'Unidades colosales con captura ininterrumpible. Muy resistentes.',
         isPremium: true
+    },
+    {
+        id: 'mutantes',
+        name: 'Hormigas Mutantes',
+        color: 0x9b59b6,
+        trait: 'Veneno Endémico',
+        difficulty: 'Especial',
+        description: 'Tropas agresivas de origen púrpura. Adaptadas a ambientes altamente contaminados.',
+        isPremium: false
     }
 ];

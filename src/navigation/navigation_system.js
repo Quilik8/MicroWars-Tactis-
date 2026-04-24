@@ -118,6 +118,42 @@ function segmentEllipseInterval(x1, y1, x2, y2, cx, cy, rx, ry, out) {
 }
 
 function segmentHazardLength(x1, y1, x2, y2, hazard, worldWidth, worldHeight, ellipseScratch) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const length = Math.sqrt(dx * dx + dy * dy);
+
+    // ── Flood: full segment minus safe zone exclusions ──
+    if (hazard.shape === 'flood') {
+        let safeLength = 0;
+        if (hazard.safeZones) {
+            for (let s = 0; s < hazard.safeZones.length; s++) {
+                const sz = hazard.safeZones[s];
+                const scx = sz.x * worldWidth;
+                const scy = sz.y * worldHeight;
+                const srx = sz.radius * worldWidth;
+                const sry = srx;
+                if (segmentEllipseInterval(x1, y1, x2, y2, scx, scy, srx, sry, ellipseScratch)) {
+                    safeLength += (ellipseScratch.exit - ellipseScratch.enter) * length;
+                }
+            }
+        }
+        return Math.max(0, length - safeLength);
+    }
+
+    // ── Rect puddle: rectangle intersection ──
+    if (hazard.shape === 'rect_puddle') {
+        const left   = hazard.x * worldWidth;
+        const top    = hazard.y * worldHeight;
+        const right  = left + (hazard.width * worldWidth);
+        const bottom = top  + (hazard.height * worldHeight);
+        const rectScratch = { enter: 0, exit: 0 };
+        if (!segmentRectInterval(x1, y1, x2, y2, left, top, right, bottom, rectScratch)) {
+            return 0;
+        }
+        return (rectScratch.exit - rectScratch.enter) * length;
+    }
+
+    // ── Circular / elliptical shapes (puddle, ring, semicircle) ──
     const cx = hazard.x * worldWidth;
     const cy = hazard.y * worldHeight;
     const rx = hazard.radius * worldWidth;
@@ -133,10 +169,20 @@ function segmentHazardLength(x1, y1, x2, y2, hazard, worldWidth, worldHeight, el
         if (midX < cx) return 0;
     }
 
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const length = Math.sqrt(dx * dx + dy * dy);
-    return (ellipseScratch.exit - ellipseScratch.enter) * length;
+    let outerLength = (ellipseScratch.exit - ellipseScratch.enter) * length;
+
+    // Ring shape: subtract the portion that crosses through the safe inner hole
+    if (hazard.shape === 'ring' && hazard.innerRadius) {
+        const irx = hazard.innerRadius * worldWidth;
+        const iry = irx * (hazard.scaleY || 1.0);
+        const innerScratch = { enter: 0, exit: 0 };
+        if (segmentEllipseInterval(x1, y1, x2, y2, cx, cy, irx, iry, innerScratch)) {
+            const innerLength = (innerScratch.exit - innerScratch.enter) * length;
+            outerLength -= innerLength;
+        }
+    }
+
+    return Math.max(0, outerLength);
 }
 
 function computeZoneWeightedLength(x1, y1, x2, y2, zones, worldWidth, worldHeight, intervalScratch) {
@@ -331,7 +377,15 @@ export class NavStaticStore {
 export class NavigationStaticBake {
     static buildFromWorld(world, options = {}) {
         const nodes = world.nodes || [];
-        const barriers = world.barriers || [];
+        let barriers = world.barriers ? [...world.barriers] : [];
+        if (world.intermittentBarriers && world.intermittentBarriers.length > 0) {
+            for (let ib of world.intermittentBarriers) {
+                const activeBounds = ib.getActiveBounds();
+                if (activeBounds && activeBounds.length > 0) {
+                    barriers = barriers.concat(activeBounds);
+                }
+            }
+        }
         const zones = world.zones || [];
         const hazards = world.hazards || [];
         const worldWidth = world.game ? world.game.width : 1920;
@@ -1163,8 +1217,8 @@ export class TimeDependentRoutePlanner {
 
 export class LocalAvoidanceSolver {
     constructor(config = {}) {
-        this.wallQueryRadius = config.wallQueryRadius || 26;
-        this.wallRepulsion = config.wallRepulsion || 110;
+        this.wallQueryRadius = config.wallQueryRadius || 8;
+        this.wallRepulsion = config.wallRepulsion || 60;
         this.separationWeight = config.separationWeight || 1;
         this.wallWeight = config.wallWeight || 1;
         this.store = null;

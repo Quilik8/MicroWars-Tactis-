@@ -31,11 +31,60 @@ export function puddle(x, y, radius, extra = {}) {
         x,
         y,
         radius,
-        dps: 6,
+        dps: 7.2,
         color: VENOM_COLOR,
         alpha: 0.24,
         shape: 'puddle',
         scaleY: 1,
+        ...extra
+    };
+}
+
+export function ring(cx, cy, outerRadius, innerRadius, extra = {}) {
+    return {
+        x: cx,
+        y: cy,
+        radius: outerRadius,
+        innerRadius,
+        dps: 7.2,
+        color: VENOM_COLOR,
+        alpha: 0.24,
+        shape: 'ring',
+        scaleY: 1,
+        seed: (cx * 1000 + cy * 777) | 0,
+        ...extra
+    };
+}
+
+export function flood(safeZones, extra = {}) {
+    return {
+        x: 0.5,
+        y: 0.5,
+        radius: 0.55,
+        shape: 'flood',
+        safeZones,
+        dps: 7.2,
+        color: VENOM_COLOR,
+        alpha: 0.24,
+        scaleY: 0.60,
+        seed: 314,
+        ...extra
+    };
+}
+
+export function rectPuddle(x, y, width, height, extra = {}) {
+    return {
+        x,
+        y,
+        width,
+        height,
+        radius: Math.max(width, height) * 2,
+        shape: 'rect_puddle',
+        dps: 7.2,
+        color: VENOM_COLOR,
+        alpha: 0.24,
+        scaleY: 1,
+        seed: (x * 1000 + y * 777) | 0,
         ...extra
     };
 }
