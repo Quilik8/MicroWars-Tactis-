@@ -12,6 +12,7 @@ export class LevelManager {
         this.ui = ui;
         this.sfx = sfx;
         this.startMusic = music.start;
+        this.onAIReset = music.onAIReset || null;
 
         this.currentSectorIndex = 0;
         this.currentLevelIndex = 0;
@@ -86,6 +87,7 @@ export class LevelManager {
 
         this.ui.setGameState('PLAYING');
         this.world.clearLevel();
+        if (this.onAIReset) this.onAIReset();
         
         // clearLevel() destroys all layerNodes children, including _barrierGfx.
         // We must drop the reference so it can be re-created if the new level needs it.
@@ -113,7 +115,10 @@ export class LevelManager {
         }
         
         // ── Directrices Estratégicas IA (AI Strategy) ──
-        this.world.aiStrategy = this._mergeAIStrategy(currentSector.aiStrategy, levelData.aiStrategy);
+        this.world.aiStrategy = this._mergeAIStrategy(
+            currentSector.ai || currentSector.aiStrategy,
+            levelData.ai || levelData.aiStrategy
+        );
 
         this.world.nodes = levelData.nodes.map((nData, nodeIndex) => {
             let n = new Node(nData.x * cx, nData.y * cy, nData.owner, nData.type);
@@ -126,7 +131,7 @@ export class LevelManager {
                 n.orbitRadiusX = nData.orbitRadiusX;
                 n.orbitRadiusY = nData.orbitRadiusY;
                 n.orbitSpeed   = nData.orbitSpeed;
-                n.orbitAngle   = 0;
+                n.orbitAngle   = nData.orbitAngle || 0;
             }
             // Nivel 8 — marcar nodo si el nivel lo indica
             if (nData.isMarkedForSweep) {
@@ -171,6 +176,10 @@ export class LevelManager {
 
         for (let n of this.world.nodes) {
             this.world.createNodeGfx(n);
+            const nData = levelData.nodes[n.navIndex];
+            if (nData.evolution) {
+                n.completeEvolution(nData.evolution);
+            }
         }
 
         let minX = Infinity, minY = Infinity;
@@ -350,6 +359,33 @@ export class LevelManager {
                     ...(merged.difficultyOverrides[diff] || {}),
                     ...levelClone.difficultyOverrides[diff],
                 };
+            }
+        }
+
+        if (sectorStrategy && sectorStrategy.factions) {
+            merged.factions = JSON.parse(JSON.stringify(sectorStrategy.factions));
+        }
+        if (levelClone.factions) {
+            if (!merged.factions) merged.factions = {};
+            for (const faction in levelClone.factions) {
+                merged.factions[faction] = {
+                    ...(merged.factions[faction] || {}),
+                    ...levelClone.factions[faction],
+                };
+
+                const sectorDiff = merged.factions[faction].difficultyOverrides || null;
+                const levelDiff = levelClone.factions[faction].difficultyOverrides || null;
+                if (sectorDiff || levelDiff) {
+                    merged.factions[faction].difficultyOverrides = {
+                        ...(sectorDiff || {}),
+                    };
+                    for (const diff in (levelDiff || {})) {
+                        merged.factions[faction].difficultyOverrides[diff] = {
+                            ...(merged.factions[faction].difficultyOverrides[diff] || {}),
+                            ...levelDiff[diff],
+                        };
+                    }
+                }
             }
         }
 

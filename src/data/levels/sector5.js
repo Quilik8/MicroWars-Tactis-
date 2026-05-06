@@ -5,6 +5,44 @@ export const sector5 = {
     name: 'Sector 5: Mareas Implacables',
     description: 'El agua barre todo a su paso. Direccion, cadencia y lectura del tiempo son la clave para sobrevivir.',
     config: { allowEvolutions: true },
+    aiStrategy: {
+        focus: 'cautious',
+        aggressionMult: 0.75,
+        minEvolutionGarrison: 35,
+        minPostCaptureGarrison: 16,
+        hazardPolicy: 'strict',
+        maxRouteCasualtyRatio: 0.10,
+        antiPendulum: {
+            targetCooldownSec: 7,
+            sourceCooldownSec: 3,
+            recaptureCooldownSec: 14,
+            flipWindowSec: 36,
+            maxFlipsBeforePenalty: 1,
+            recentAttackPenalty: 550,
+            flipPenalty: 900,
+            sourceRepeatPenalty: 300
+        },
+        difficultyOverrides: {
+            easy: {
+                aggressionMult: 0.45,
+                maxRouteCasualtyRatio: 0.05,
+                antiPendulum: {
+                    recaptureCooldownSec: 18,
+                    flipPenalty: 1100
+                }
+            },
+            hard: {
+                aggressionMult: 1.00,
+                hazardPolicy: 'cautious',
+                maxRouteCasualtyRatio: 0.18,
+                minEvolutionGarrison: 28,
+                antiPendulum: {
+                    recaptureCooldownSec: 10,
+                    flipPenalty: 650
+                }
+            }
+        }
+    },
     levels: [
         {
             name: 'Nivel 22: El Arroyuelo',

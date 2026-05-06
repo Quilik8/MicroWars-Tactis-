@@ -173,7 +173,7 @@ export class Node {
     }
 
     completeEvolution(type = this.pendingEvolution) {
-        if (!type || this.owner === 'neutral') {
+        if (!type) {
             this.resetEvolutionState();
             this.redraw();
             return false;

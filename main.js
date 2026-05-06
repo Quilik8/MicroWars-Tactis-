@@ -90,7 +90,10 @@ world = new WorldManager(game, ui, CONFIG);
 const ai       = new AIManager({ difficulty: currentDifficulty, worldRef: world });
 const campaign = new CampaignCore(game, ui);
 const input    = new InputManager(game, world, ui, SFX, campaign);
-const level    = new LevelManager(game, world, ui, SFX, { start: startMusic });
+const level    = new LevelManager(game, world, ui, SFX, {
+    start: startMusic,
+    onAIReset: () => ai.reset()
+});
 
 window.campaign = campaign;
 
@@ -114,6 +117,23 @@ function setGameSpeed(speed) {
     ui.updateSpeedButtons(gameSpeed);
 }
 
+function getActiveAIFactions(nodes, allUnits, playerFaction) {
+    const factions = new Set();
+    const controlled = new Set([playerFaction, 'player']);
+
+    for (const n of nodes) {
+        if (!n || n.owner === 'neutral' || controlled.has(n.owner)) continue;
+        factions.add(n.owner);
+    }
+
+    for (const u of allUnits) {
+        if (!u || u.pendingRemoval || u.faction === 'neutral' || controlled.has(u.faction)) continue;
+        factions.add(u.faction);
+    }
+
+    return factions;
+}
+
 // ══════════════════════════════════════════════════════════════
 // BUCLE PRINCIPAL
 // ══════════════════════════════════════════════════════════════
@@ -125,7 +145,7 @@ game.onUpdate = (dt) => {
 
         const pId = campaign.isStarted ? (campaign.playerFaction?.id || 'player') : 'player';
 
-        const activeEnemies = ['enemy', 'fuego', 'carpinteras', 'bala', 'tejedoras'];
+        const activeEnemies = getActiveAIFactions(world.nodes, world.allUnits, pId);
         for (const enemyFaction of activeEnemies) {
             ai.update(dt, world.nodes, world.allUnits, enemyFaction, pId);
         }

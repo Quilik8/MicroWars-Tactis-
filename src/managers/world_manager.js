@@ -579,7 +579,8 @@ export class WorldManager {
 
             if (hz.shape === 'flood') {
                 // ── FLOOD: entire map is toxic, with organic safe-zone holes ──
-                const alphaPulse = 0.20 + Math.sin(t * 2.0 + hz.seed) * 0.05;
+                // Static alpha — no pulsing to avoid epileptic flicker on full-screen coverage
+                const alphaPulse = 0.22;
                 const margin = 40;
 
                 // 1) CONSTRUIR EL LAGO COLOSAL DE VENENO Y PERFORAR LOS HUECOS
@@ -588,9 +589,10 @@ export class WorldManager {
                 const fSy = hz.scaleY || 1.0;
                 for (let i = 0; i <= outerSegs; i++) {
                     const angle = (i / outerSegs) * Math.PI * 2;
-                    const ripple = Math.sin(angle * 6 + t * 1.5 + hz.seed) * 12
-                                 + Math.cos(angle * 4 - t * 1.2 + hz.seed * 0.8) * 8
-                                 + Math.sin(angle * 9 + t * 2.0) * 5;
+                    // Static ripple — no time component to avoid flickering
+                    const ripple = Math.sin(angle * 6 + hz.seed) * 12
+                                 + Math.cos(angle * 4 + hz.seed * 0.8) * 8
+                                 + Math.sin(angle * 9) * 5;
                     const r = hR + ripple;
                     const px = hx + Math.cos(angle) * r;
                     const py = hy + Math.sin(angle) * (r * fSy);
@@ -658,7 +660,7 @@ export class WorldManager {
                 const rHeight = hz.height * cy;
                 const segsH   = 24; // segments per horizontal edge
                 const segsV   = Math.max(8, Math.round(segsH * (rHeight / rWidth)));
-                const alphaPulse = 0.22 + Math.sin(t * 2.5 + hz.seed) * 0.05;
+                const alphaPulse = hz.noPulse ? 0.22 : 0.22 + Math.sin(t * 2.5 + hz.seed) * 0.05;
 
                 this.hazardGraphics.beginPath();
 

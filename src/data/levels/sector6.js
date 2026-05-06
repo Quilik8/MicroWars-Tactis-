@@ -5,6 +5,44 @@ export const sector6 = {
     name: 'Sector 6: Barreras Dinamicas',
     description: 'Compuertas intermitentes, celdas pulsantes y barridos solares convierten cada avance en una prueba de sincronizacion.',
     config: { allowEvolutions: true },
+    aiStrategy: {
+        focus: 'timing',
+        aggressionMult: 0.80,
+        minEvolutionGarrison: 32,
+        minPostCaptureGarrison: 14,
+        hazardPolicy: 'cautious',
+        maxRouteCasualtyRatio: 0.18,
+        antiPendulum: {
+            targetCooldownSec: 6,
+            sourceCooldownSec: 2.5,
+            recaptureCooldownSec: 12,
+            flipWindowSec: 32,
+            maxFlipsBeforePenalty: 1,
+            recentAttackPenalty: 480,
+            flipPenalty: 800,
+            sourceRepeatPenalty: 250
+        },
+        difficultyOverrides: {
+            easy: {
+                aggressionMult: 0.50,
+                maxRouteCasualtyRatio: 0.10,
+                antiPendulum: {
+                    recaptureCooldownSec: 16,
+                    flipPenalty: 1000
+                }
+            },
+            hard: {
+                aggressionMult: 1.10,
+                hazardPolicy: 'normal',
+                maxRouteCasualtyRatio: 0.25,
+                minEvolutionGarrison: 26,
+                antiPendulum: {
+                    recaptureCooldownSec: 8,
+                    flipPenalty: 550
+                }
+            }
+        }
+    },
     levels: [
         {
             name: 'Nivel 27: El Latido de la Espiral',

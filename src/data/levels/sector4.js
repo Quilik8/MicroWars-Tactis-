@@ -5,6 +5,41 @@ export const sector4 = {
     name: 'Sector 4: Terrenos Viscosos',
     description: 'Domina friccion, lodo y autopistas. La velocidad del terreno altera por completo el flujo del combate.',
     config: { allowEvolutions: true },
+    aiStrategy: {
+        focus: 'balanced',
+        aggressionMult: 0.90,
+        minEvolutionGarrison: 30,
+        minPostCaptureGarrison: 12,
+        hazardPolicy: 'none',
+        antiPendulum: {
+            targetCooldownSec: 5,
+            sourceCooldownSec: 2,
+            recaptureCooldownSec: 10,
+            flipWindowSec: 30,
+            maxFlipsBeforePenalty: 2,
+            recentAttackPenalty: 400,
+            flipPenalty: 600,
+            sourceRepeatPenalty: 180
+        },
+        difficultyOverrides: {
+            easy: {
+                aggressionMult: 0.55,
+                antiPendulum: {
+                    recaptureCooldownSec: 14,
+                    flipPenalty: 800
+                }
+            },
+            hard: {
+                aggressionMult: 1.20,
+                minEvolutionGarrison: 25,
+                minPostCaptureGarrison: 18,
+                antiPendulum: {
+                    recaptureCooldownSec: 7,
+                    flipPenalty: 400
+                }
+            }
+        }
+    },
     levels: [
         {
             name: 'Nivel 16: Carreteras y Pantanos',
@@ -38,10 +73,11 @@ export const sector4 = {
                 node('oasis_left', 0.44, 0.42, 'neutral', 'gigante', 30),
                 node('oasis_right', 0.58, 0.58, 'neutral', 'gigante', 30),
                 node('east_mid', 0.76, 0.50, 'neutral', 'normal', 20),
-                node('enemy_core', 0.90, 0.18, 'enemy', 'gigante', 175)
+                node('enemy_core', 0.90, 0.18, 'enemy', 'gigante', 175),
+                node('south_east', 0.86, 0.82, 'neutral', 'normal', 20)
             ],
             zones: [
-                rectZone('oasis', 0.40, 0.36, 0.22, 0.28, 1.8, FAST_COLOR, 0.16),
+                rectZone('oasis', 0.32, 0.28, 0.38, 0.44, 1.8, FAST_COLOR, 0.16),
                 rectZone('desert', 0.00, 0.00, 1.00, 1.00, 0.4, SLOW_COLOR, 0.18)
             ]
         },
@@ -49,13 +85,13 @@ export const sector4 = {
             name: 'Nivel 18: Franjas de Interferencia',
             description: 'El campo se alterna entre franjas rapidas y lentas.\nPlanifica tus rutas para vivir en las autopistas y no quedarte atrapado en el lodo.',
             nodes: [
-                node('p_base', 0.08, 0.52, 'player', 'gigante', 150),
-                node('lane_1', 0.20, 0.22, 'neutral', 'normal', 20),
-                node('lane_2', 0.34, 0.72, 'neutral', 'normal', 20),
-                node('lane_3', 0.50, 0.32, 'neutral', 'enjambre', 20),
-                node('lane_4', 0.66, 0.70, 'neutral', 'normal', 20),
-                node('lane_5', 0.80, 0.28, 'neutral', 'normal', 20),
-                node('enemy_core', 0.92, 0.52, 'enemy', 'gigante', 175)
+                node('p_base', 0.08, 0.50, 'player', 'gigante', 150),
+                node('lane_1', 0.24, 0.15, 'neutral', 'normal', 20),
+                node('lane_2', 0.40, 0.85, 'neutral', 'normal', 20),
+                node('lane_3', 0.56, 0.15, 'neutral', 'enjambre', 20),
+                node('lane_4', 0.72, 0.85, 'neutral', 'normal', 20),
+                node('lane_5', 0.90, 0.15, 'neutral', 'normal', 20),
+                node('enemy_core', 0.90, 0.50, 'enemy', 'gigante', 175)
             ],
             zones: [
                 rectZone('fast_1', 0.00, 0.00, 0.16, 1.00, 1.75, FAST_COLOR, 0.14),
@@ -71,19 +107,19 @@ export const sector4 = {
             description: 'Una gran zona viscosa cubre el centro, pero varios canales rapidos serpentean por dentro.\nDominar esos canales es la forma segura de cruzar.',
             nodes: [
                 node('p_base', 0.10, 0.82, 'player', 'gigante', 150),
-                node('canal_1', 0.24, 0.66, 'neutral', 'normal', 20),
-                node('canal_2', 0.38, 0.54, 'neutral', 'normal', 20),
-                node('canal_3', 0.52, 0.36, 'neutral', 'enjambre', 20),
-                node('canal_4', 0.68, 0.46, 'neutral', 'normal', 20),
-                node('canal_5', 0.82, 0.22, 'neutral', 'normal', 20),
+                node('canal_1', 0.25, 0.73, 'neutral', 'normal', 20),
+                node('canal_2', 0.40, 0.56, 'neutral', 'normal', 20),
+                node('canal_3', 0.55, 0.36, 'neutral', 'enjambre', 20),
+                node('canal_4', 0.70, 0.53, 'neutral', 'normal', 20),
+                node('canal_5', 0.85, 0.33, 'neutral', 'normal', 20),
                 node('enemy_core', 0.92, 0.62, 'enemy', 'gigante', 180)
             ],
             zones: [
-                rectZone('fast_a', 0.16, 0.58, 0.18, 0.10, 1.8, FAST_COLOR, 0.16),
-                rectZone('fast_b', 0.30, 0.48, 0.18, 0.10, 1.8, FAST_COLOR, 0.16),
-                rectZone('fast_c', 0.44, 0.32, 0.18, 0.10, 1.8, FAST_COLOR, 0.16),
-                rectZone('fast_d', 0.58, 0.40, 0.18, 0.10, 1.8, FAST_COLOR, 0.16),
-                rectZone('fast_e', 0.72, 0.18, 0.18, 0.10, 1.8, FAST_COLOR, 0.16),
+                rectZone('fast_a', 0.15, 0.62, 0.20, 0.22, 1.8, FAST_COLOR, 0.16),
+                rectZone('fast_b', 0.30, 0.45, 0.20, 0.22, 1.8, FAST_COLOR, 0.16),
+                rectZone('fast_c', 0.45, 0.25, 0.20, 0.22, 1.8, FAST_COLOR, 0.16),
+                rectZone('fast_d', 0.60, 0.42, 0.20, 0.22, 1.8, FAST_COLOR, 0.16),
+                rectZone('fast_e', 0.75, 0.22, 0.20, 0.22, 1.8, FAST_COLOR, 0.16),
                 rectZone('slow_map', 0.00, 0.12, 1.00, 0.76, 0.42, SLOW_COLOR, 0.19)
             ]
         },
@@ -109,14 +145,14 @@ export const sector4 = {
             name: 'Nivel 21: Ajedrez de Friccion',
             description: 'Cada salto entre nodos exige escoger la ruta con menos resistencia.\nEs una prueba pura de microgestion y lectura del terreno.',
             nodes: [
-                node('p_base', 0.08, 0.88, 'player', 'gigante', 150),
-                node('cell_1', 0.20, 0.70, 'neutral', 'normal', 20),
-                node('cell_2', 0.32, 0.54, 'neutral', 'normal', 20),
-                node('cell_3', 0.44, 0.70, 'neutral', 'normal', 20),
-                node('cell_4', 0.56, 0.38, 'neutral', 'enjambre', 20),
-                node('cell_5', 0.68, 0.54, 'neutral', 'normal', 20),
-                node('cell_6', 0.80, 0.22, 'neutral', 'normal', 20),
-                node('enemy_core', 0.92, 0.12, 'enemy', 'gigante', 178)
+                node('p_base', 0.08, 0.92, 'player', 'gigante', 150),
+                node('cell_1', 0.25, 0.75, 'neutral', 'normal', 20),
+                node('cell_2', 0.42, 0.58, 'neutral', 'normal', 20),
+                node('cell_3', 0.58, 0.92, 'neutral', 'enjambre', 20),
+                node('cell_4', 0.58, 0.42, 'neutral', 'normal', 20),
+                node('cell_5', 0.75, 0.58, 'neutral', 'normal', 20),
+                node('cell_6', 0.75, 0.25, 'neutral', 'normal', 20),
+                node('enemy_core', 0.92, 0.08, 'enemy', 'gigante', 178)
             ],
             zones: checkerZones(6, 6, 1.65, 0.46)
         }

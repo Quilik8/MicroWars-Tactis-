@@ -7,18 +7,36 @@ export const sector3 = {
     config: { allowEvolutions: true },
     aiStrategy: {
         focus: 'expansion',
+        doctrine: 'expansion',
+        hazardPolicy: 'strict',
+        diplomacyMode: 'antiPlayerWithNeutralExpansion',
         aggressionMult: 1.1,
         minEvolutionGarrison: 34,
         minPostCaptureGarrison: 22,
         hazardGarrisonBonus: 8,
-        hazardFatalityRatio: 0.32,
+        maxRouteCasualtyRatio: 0.20,
+        antiPendulum: {
+            targetCooldownSec: 6,
+            sourceCooldownSec: 2.5,
+            recaptureCooldownSec: 14,
+            flipWindowSec: 34,
+            maxFlipsBeforePenalty: 1,
+            recentAttackPenalty: 520,
+            flipPenalty: 950,
+            sourceRepeatPenalty: 280
+        },
         difficultyOverrides: {
             hard: {
                 aggressionMult: 1.25,
                 minEvolutionGarrison: 42,
                 minPostCaptureGarrison: 28,
                 hazardGarrisonBonus: 12,
-                hazardFatalityRatio: 0.24
+                maxRouteCasualtyRatio: 0.18,
+                hazardPolicy: 'cautious',
+                antiPendulum: {
+                    recaptureCooldownSec: 10,
+                    flipPenalty: 700
+                }
             }
         }
     },
@@ -130,41 +148,80 @@ export const sector3 = {
             ]
         },
         {
-            name: 'Nivel 14: El Pantano de los Ferries',
-            description: 'Un rio vertical de insecticida divide el mapa por la mitad.\nNo existe ruta terrestre segura: solo los ferries permiten cruzar al territorio enemigo.',
+            name: 'Nivel 14: Oceano de Insecticida',
+            description: 'Un enorme mar de insecticida lo cubre todo. Las bases estan separadas al extremo. Deberas calcular perfectamente el salto hacia los nodos elipticos.',
+            cameraPadding: 200, // Escala dictada por las coordenadas (-0.9 a 2.1)
+            aiStrategy: {
+                hazardPolicy: 'reckless',
+                maxRouteCasualtyRatio: 0.85
+            },
             nodes: [
-                node('p_base', 0.06, 0.50, 'player', 'gigante', 150),
-                node('p_top', 0.16, 0.16, 'neutral', 'normal', 20),
-                node('p_bot', 0.16, 0.84, 'neutral', 'normal', 20),
-                node('mid_top', 0.50, 0.14, 'neutral', 'enjambre', 20),
-                node('mid_bot', 0.50, 0.86, 'neutral', 'enjambre', 20),
-                node('e_top', 0.84, 0.18, 'enemy', 'normal', 60),
-                node('e_bot', 0.84, 0.82, 'fuego', 'normal', 60),
-                node('enemy_core', 0.94, 0.50, 'enemy', 'gigante', 185),
-                mobileNode('ferry_top', 0.38, 0.22, 0.38, 0.22, 0.18, 0, 0.50),
-                mobileNode('ferry_mid', 0.38, 0.50, 0.38, 0.50, 0.18, 0, 0.65),
-                mobileNode('ferry_bot', 0.38, 0.78, 0.38, 0.78, 0.18, 0, 0.45)
+                // Bases extremas
+                node('p_base', -0.90, 0.50, 'player', 'gigante', 150),
+                node('e_base', 2.10, 0.50, 'enemy', 'gigante', 150),
+                
+                // Islas estáticas intermedias y centrales (muy separadas)
+                node('island_c1', 0.10, 0.50, 'neutral', 'gigante', 50),
+                node('island_c2', 1.10, 0.50, 'neutral', 'gigante', 50),
+                
+                // Islas superior/inferior
+                node('island_t1', -0.40, -0.20, 'neutral', 'normal', 30),
+                node('island_b1', -0.40, 1.20, 'neutral', 'normal', 30),
+                node('island_t2', 0.60, -0.20, 'neutral', 'normal', 30),
+                node('island_b2', 0.60, 1.20, 'neutral', 'normal', 30),
+                node('island_t3', 1.60, -0.20, 'neutral', 'normal', 30),
+                node('island_b3', 1.60, 1.20, 'neutral', 'normal', 30),
+
+                // Órbita 1 (Izquierda) - centro: -0.40, 0.50 | radioX: 0.30, radioY: 0.45
+                // Gap a base player: 0.20 | Gap a C1: 0.20 | Gap a T1/B1: 0.25
+                mobileNode('orb_1_a', -0.40, 0.50, -0.40, 0.50, 0.30, 0.45, 0.35, { orbitAngle: 0 }),
+                mobileNode('orb_1_b', -0.40, 0.50, -0.40, 0.50, 0.30, 0.45, 0.35, { orbitAngle: Math.PI / 2 }),
+                mobileNode('orb_1_c', -0.40, 0.50, -0.40, 0.50, 0.30, 0.45, 0.35, { orbitAngle: Math.PI }),
+                mobileNode('orb_1_d', -0.40, 0.50, -0.40, 0.50, 0.30, 0.45, 0.35, { orbitAngle: Math.PI * 1.5 }),
+
+                // Órbita 2 (Centro) - centro: 0.60, 0.50 | radioX: 0.30, radioY: 0.45
+                // Gap a C1: 0.20 | Gap a C2: 0.20 | Gap a T2/B2: 0.25
+                mobileNode('orb_2_a', 0.60, 0.50, 0.60, 0.50, 0.30, 0.45, -0.35, { orbitAngle: 0 }),
+                mobileNode('orb_2_b', 0.60, 0.50, 0.60, 0.50, 0.30, 0.45, -0.35, { orbitAngle: Math.PI / 2 }),
+                mobileNode('orb_2_c', 0.60, 0.50, 0.60, 0.50, 0.30, 0.45, -0.35, { orbitAngle: Math.PI }),
+                mobileNode('orb_2_d', 0.60, 0.50, 0.60, 0.50, 0.30, 0.45, -0.35, { orbitAngle: Math.PI * 1.5 }),
+
+                // Órbita 3 (Derecha) - centro: 1.60, 0.50 | radioX: 0.30, radioY: 0.45
+                // Gap a C2: 0.20 | Gap a base enemy: 0.20 | Gap a T3/B3: 0.25
+                mobileNode('orb_3_a', 1.60, 0.50, 1.60, 0.50, 0.30, 0.45, 0.35, { orbitAngle: 0 }),
+                mobileNode('orb_3_b', 1.60, 0.50, 1.60, 0.50, 0.30, 0.45, 0.35, { orbitAngle: Math.PI / 2 }),
+                mobileNode('orb_3_c', 1.60, 0.50, 1.60, 0.50, 0.30, 0.45, 0.35, { orbitAngle: Math.PI }),
+                mobileNode('orb_3_d', 1.60, 0.50, 1.60, 0.50, 0.30, 0.45, 0.35, { orbitAngle: Math.PI * 1.5 })
             ],
             hazards: [
-                rectPuddle(0.28, -0.02, 0.22, 1.04)
+                rectPuddle(-2.0, -2.0, 6.0, 6.0, { dps: 4.5, noPulse: true })
             ]
         },
         {
-            name: 'Nivel 15: Zig-Zag Letal',
-            description: 'Dos muros horizontales de insecticida crean un corredor serpenteante.\nControla el flujo: un paso en falso y las tropas se pierden en el veneno.',
+            name: 'Nivel 15: Fortalezas de Artilleria',
+            description: 'Tres islas artilladas dominan el charco central. Capturalas para someter a tu enemigo bajo fuego pesado, pero cuidado con el veneno.',
             nodes: [
-                node('p_base', 0.06, 0.86, 'player', 'gigante', 150),
-                node('path_1', 0.18, 0.62, 'neutral', 'normal', 20),
-                node('path_2', 0.34, 0.86, 'neutral', 'normal', 20),
-                node('path_3', 0.50, 0.50, 'neutral', 'enjambre', 20),
-                node('path_4', 0.66, 0.14, 'neutral', 'normal', 20),
-                node('path_5', 0.82, 0.38, 'neutral', 'normal', 20),
-                node('enemy_core', 0.94, 0.10, 'enemy', 'gigante', 175)
+                // Centro (Artillería) - Nodos enormes y muy juntos
+                node('art_1', 0.50, 0.40, 'neutral', 'gigante', 50, { evolution: 'artilleria' }),
+                node('art_2', 0.43, 0.55, 'neutral', 'gigante', 50, { evolution: 'artilleria' }),
+                node('art_3', 0.57, 0.55, 'neutral', 'gigante', 50, { evolution: 'artilleria' }),
+
+                // Bases e intermediarios jugador (bien separados del charco)
+                node('p_base', 0.05, 0.50, 'player', 'gigante', 150),
+                node('p_aux_top', 0.12, 0.20, 'neutral', 'normal', 30),
+                node('p_aux_bot', 0.12, 0.80, 'neutral', 'normal', 30),
+                
+                // Bases e intermediarios enemigo (bien separados del charco)
+                node('e_base', 0.95, 0.50, 'enemy', 'gigante', 150),
+                node('e_aux_top', 0.88, 0.20, 'neutral', 'normal', 30),
+                node('e_aux_bot', 0.88, 0.80, 'neutral', 'normal', 30)
             ],
             hazards: [
-                rectPuddle(0.00, -0.02, 0.42, 0.40),
-                rectPuddle(0.30, 0.60, 0.70, 0.42),
-                rectPuddle(0.58, -0.02, 0.42, 0.30)
+                flood([
+                    { x: 0.50, y: 0.40, radius: 0.07 },
+                    { x: 0.43, y: 0.55, radius: 0.07 },
+                    { x: 0.57, y: 0.55, radius: 0.07 }
+                ], { radius: 0.22, scaleY: 1.0 })
             ]
         }
     ]

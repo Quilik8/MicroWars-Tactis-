@@ -68,6 +68,9 @@ export class AIManager {
     // Compatibilidad en caso de que otros módulos intenten resetear el estado
     reset() {
         this._engine.reset();
+        if (this._opportunityAnalyzer && this.world) {
+            this._opportunityAnalyzer.reset(this.world);
+        }
         // Limpiar timers de todas las facciones
         for (const key in this._factionTimers) {
             delete this._factionTimers[key];

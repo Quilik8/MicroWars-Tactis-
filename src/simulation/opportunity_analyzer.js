@@ -291,7 +291,7 @@ export class OpportunityAnalyzer {
 
                 if (currOwner === OWNER_PLAYER) {
                     const evoCost = node.pendingEvolution === 'artilleria' ? 40
-                        : (node.pendingEvolution === 'tanque' ? 45 : 30);
+                        : (node.pendingEvolution === 'tanque' ? 50 : 30);
                     const urgency     = evoCost / 20;
                     const evoDuration = node.pendingEvolutionDurationSec || 3.5;
                     this._emitOpportunity(

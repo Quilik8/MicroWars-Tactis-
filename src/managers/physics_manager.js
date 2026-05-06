@@ -29,8 +29,25 @@ export class PhysicsManager {
             let u = world.allUnits[world.travelingIds[i]];
             if (!u.targetNode) continue;
             let targetR = u.targetNode.radius;
-            let dx = u.targetNode.x - u.x;
-            let dy = u.targetNode.y - u.y;
+            let targetX = u.targetNode.x;
+            let targetY = u.targetNode.y;
+
+            if (u.targetNode.isMobile) {
+                let dist = Math.sqrt((targetX - u.x) * (targetX - u.x) + (targetY - u.y) * (targetY - u.y));
+                let effectiveSpeed = u.speed * u.speedMult * (u.currentZoneMult || 1.0);
+                if (effectiveSpeed > 0) {
+                    for (let iter = 0; iter < 2; iter++) {
+                        let t = dist / effectiveSpeed;
+                        let futureAngle = u.targetNode.orbitAngle + u.targetNode.orbitSpeed * t;
+                        targetX = (u.targetNode.orbitAnchorX + Math.cos(futureAngle) * u.targetNode.orbitRadiusX) * world.game.width;
+                        targetY = (u.targetNode.orbitAnchorY + Math.sin(futureAngle) * u.targetNode.orbitRadiusY) * world.game.height;
+                        dist = Math.sqrt((targetX - u.x) * (targetX - u.x) + (targetY - u.y) * (targetY - u.y));
+                    }
+                }
+            }
+
+            let dx = targetX - u.x;
+            let dy = targetY - u.y;
             if (dx * dx + dy * dy < (targetR * 4) * (targetR * 4)) {
                 world.grid.findNear(u.x, u.y, 30, world.neighbors);
             } else {
@@ -38,8 +55,8 @@ export class PhysicsManager {
             }
             u.updateForces(
                 dt,
-                u.targetNode.x,
-                u.targetNode.y,
+                targetX,
+                targetY,
                 targetR,
                 world.neighbors,
                 world.allUnits,

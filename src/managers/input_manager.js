@@ -1,3 +1,4 @@
+
 /**
  * InputManager — MicroWars v2
  *
@@ -34,6 +35,8 @@
 import { PIXI } from '../core/engine.js';
 import { Node } from '../entities/node.js';
 import { CombatManager } from './combat_manager.js';
+import { InputDrawHelper } from './input_draw.js';
+
 
 // ── Constantes de interacción ────────────────────────────────────
 const DRAG_THRESHOLD = 8;    // px mínimos para distinguir click de drag
@@ -758,167 +761,12 @@ export class InputManager {
     // DRAW — llamado cada frame desde game.onDraw (uiCanvas 2D)
     // ═══════════════════════════════════════════════════════════════
     draw(ctx) {
-        if (this.ui.gameState !== 'PLAYING' || this.ui.isPaused) return;
-        
-        this.updateEvolutionMenuPosition();
-        
-        const w = this.game.world;
-        if (!w) return;
-
-        const now = performance.now();
-
-        // ── 1. Línea de arrastre activa (solo si supera threshold) ──
-        if (this.dragStartNode && this.isDragging) {
-            const sx = this.dragStartNode.x * w.scale.x + w.position.x;
-            const sy = this.dragStartNode.y * w.scale.y + w.position.y;
-
-            if (this.dragMode === 'tunnel') {
-                this._drawTunnelLine(ctx, sx, sy, this.mouseX, this.mouseY, now);
-            } else {
-                this._drawAttackArrow(ctx, sx, sy, this.mouseX, this.mouseY,
-                    this.dragStartNode.owner);
-            }
-        }
-
-        // ── 2. Modo túnel mobile: halo en nodo fuente + línea al cursor ──
-        if (this.tunnelSourceNode) {
-            const sx = this.tunnelSourceNode.x * w.scale.x + w.position.x;
-            const sy = this.tunnelSourceNode.y * w.scale.y + w.position.y;
-            const sr = this.tunnelSourceNode.radius * w.scale.x;
-
-            // Halo pulsante doble
-            const pulse = 0.5 + 0.5 * Math.sin(now * 0.007);
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(sx, sy, sr + 6 + pulse * 8, 0, Math.PI * 2);
-            ctx.strokeStyle = '#f39c12';
-            ctx.lineWidth = 2.5;
-            ctx.globalAlpha = 0.8 * pulse;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(sx, sy, sr + 14 + pulse * 4, 0, Math.PI * 2);
-            ctx.lineWidth = 1.2;
-            ctx.globalAlpha = 0.35 * pulse;
-            ctx.stroke();
-            ctx.restore();
-
-            // Línea punteada hacia el cursor (solo si el cursor se movió del nodo)
-            const dx = this.mouseX - sx;
-            const dy = this.mouseY - sy;
-            if (dx * dx + dy * dy > (sr + 20) * (sr + 20)) {
-                this._drawTunnelLine(ctx, sx, sy, this.mouseX, this.mouseY, now);
-            }
-        }
-
-        // ── 3. Previsualización de flecha desde nodo seleccionado ──
-        //    Solo cuando el cursor está sobre un nodo destino válido
-        if (this.selectedNode && !this.isDragging && !this.tunnelSourceNode) {
-            let hovered = null;
-            for (let n of this.world.nodes) {
-                if (n.hovered && n !== this.selectedNode) { hovered = n; break; }
-            }
-            if (hovered) {
-                const sx = this.selectedNode.x * w.scale.x + w.position.x;
-                const sy = this.selectedNode.y * w.scale.y + w.position.y;
-                const tx = hovered.x * w.scale.x + w.position.x;
-                const ty = hovered.y * w.scale.y + w.position.y;
-                this._drawAttackArrow(ctx, sx, sy, tx, ty, this.selectedNode.owner, 0.40);
-            }
-        }
+        InputDrawHelper.draw(this, ctx);
     }
-
-    // ─── Flecha sólida de ataque / envío de tropas ────────────────
-    _drawAttackArrow(ctx, x1, y1, x2, y2, owner, alphaOverride) {
-        const dx = x2 - x1;
-        const dy = y2 - y1;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 10) return;
-
-        const angle = Math.atan2(dy, dx);
-        // Node.COLORS cubre todas las facciones (player, enemy, fuego, carpinteras, etc.)
-        // Evita el FACTIONS.find() O(n) que antes importaba faction_data aquí.
-        const nodeColors = Node.COLORS[owner];
-        const color = nodeColors
-            ? `#${nodeColors.fill.toString(16).padStart(6, '0')}`
-            : '#ffffff';
-
-        ctx.save();
-        ctx.strokeStyle = color;
-        ctx.fillStyle = color;
-        ctx.lineWidth = 3.5;
-        ctx.globalAlpha = alphaOverride ?? 0.88;
-        ctx.setLineDash([]);
-        ctx.lineCap = 'round';
-
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-
-        const headLen = 14;
-        ctx.beginPath();
-        ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6),
-            y2 - headLen * Math.sin(angle - Math.PI / 6));
-        ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6),
-            y2 - headLen * Math.sin(angle + Math.PI / 6));
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-    }
-
-    // ─── Línea punteada animada para modo túnel ───────────────────
-    _drawTunnelLine(ctx, x1, y1, x2, y2, now) {
-        const dx = x2 - x1;
-        const dy = y2 - y1;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 12) return;
-
-        const dashOffset = -(now * 0.09) % 24;
-
-        ctx.save();
-
-        // Halo exterior suave
-        ctx.strokeStyle = '#f39c12';
-        ctx.lineWidth = 5;
-        ctx.globalAlpha = 0.18;
-        ctx.setLineDash([]);
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-
-        // Línea punteada animada principal
-        ctx.strokeStyle = '#f39c12';
-        ctx.lineWidth = 2.5;
-        ctx.globalAlpha = 0.92;
-        ctx.setLineDash([10, 14]);
-        ctx.lineDashOffset = dashOffset;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-
-        // Círculo indicador en el destino
-        ctx.setLineDash([]);
-        ctx.beginPath();
-        ctx.arc(x2, y2, 7, 0, Math.PI * 2);
-        ctx.fillStyle = '#f39c12';
-        ctx.globalAlpha = 0.88;
-        ctx.fill();
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1.5;
-        ctx.globalAlpha = 0.70;
-        ctx.stroke();
-
-        ctx.restore();
-    }
-
     // ─── Alias de compatibilidad (por si algo externo los llama) ──
     drawArrow(ctx, x1, y1, x2, y2, owner) {
-        this._drawAttackArrow(ctx, x1, y1, x2, y2, owner);
+        InputDrawHelper._drawAttackArrow(ctx, x1, y1, x2, y2, owner);
     }
     onRightClick() { /* ahora gestionado en _handleRMBUp vía pointerUp */ }
 }
+

@@ -5,6 +5,42 @@ export const sector2 = {
     name: 'Sector 2: Redes Subterraneas',
     description: 'Domina tuneles, logistica y evoluciones tacticas. Artilleria, espinas y tanques empiezan a definir cada puzzle.',
     config: { allowEvolutions: true },
+    aiStrategy: {
+        focus: 'balanced',
+        aggressionMult: 0.85,
+        minEvolutionGarrison: 30,
+        minPostCaptureGarrison: 14,
+        hazardPolicy: 'none',
+        antiPendulum: {
+            targetCooldownSec: 5,
+            sourceCooldownSec: 2,
+            recaptureCooldownSec: 10,
+            flipWindowSec: 28,
+            maxFlipsBeforePenalty: 2,
+            recentAttackPenalty: 400,
+            flipPenalty: 650,
+            sourceRepeatPenalty: 200
+        },
+        difficultyOverrides: {
+            easy: {
+                aggressionMult: 0.55,
+                minEvolutionGarrison: 40,
+                antiPendulum: {
+                    recaptureCooldownSec: 14,
+                    flipPenalty: 850
+                }
+            },
+            hard: {
+                aggressionMult: 1.10,
+                minEvolutionGarrison: 25,
+                minPostCaptureGarrison: 18,
+                antiPendulum: {
+                    recaptureCooldownSec: 7,
+                    flipPenalty: 450
+                }
+            }
+        }
+    },
     levels: [
         {
             name: 'Nivel 6: Conexiones Subterraneas',

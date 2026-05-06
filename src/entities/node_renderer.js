@@ -113,7 +113,7 @@ export class NodeRenderer {
 
             // ── Anillo de rango punteado ──
             g.circle(node.x, node.y, node.artilleryRange);
-            g.stroke({ color: 0xf39c12, alpha: 0.08, width: 1, dashArray: [6, 8] });
+            g.stroke({ color: 0xf39c12, alpha: 0.25, width: 2, dashArray: [6, 8] });
         } else if (node.evolution === 'tanque') {
             g.circle(node.x, node.y, r * 0.6);
             g.fill({ color: 0x8e44ad, alpha: 0.4 });

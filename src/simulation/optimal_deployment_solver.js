@@ -25,6 +25,12 @@ import {
 } from './deterministic_rules.js';
 
 import { PredictiveCombatSimulator } from './predictive_combat_simulator.js';
+import {
+    SIM_RESULT_CODE,
+    SIM_RESULT_SURVIVOR_POWER,
+    SIM_RESULT_CRITICAL_MASS,
+    SIM_RESULT_SIZE,
+} from './ai_constants.js';
 
 // ── Condiciones de éxito ────────────────────────────────────────────
 export const SUCCESS_VICTORIA = 0;   // PIRRICA o SEGURA
@@ -40,10 +46,7 @@ export const OUT_CRITICAL_MASS_BONUS    = 5;
 export const OUT_SIMULATOR_CALLS        = 6;
 export const OUT_A_MIN_BODIES           = 7;
 
-// ── Índices internos del resultado del simulador ────────────────────
-const SIM_RESULT_CODE      = 0;
-const SIM_SURVIVOR_POWER   = 2;
-const SIM_CRITICAL_MASS    = 5;
+
 
 // ── Constantes de búsqueda ──────────────────────────────────────────
 const BISECT_STEP           = 5;     // Granularidad mínima (cuerpos)
@@ -61,7 +64,7 @@ export class OptimalDeploymentSolver {
         this._simulator = simulator;
 
         // Buffers pre-asignados (ZERO ALLOCATION)
-        this._simResult          = new Float32Array(PredictiveCombatSimulator.RESULT_SIZE);
+        this._simResult          = new Float32Array(SIM_RESULT_SIZE);
         this._compositionScratch = new Int32Array(4); // [light, heavy, totalBodies, totalPower]
 
         // Scratch para _findMinimumBodies (evita crear objetos)
@@ -147,8 +150,8 @@ export class OptimalDeploymentSolver {
             );
             simCalls++;
 
-            if (this._simResult[SIM_CRITICAL_MASS] > 0
-                && this._simResult[SIM_SURVIVOR_POWER] > adjustedAMin * 0.4) {
+            if (this._simResult[SIM_RESULT_CRITICAL_MASS] > 0
+                && this._simResult[SIM_RESULT_SURVIVOR_POWER] > adjustedAMin * 0.4) {
                 criticalMassBonus = 1;
                 finalBodies = aCheck;
             }
@@ -164,11 +167,22 @@ export class OptimalDeploymentSolver {
         const recHeavy  = this._compositionScratch[1];
         const totalPower = recLight + (recHeavy * UNIT_POWER_HEAVY);
 
+        // ── Fase 5: Simulación Final de Validación ────────────────
+        // Aseguramos que _simResult contenga los datos precisos (como supervivientes)
+        // para el despliegue final recomendado, en lugar de un probe fallido de bisección.
+        if (!criticalMassBonus || aCheck <= adjustedAMin + BISECT_STEP) {
+            this._simulateWithBodies(
+                world, originNode, targetNode,
+                finalBodies, attackerFaction, routeResult
+            );
+            simCalls++;
+        }
+
         // ── Escribir resultado ────────────────────────────────────
         outBuffer[OUT_RECOMMENDED_LIGHT]      = recLight;
         outBuffer[OUT_RECOMMENDED_HEAVY]      = recHeavy;
         outBuffer[OUT_TOTAL_POWER_COST]       = totalPower;
-        outBuffer[OUT_EXPECTED_SURVIVORS_PWR]  = this._simResult[SIM_SURVIVOR_POWER];
+        outBuffer[OUT_EXPECTED_SURVIVORS_PWR]  = this._simResult[SIM_RESULT_SURVIVOR_POWER];
         outBuffer[OUT_IS_VALID]               = 1;
         outBuffer[OUT_CRITICAL_MASS_BONUS]    = criticalMassBonus;
         outBuffer[OUT_SIMULATOR_CALLS]        = simCalls;

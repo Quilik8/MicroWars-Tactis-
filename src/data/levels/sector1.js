@@ -5,6 +5,40 @@ export const sector1 = {
     name: 'Sector 1: El Despertar',
     description: 'Fundamentos, movilidad pura y establecimiento de caminos logisticos. Aprende a dominar el enjambre. Mejoras desactivadas.',
     config: { allowEvolutions: false },
+    aiStrategy: {
+        focus: 'expansion',
+        aggressionMult: 0.65,
+        minPostCaptureGarrison: 8,
+        hazardPolicy: 'none',
+        antiPendulum: {
+            targetCooldownSec: 6,
+            sourceCooldownSec: 3,
+            recaptureCooldownSec: 12,
+            flipWindowSec: 30,
+            maxFlipsBeforePenalty: 2,
+            recentAttackPenalty: 350,
+            flipPenalty: 600,
+            sourceRepeatPenalty: 200
+        },
+        difficultyOverrides: {
+            easy: {
+                aggressionMult: 0.35,
+                minPostCaptureGarrison: 5,
+                antiPendulum: {
+                    recaptureCooldownSec: 16,
+                    flipPenalty: 800
+                }
+            },
+            hard: {
+                aggressionMult: 0.90,
+                minPostCaptureGarrison: 12,
+                antiPendulum: {
+                    recaptureCooldownSec: 8,
+                    flipPenalty: 400
+                }
+            }
+        }
+    },
     levels: [
         {
             name: 'Nivel 1: Aprende a Conquistar',

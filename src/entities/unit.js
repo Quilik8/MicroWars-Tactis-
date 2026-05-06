@@ -61,14 +61,15 @@ export class Unit {
      */
     updateForces(dt, targetX, targetY, nodeRadius, neighborIds, unitsList, grid = null, localAvoidanceSolver = null) {
         // Detectar cambio de nodo y reasignar posicion personal de forma determinista.
-        if (targetX !== this._lastTargetX || targetY !== this._lastTargetY) {
+        if (this.targetNode !== this._lastTargetNode) {
+            let seedX = this.targetNode ? this.targetNode.x : targetX;
+            let seedY = this.targetNode ? this.targetNode.y : targetY;
             const targetSeed = mixSeeds(
                 this.deterministicSeed != null ? this.deterministicSeed : 1,
-                (Math.imul(targetX | 0, 73856093) ^ Math.imul(targetY | 0, 19349663)) >>> 0
+                (Math.imul(seedX | 0, 73856093) ^ Math.imul(seedY | 0, 19349663)) >>> 0
             );
             reseedUnitFormation(this, targetSeed);
-            this._lastTargetX = targetX;
-            this._lastTargetY = targetY;
+            this._lastTargetNode = this.targetNode;
         }
 
         const APPROACH_ZONE = nodeRadius * 4;
