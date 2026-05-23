@@ -2,6 +2,19 @@
  * DOM and UI Manager for MicroWars
  */
 import { Node } from '../entities/node.js';
+import {
+    applyTranslations,
+    getLanguage,
+    LANGUAGE_NAMES,
+    setLanguage,
+    t,
+    tf
+} from '../i18n/translations.js';
+import {
+    localizeFaction,
+    localizeLevel,
+    localizeSector
+} from '../i18n/content_translations.js';
 
 export class UIManager {
     constructor(gameCallbacks) {
@@ -9,8 +22,6 @@ export class UIManager {
         this.gameState = 'MENU';
         this.isPaused = false;
 
-        this.hudFPS = null;
-        this.hudUnits = null;
         this.sendSlider = null;
         this.sendPct = null;
         this.pauseBtn = null;
@@ -18,11 +29,16 @@ export class UIManager {
         this.sendBar = null;
         this.nodeTooltip = null;
         this.difficultyBtns = null;   // ← NUEVO
+        this.languageBtns = null;
+        this.languageMenuBtn = null;
+        this.languageOptions = null;
+        this.creditsModal = null;
+        this.sectorGridState = null;
+        this.activeSectorIndex = null;
+        this.sectorLevelViewOpen = false;
     }
 
     init() {
-        this.hudFPS = document.getElementById('hudFPS');
-        this.hudUnits = document.getElementById('hudUnits');
         this.sendSlider = document.getElementById('sendSlider');
         this.sendPct = document.getElementById('sendPct');
         this.pauseBtn = document.getElementById('pauseBtn');
@@ -31,6 +47,10 @@ export class UIManager {
         this.sendBar = document.getElementById('sendBar');
         this.speedBtns = document.querySelectorAll('.speed-btn');
         this.difficultyBtns = document.querySelectorAll('.diff-select-btn'); // ← NUEVO
+        this.languageBtns = document.querySelectorAll('.language-btn');
+        this.languageMenuBtn = document.getElementById('btnLanguageMenu');
+        this.languageOptions = document.getElementById('languageOptions');
+        this.creditsModal = document.getElementById('creditsModal');
 
         let existingTooltip = document.getElementById('nodeTooltip');
         if (existingTooltip) existingTooltip.remove();
@@ -41,6 +61,7 @@ export class UIManager {
         document.body.appendChild(this.nodeTooltip);
 
         this.initEventListeners();
+        this.applyLanguage();
     }
 
     initEventListeners() {
@@ -84,6 +105,28 @@ export class UIManager {
             });
         }
 
+        if (this.languageBtns) {
+            this.languageBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!btn.dataset.language) return;
+                    setLanguage(btn.dataset.language);
+                    this.applyLanguage();
+                    this.toggleLanguageMenu(false);
+                });
+            });
+        }
+
+        if (this.languageMenuBtn) {
+            this.languageMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleLanguageMenu();
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.language-panel')) this.toggleLanguageMenu(false);
+        });
+
         // Botones Generales de Pantallas
         const btnCampaign = document.getElementById('btnCampaign');
         if (btnCampaign) btnCampaign.onclick = () => {
@@ -101,6 +144,25 @@ export class UIManager {
             if (this.callbacks.onPlayIntro) this.callbacks.onPlayIntro();
             this.setGameState('LEVELS');
         };
+
+        const btnCredits = document.getElementById('btnCredits');
+        if (btnCredits) btnCredits.onclick = () => this.showCreditsModal();
+
+        const btnCloseCredits = document.getElementById('btnCloseCredits');
+        if (btnCloseCredits) btnCloseCredits.onclick = () => this.hideCreditsModal();
+
+        const btnCreditsOk = document.getElementById('btnCreditsOk');
+        if (btnCreditsOk) btnCreditsOk.onclick = () => this.hideCreditsModal();
+
+        if (this.creditsModal) {
+            this.creditsModal.addEventListener('click', (e) => {
+                if (e.target === this.creditsModal) this.hideCreditsModal();
+            });
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') this.hideCreditsModal();
+        });
 
         const btnBackFromCampaign = document.getElementById('btnBackFromCampaign');
         if (btnBackFromCampaign) btnBackFromCampaign.onclick = () => this.setGameState('MENU');
@@ -151,25 +213,60 @@ export class UIManager {
         };
     }
 
+    applyLanguage() {
+        applyTranslations(document);
+        this.updatePauseButton();
+
+        const activeDifficulty = document.querySelector('.diff-select-btn.active-difficulty')?.dataset.difficulty;
+        if (activeDifficulty) this.updateDifficultyButtons(activeDifficulty);
+
+        if (!this.languageBtns) return;
+
+        const activeLanguage = getLanguage();
+        const currentLabel = document.querySelector('.language-current');
+        if (currentLabel) currentLabel.textContent = activeLanguage === 'zh-CN' ? '中文' : (activeLanguage === 'pt-BR' ? 'PT' : activeLanguage.toUpperCase());
+
+        this.languageBtns.forEach(btn => {
+            const isActive = btn.dataset.language === activeLanguage;
+            btn.classList.toggle('active-language', isActive);
+            btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            const name = LANGUAGE_NAMES[btn.dataset.language] || btn.dataset.language;
+            btn.setAttribute('title', name);
+        });
+
+        if (this.gameState === 'LEVELS') {
+            this.refreshSectorGrid();
+        }
+    }
+
+    toggleLanguageMenu(forceOpen = null) {
+        if (!this.languageMenuBtn || !this.languageOptions) return;
+        const open = forceOpen === null
+            ? this.languageOptions.classList.contains('hidden')
+            : forceOpen;
+        this.languageOptions.classList.toggle('hidden', !open);
+        this.languageMenuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    showCreditsModal() {
+        if (!this.creditsModal) return;
+        this.creditsModal.classList.remove('hidden');
+    }
+
+    hideCreditsModal() {
+        if (!this.creditsModal) return;
+        this.creditsModal.classList.add('hidden');
+    }
+
     // ── NUEVO: actualiza el estado visual de los botones de dificultad ─────
     updateDifficultyButtons(activeDifficulty) {
         if (!this.difficultyBtns) return;
-        const DESCS = {
-            easy:   'Conciencia estratégica: planifica rutas, refuerza momentum y evita sobreextensión.',
-            normal: 'Inteligencia enjambre: coordinación de pinzas, ataques precisos y sniping oportunista.',
-            hard:   'Dominio absoluto: back-capping, flanqueos letales, conciencia de peligros del mapa.'
-        };
         const desc = document.getElementById('difficultyDesc');
-        if (desc) desc.textContent = DESCS[activeDifficulty] || '';
+        if (desc) desc.textContent = t(`difficulty.${activeDifficulty}Desc`);
 
         this.difficultyBtns.forEach(btn => {
             btn.classList.toggle('active-difficulty', btn.dataset.difficulty === activeDifficulty);
         });
-    }
-
-    updateHUD(fps, units, power) {
-        if (this.hudFPS) this.hudFPS.textContent = `FPS: ${fps}`;
-        if (this.hudUnits) this.hudUnits.textContent = `Hormigas: ${units} (Fuerza: ${power})`;
     }
 
     updateSpeedButtons(activeSpeed) {
@@ -190,7 +287,7 @@ export class UIManager {
         const screenY = node.y * world.scale.y + world.position.y;
 
         const p = node.population || {};
-        const evLabel = node.evolution ? `Evo: ${node.evolution.toUpperCase()}` : 'Sin evolución';
+        const evLabel = node.evolution ? `Evo: ${node.evolution.toUpperCase()}` : t('tooltip.noEvolution');
 
         let total = Math.round(p['neutral'] || 0);
         let factionHtml = '';
@@ -215,8 +312,8 @@ export class UIManager {
         this.nodeTooltip.innerHTML = `
             <div class="tooltip-header">[${node.type.toUpperCase()}]</div>
             <div class="tooltip-row"><span>${evLabel}</span></div>
-            <div class="tooltip-row"><span>Dueño:</span> <span class="owner-${node.owner}">${node.owner}</span></div>
-            <div class="tooltip-row"><span>Límite:</span> <span>${Math.round(total)} / ${node.maxUnits}</span></div>
+            <div class="tooltip-row"><span>${t('tooltip.owner')}:</span> <span class="owner-${node.owner}">${node.owner}</span></div>
+            <div class="tooltip-row"><span>${t('tooltip.limit')}:</span> <span>${Math.round(total)} / ${node.maxUnits}</span></div>
             <div class="tooltip-divider"></div>
             ${factionHtml}
         `;
@@ -263,9 +360,27 @@ export class UIManager {
         }
     }
 
-    renderSectorGrid(sectors, levelState, onSelectLevel, autoOpenSectorIndex = null) {
+    refreshSectorGrid(autoOpenSectorIndex = undefined) {
+        if (!this.sectorGridState) return;
+        const requestedSector = autoOpenSectorIndex !== undefined
+            ? autoOpenSectorIndex
+            : (this.sectorLevelViewOpen ? this.activeSectorIndex : null);
+        this.renderSectorGrid(
+            this.sectorGridState.sectors,
+            this.sectorGridState.levelState,
+            this.sectorGridState.onSelectLevel,
+            requestedSector,
+            false
+        );
+    }
+
+    renderSectorGrid(sectors, levelState, onSelectLevel, autoOpenSectorIndex = null, remember = true) {
         const root = document.getElementById('levelSelection');
         if (!root) return;
+
+        if (remember) {
+            this.sectorGridState = { sectors, levelState, onSelectLevel };
+        }
         
         let grid = root.querySelector('.level-grid');
         if (grid) grid.style.display = 'none';
@@ -297,8 +412,10 @@ export class UIManager {
         // Botón de retorno al macro
         const backBtn = document.createElement('button');
         backBtn.className = 'btn-back-macro';
-        backBtn.innerText = '← VISTA DE SECTORES';
+        backBtn.innerText = t('nav.backSectorsView');
         backBtn.onclick = () => {
+            this.sectorLevelViewOpen = false;
+            this.activeSectorIndex = null;
             levelContainer.classList.remove('active');
         };
         levelContainer.appendChild(backBtn);
@@ -308,18 +425,21 @@ export class UIManager {
         levelContainer.appendChild(trail);
 
         const renderLevels = (sector, sIdx) => {
+            this.sectorLevelViewOpen = true;
+            this.activeSectorIndex = sIdx;
             let absoluteStart = 0;
             for (let i = 0; i < sIdx; i++) absoluteStart += sectors[i].levels.length;
 
             trail.innerHTML = ''; // reset nodes
             sector.levels.forEach((lvl, lIdx) => {
+                const localizedLevel = localizeLevel(lvl, absoluteStart + lIdx + 1);
                 const nodeWrap = document.createElement('div');
                 nodeWrap.className = 'level-node-wrapper';
                 nodeWrap.innerHTML = `
                     <div class="level-node">${absoluteStart + lIdx + 1}</div>
                     <div class="level-info">
-                        <div class="level-info-title">${lvl.name}</div>
-                        <div class="level-info-desc">${lvl.description}</div>
+                        <div class="level-info-title">${localizedLevel.name}</div>
+                        <div class="level-info-desc">${localizedLevel.description}</div>
                     </div>
                 `;
                 nodeWrap.onclick = () => onSelectLevel(sIdx, lIdx);
@@ -331,6 +451,7 @@ export class UIManager {
         const RomanToSector = ["I","II","III","IV","V","VI","VII"];
 
         sectors.forEach((sector, sIdx) => {
+            const localizedSector = localizeSector(sector, sIdx + 1);
             const card = document.createElement('div');
             card.className = `sector-macro-card`;
             card.dataset.idx = sIdx;
@@ -343,9 +464,9 @@ export class UIManager {
                 <div class="smc-bg ${bgClass}"></div>
                 <div class="smc-shape ${borderClass}">
                     <div class="smc-content">
-                        <h2 class="smc-title">${sector.name}</h2>
-                        <div class="smc-desc">${sector.description}</div>
-                        <div class="smc-levels-badge">${sector.levels.length} REDES IDENTIFICADAS</div>
+                        <h2 class="smc-title">${localizedSector.name}</h2>
+                        <div class="smc-desc">${localizedSector.description}</div>
+                        <div class="smc-levels-badge">${tf('sector.levelsBadge', { count: sector.levels.length })}</div>
                     </div>
                 </div>
             `;
@@ -425,6 +546,8 @@ export class UIManager {
                 const card = e.target.closest('.sector-macro-card');
                 if (card) {
                     const idx = parseInt(card.dataset.idx);
+                    this.sectorLevelViewOpen = true;
+                    this.activeSectorIndex = idx;
                     renderLevels(sectors[idx], idx);
                 }
             } else {
@@ -458,6 +581,8 @@ export class UIManager {
                 }, 50);
             }
         } else {
+            this.sectorLevelViewOpen = false;
+            this.activeSectorIndex = null;
             levelContainer.classList.remove('active');
         }
     }
@@ -485,16 +610,10 @@ export class UIManager {
             this.hideNodeTooltip();
             if (this.callbacks.onClearMenuAnts) this.callbacks.onClearMenuAnts();
             if (this.callbacks.onClearLevel)    this.callbacks.onClearLevel();
-            
-            // Forzar actualización si hay callback global de repintado de sectores
-            // Utilizando options.returnToSector
-            if (window.level && window.SECTORS) {
-                let sIdx = options.returnToSector ? window.level.currentSectorIndex : null;
-                this.renderSectorGrid(window.SECTORS, window.level.state, (s, l) => {
-                    if (window.ai) window.ai.setDifficulty(currentDifficulty);
-                    window.level.loadLevel(s, l);
-                }, sIdx);
-            }
+            const sIdx = options.returnToSector && this.sectorGridState?.levelState
+                ? this.sectorGridState.levelState.currentSectorIndex
+                : null;
+            this.refreshSectorGrid(sIdx);
         } else if (state === 'CAMPAIGN') {
             this.showScreen('campaignScreen');
             this.hideNodeTooltip();
@@ -531,6 +650,7 @@ export class UIManager {
         grid.innerHTML = '';
 
         factions.forEach(f => {
+            const localizedFaction = localizeFaction(f);
             const card = document.createElement('div');
             card.className = `faction-card ${f.isPremium ? 'premium-locked' : ''}`;
 
@@ -540,16 +660,16 @@ export class UIManager {
 
             card.innerHTML = `
                 <div class="faction-icon" style="background: ${colorHex}"></div>
-                <h3>${f.name}</h3>
-                <div class="faction-trait">${f.trait}</div>
-                <div class="faction-desc">${f.description}</div>
-                <div class="difficulty-badge diff-${f.difficulty.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}">${f.difficulty}</div>
+                <h3>${localizedFaction.name}</h3>
+                <div class="faction-trait">${localizedFaction.trait}</div>
+                <div class="faction-desc">${localizedFaction.description}</div>
+                <div class="difficulty-badge diff-${(f.difficulty || 'normal').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}">${localizedFaction.difficulty || ''}</div>
             `;
 
             if (!f.isPremium) {
                 card.onclick = () => onSelect(f);
             } else {
-                card.onclick = () => alert("¡Esta facción es exclusiva de la versión Premium!");
+                card.onclick = () => alert(t('alert.premiumFaction'));
             }
 
             grid.appendChild(card);
@@ -558,12 +678,16 @@ export class UIManager {
 
     setPauseState(isPaused, skipCallback = false) {
         this.isPaused = isPaused;
-        if (this.pauseBtn) {
-            this.pauseBtn.innerText = isPaused ? '▶ REANUDAR' : '⏸ PAUSA';
-        }
+        this.updatePauseButton();
 
         if (!skipCallback && this.callbacks.onTogglePause) {
             this.callbacks.onTogglePause(isPaused);
+        }
+    }
+
+    updatePauseButton() {
+        if (this.pauseBtn) {
+            this.pauseBtn.innerText = this.isPaused ? t('pause.resume') : t('pause.pause');
         }
     }
 }

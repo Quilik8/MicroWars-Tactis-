@@ -3,7 +3,8 @@ export class IntermittentBarrier {
         this.zones = config.zones || [];
         this.interval = config.interval || 8;
         this.initialDelay = config.initialDelay || 0;
-        this.activeZoneIndex = config.activeZoneIndex || 0;
+        const zoneCount = this.zones.length || 1;
+        this.activeZoneIndex = ((config.activeZoneIndex || 0) % zoneCount + zoneCount) % zoneCount;
         
         this.timer = -this.initialDelay;
         this.graphics = [];
@@ -23,6 +24,7 @@ export class IntermittentBarrier {
     update(dt, cx, cy) {
         this.timer += dt;
         let needsRedraw = false;
+        let stateChanged = false;
 
         // Si cambiaron las dimensiones del mundo, forzar redibujado (responsive)
         if (cx !== this._lastCx || cy !== this._lastCy) {
@@ -31,15 +33,19 @@ export class IntermittentBarrier {
             needsRedraw = true;
         }
 
-        if (this.timer >= this.interval) {
-            this.timer = 0;
-            this.activeZoneIndex = (this.activeZoneIndex + 1) % this.zones.length;
+        if (this.zones.length > 0 && this.timer >= this.interval) {
+            const steps = Math.floor(this.timer / this.interval);
+            this.timer = this.timer % this.interval;
+            this.activeZoneIndex = (this.activeZoneIndex + steps) % this.zones.length;
             needsRedraw = true;
+            stateChanged = true;
         }
 
         if (needsRedraw) {
             this._updateVisuals(cx, cy);
         }
+
+        return stateChanged;
     }
 
     _updateVisuals(cx, cy) {
@@ -48,6 +54,7 @@ export class IntermittentBarrier {
         for (let i = 0; i < this.zones.length; i++) {
             const z = this.zones[i];
             const gfx = this.graphics[i];
+            if (!gfx) continue;
             gfx.clear();
 
             const rx = z.x * cx;
@@ -106,9 +113,13 @@ export class IntermittentBarrier {
             
             if (z.isHollow) {
                 const t = z.thickness || 0.012;
+                // Ajuste de relación de aspecto en Y para que el grosor físico de las paredes
+                // superior e inferior coincida exactamente con el visual (que se renderiza con cx)
+                const scaleYFactor = (this._lastCx && this._lastCy) ? (this._lastCx / this._lastCy) : 1.0;
+                const adjustedT = t * scaleYFactor;
                 return [
-                    { x: z.x, y: z.y, width: z.width, height: t, isHollowElement: true },
-                    { x: z.x, y: z.y + z.height - t, width: z.width, height: t, isHollowElement: true },
+                    { x: z.x, y: z.y, width: z.width, height: adjustedT, isHollowElement: true },
+                    { x: z.x, y: z.y + z.height - adjustedT, width: z.width, height: adjustedT, isHollowElement: true },
                     { x: z.x, y: z.y, width: t, height: z.height, isHollowElement: true },
                     { x: z.x + z.width - t, y: z.y, width: t, height: z.height, isHollowElement: true }
                 ];

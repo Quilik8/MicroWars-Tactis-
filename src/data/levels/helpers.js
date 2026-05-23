@@ -175,6 +175,6 @@ export function hollowPulse(x, y, width, height, interval, initialDelay = 0, col
         ],
         interval,
         initialDelay,
-        activeZoneIndex
+        activeZoneIndex: activeZoneIndex % 2
     };
 }

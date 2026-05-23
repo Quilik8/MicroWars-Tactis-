@@ -777,9 +777,9 @@ export class PredictiveCombatSimulator {
             }
 
             if (travelingWindowOpen && currentEvolutionCode === EVOLUTION_ESPINOSO && currentTime + SIM_EPSILON >= nextEspinosoTime) {
-                // Daño proporcional a la densidad: 1 base + 5% de atacantes en tránsito
+                // Daño proporcional a la densidad: 1 base + 20% de atacantes en tránsito
                 const travelingBodies = getTotalBodies(attackerTravelLight, attackerTravelHeavy);
-                const killCount = Math.min(travelingBodies, 1 + Math.floor(travelingBodies * 0.05));
+                const killCount = Math.min(travelingBodies, 1 + Math.floor(travelingBodies * 0.20));
                 applyBodyLosses(attackerTravelLight, attackerTravelHeavy, killCount, bodyScratch);
                 const killedLight = bodyScratch.killedLight | 0;
                 const killedHeavy = bodyScratch.killedHeavy | 0;

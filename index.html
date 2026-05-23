@@ -15,7 +15,7 @@
     }
     </script>
 
-    <script type="module" src="main.js"></script>
+    <script type="module" src="main.js?v=20260521_menu3"></script>
 </head>
 
 <body>
@@ -26,32 +26,49 @@
             <button id="btnSpeed2" class="hud-btn speed-btn" data-speed="2">▶▶ 2×</button>
             <button id="btnSpeed4" class="hud-btn speed-btn" data-speed="4">▶▶▶ 4×</button>
         </div>
-        <button id="pauseBtn">⏸ Pausa</button>
+        <button id="pauseBtn" data-i18n="pause.pause">⏸ Pausa</button>
     </div>
 
     <!-- UI Overlay (Menús Fijos) -->
     <div id="uiLayer">
         <!-- Menú Principal -->
         <div id="mainMenu" class="screen active">
-            <h1>MicroWars</h1>
-            <h2>Tácticas de Enjambre</h2>
-            <div class="menu-buttons">
-                <button id="btnCampaign" class="primary-btn" style="display: none;">MODO CAMPAÑA</button>
-                <button id="btnLevels" class="secondary-btn">MISIONES (NIVELES)</button>
+            <div class="language-panel" aria-label="Selector de idioma">
+                <button id="btnLanguageMenu" class="language-menu-toggle" type="button" aria-expanded="false" aria-controls="languageOptions">
+                    <span class="language-menu-icon">☰</span>
+                    <span class="language-current">ES</span>
+                </button>
+                <div id="languageOptions" class="language-options hidden">
+                    <span class="language-label" data-i18n="language.label">Idioma</span>
+                    <button class="language-btn" data-language="es">ES</button>
+                    <button class="language-btn" data-language="en">EN</button>
+                    <button class="language-btn" data-language="pt-BR">PT</button>
+                    <button class="language-btn" data-language="zh-CN">中文</button>
+                </div>
             </div>
+
+            <h1 data-i18n="menu.title">MicroWars</h1>
+            <h2 data-i18n="menu.subtitle">Tácticas de Enjambre</h2>
+            <div class="menu-buttons">
+                <button id="btnCampaign" class="primary-btn" style="display: none;" data-i18n="menu.campaign">MODO CAMPAÑA</button>
+                <button id="btnLevels" class="primary-btn play-btn" data-i18n="menu.play">JUGAR</button>
+                <a id="btnDownload" class="secondary-btn" href="https://quilik.itch.io/microwars" target="_blank" rel="noopener noreferrer" data-i18n="menu.download" data-i18n-title="menu.downloadReady" title="Descargar en itch.io">DESCARGA</a>
+            </div>
+            <div class="download-note" data-i18n="menu.downloadReady">Disponible en itch.io</div>
+            <button id="btnCredits" class="credits-corner-btn" data-i18n="menu.credits">CRÉDITOS</button>
         </div>
 
         <!-- Pantalla de Selección de Nivel -->
         <div id="levelSelection" class="screen hidden">
-            <h1>SELECCIONAR ESCARAMUZA</h1>
+            <h1 data-i18n="screen.levelSelect">SELECCIONAR ESCARAMUZA</h1>
 
             <!-- ── SELECTOR DE DIFICULTAD ─────────────────────────── -->
             <div class="difficulty-selector">
-                <span class="difficulty-label">Dificultad de la IA:</span>
+                <span class="difficulty-label" data-i18n="difficulty.label">Dificultad de la IA:</span>
                 <div class="difficulty-buttons">
-                    <button class="diff-select-btn diff-easy"   data-difficulty="easy"   title="La IA comete errores, ataca lento y rara vez coordina.">FÁCIL</button>
-                    <button class="diff-select-btn diff-normal" data-difficulty="normal" title="Comportamiento equilibrado. La IA expande, evoluciona y ataca con ritmo normal.">NORMAL</button>
-                    <button class="diff-select-btn diff-hard"   data-difficulty="hard"   title="La IA actúa rápido, coordina flancos y hace rush temprano.">DIFÍCIL</button>
+                    <button class="diff-select-btn diff-easy"   data-difficulty="easy"   data-i18n="difficulty.easy" data-i18n-title="difficulty.easyTitle" title="La IA comete errores, ataca lento y rara vez coordina.">FÁCIL</button>
+                    <button class="diff-select-btn diff-normal" data-difficulty="normal" data-i18n="difficulty.normal" data-i18n-title="difficulty.normalTitle" title="Comportamiento equilibrado. La IA expande, evoluciona y ataca con ritmo normal.">NORMAL</button>
+                    <button class="diff-select-btn diff-hard"   data-difficulty="hard"   data-i18n="difficulty.hard" data-i18n-title="difficulty.hardTitle" title="La IA actúa rápido, coordina flancos y hace rush temprano.">DIFÍCIL</button>
                 </div>
                 <!-- Descripción dinámica de la dificultad activa -->
                 <div class="difficulty-desc" id="difficultyDesc">Comportamiento equilibrado.</div>
@@ -61,28 +78,28 @@
             <div id="levelGrid" class="level-grid">
                 <!-- Se poblará dinámicamente desde main.js -->
             </div>
-            <button id="btnBackToMenu" class="secondary-btn" style="margin-top: 20px;">VOLVER AL MENÚ</button>
+            <button id="btnBackToMenu" class="secondary-btn" style="margin-top: 20px;" data-i18n="nav.backMenu">VOLVER AL MENÚ</button>
         </div>
 
         <!-- Pantalla de Selección de Facción -->
         <div id="factionSelection" class="screen hidden">
-            <h1 class="campaign-title">ELIGE TU ENJAMBRE</h1>
+            <h1 class="campaign-title" data-i18n="screen.factionSelect">ELIGE TU ENJAMBRE</h1>
             <div class="faction-grid">
                 <!-- Se poblará dinámicamente -->
             </div>
             <div class="campaign-footer">
-                <button id="btnBackToMenuFromFactions" class="secondary-btn">VOLVER AL MENÚ</button>
+                <button id="btnBackToMenuFromFactions" class="secondary-btn" data-i18n="nav.backMenu">VOLVER AL MENÚ</button>
             </div>
         </div>
 
         <!-- Pantalla de Campaña (Mapa Estratégico) -->
         <div id="campaignScreen" class="screen hidden">
-            <h1 class="campaign-title">MAPA ESTRATÉGICO</h1>
+            <h1 class="campaign-title" data-i18n="screen.campaignMap">MAPA ESTRATÉGICO</h1>
             <div id="mapContainer">
                 <!-- PixiJS renders here -->
             </div>
             <div class="campaign-footer">
-                <button id="btnBackFromCampaign" class="secondary-btn">VOLVER AL MENÚ</button>
+                <button id="btnBackFromCampaign" class="secondary-btn" data-i18n="nav.backMenu">VOLVER AL MENÚ</button>
             </div>
         </div>
 
@@ -92,51 +109,57 @@
             <h1 id="introTitle">Nivel 1</h1>
             <h2 id="introDesc" style="color: #fff; max-width: 600px; text-align: center; line-height: 1.5;">Descripción
                 del nivel</h2>
-            <p style="color: #aaa; margin-top: 20px; font-family: monospace; animation: pulse 1.5s infinite;">(Haz Clic
+            <p style="color: #aaa; margin-top: 20px; font-family: monospace; animation: pulse 1.5s infinite;" data-i18n="intro.continue">(Haz Clic
                 en cualquier lado para continuar)</p>
         </div>
 
         <!-- Pantalla de Victoria -->
         <div id="levelComplete" class="screen hidden">
-            <h1>¡VICTORIA!</h1>
-            <h2>El territorio es nuestro</h2>
-            <button id="btnNextLevel" class="primary-btn">SIGUIENTE NIVEL</button>
-            <button id="btnMenuFromWin" class="secondary-btn">VOLVER AL SECTOR</button>
+            <h1 data-i18n="victory.title">¡VICTORIA!</h1>
+            <h2 data-i18n="victory.subtitle">El territorio es nuestro</h2>
+            <button id="btnNextLevel" class="primary-btn" data-i18n="nav.nextLevel">SIGUIENTE NIVEL</button>
+            <button id="btnMenuFromWin" class="secondary-btn" data-i18n="nav.backSector">VOLVER AL SECTOR</button>
         </div>
 
         <!-- Pantalla de Derrota -->
         <div id="gameOver" class="screen hidden">
-            <h1>LA COLONIA HA CAÍDO</h1>
-            <h2>Nuestros números no fueron suficientes</h2>
-            <button id="btnRestart" class="primary-btn">REINTENTAR</button>
-            <button id="btnMenuFromLoss" class="secondary-btn">VOLVER AL SECTOR</button>
+            <h1 data-i18n="gameover.title">LA COLONIA HA CAÍDO</h1>
+            <h2 data-i18n="gameover.subtitle">Nuestros números no fueron suficientes</h2>
+            <button id="btnRestart" class="primary-btn" data-i18n="nav.retry">REINTENTAR</button>
+            <button id="btnMenuFromLoss" class="secondary-btn" data-i18n="nav.backSector">VOLVER AL SECTOR</button>
         </div>
-    </div>
 
-    <!-- HUD de diagnóstico -->
-    <div id="hud" class="hidden">
-        <span id="hudFPS">FPS: --</span>
-        <span id="hudUnits">Unidades: 0</span>
+        <!-- Modal de Créditos -->
+        <div id="creditsModal" class="credits-modal hidden" role="dialog" aria-modal="true" aria-labelledby="creditsTitle">
+            <div class="credits-panel">
+                <button id="btnCloseCredits" class="credits-close" type="button" aria-label="Cerrar">×</button>
+                <h2 id="creditsTitle" data-i18n="credits.title">Créditos</h2>
+                <p data-i18n="credits.greeting">Hola, jugador. Gracias por jugar MicroWars: Swarm Tactics.</p>
+                <p class="credits-creator" data-i18n="credits.creator">Creado por Quilik.</p>
+                <p><span data-i18n="credits.contactLabel">Contacto</span>: <a href="mailto:proyecto001a.u.t.o.r@gmail.com">proyecto001a.u.t.o.r@gmail.com</a></p>
+                <button id="btnCreditsOk" class="secondary-btn" type="button" data-i18n="credits.close">Cerrar</button>
+            </div>
+        </div>
     </div>
 
     <!-- Barra de porcentaje inferior -->
     <div id="sendBar" class="hidden">
-        <span id="sendLabel">Enviar: <strong id="sendPct">50%</strong></span>
+        <span id="sendLabel"><span data-i18n="hud.send">Enviar</span>: <strong id="sendPct">50%</strong></span>
         <input type="range" id="sendSlider" min="10" max="100" step="10" value="50">
-        <button id="btnZoomOut" class="hud-btn">- Zoom</button>
-        <button id="btnZoomIn" class="hud-btn">+ Zoom</button>
-        <button id="btnRestartLevel" class="hud-btn" style="margin-right: 10px;">🔄 Reiniciar</button>
-        <button id="btnSurrender" class="hud-btn surrender-btn">RETIRADA AL SECTOR</button>
+        <button id="btnZoomOut" class="hud-btn" data-i18n="hud.zoomOut">- Zoom</button>
+        <button id="btnZoomIn" class="hud-btn" data-i18n="hud.zoomIn">+ Zoom</button>
+        <button id="btnRestartLevel" class="hud-btn" style="margin-right: 10px;" data-i18n="hud.restart">🔄 Reiniciar</button>
+        <button id="btnSurrender" class="hud-btn surrender-btn" data-i18n="hud.surrender">RETIRADA AL SECTOR</button>
     </div>
 
     <div id="gameContainer"></div>
 
     <!-- MENÚ RADIAL DE EVOLUCIÓN -->
     <div id="evolutionMenu" class="evolution-menu hidden">
-        <button class="evo-btn" data-evo="espinoso" title="Tronco Espinoso (30)">🌵</button>
-        <button class="evo-btn" data-evo="artilleria" title="Artillería (40)">🔫</button>
-        <button class="evo-btn" data-evo="tanque" title="Tanques (50)">🛡️</button>
-        <button class="evo-btn cancel" data-evo="cancel" title="Cancelar">✕</button>
+        <button class="evo-btn" data-evo="espinoso" data-i18n-title="evolution.thorn" title="Tronco Espinoso (30)">🌵</button>
+        <button class="evo-btn" data-evo="artilleria" data-i18n-title="evolution.artillery" title="Artillería (40)">🔫</button>
+        <button class="evo-btn" data-evo="tanque" data-i18n-title="evolution.tank" title="Tanques (50)">🛡️</button>
+        <button class="evo-btn cancel" data-evo="cancel" data-i18n-title="evolution.cancel" title="Cancelar">✕</button>
     </div>
 
     <script>

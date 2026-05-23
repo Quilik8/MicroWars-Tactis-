@@ -71,7 +71,7 @@ export const archetypeStore = new Float32Array(WEIGHT_VECTOR_SIZE * ARCHETYPE_CO
 // ── EASY ──  (Doctrina: acumula, refuerza, ataca poco, evoluciona lento)
 archetypeStore.set([
     1.0,  1.0,  0.8,  0.7,  0.7,  1.2,  0.7,  0.8,
-    0.0,  0.7,  0.50, 0.8,  0.3,  1,    0.3,  60,
+    0.0,  0.7,  0.40, 0.8,  0.3,  1,    0.3,  60,
     0.45, 0.82, 0.75, 5.0,  10.0, 0.0,  0.0,  0.0,
     0.0,  0.0,  6.0
 ], 0);
@@ -79,16 +79,16 @@ archetypeStore.set([
 // ── NORMAL ──  (Doctrina: equilibrado, refuerzo suave, oportunismo parcial)
 archetypeStore.set([
     0.9,  1.2,  1.0,  0.9,  1.0,  0.9,  0.8,  0.3,
-    0.3,  1.0,  0.75, 0.9,  0.7,  2,    0.7,  30,
-    0.90, 0.88, 0.90, 1.5,  8.0,  0.3,  0.5,  0.5,
+    0.3,  1.0,  0.65, 0.9,  0.7,  2,    0.7,  30,
+    0.70, 0.88, 0.90, 2.0,  8.0,  0.3,  0.5,  0.5,
     0.7,  0.8,  3.0
 ], WEIGHT_VECTOR_SIZE);
 
 // ── HARD ──  (Doctrina: inteligente y agresivo, doctrina completa)
 archetypeStore.set([
     0.8,  1.5,  1.2,  1.0,  1.1,  0.6,  0.9,  0.1,
-    0.5,  1.0,  0.90, 1.0,  1.0,  3,    1.0,  20,
-    0.75, 0.95, 1.00, 0.5,  6.0,  1.0,  1.0,  1.0,
+    0.5,  1.0,  1.00, 1.0,  1.0,  3,    1.0,  20,
+    0.85, 0.95, 1.00, 0.5,  6.0,  1.0,  1.0,  1.0,
     1.0,  1.0,  1.5
 ], WEIGHT_VECTOR_SIZE * 2);
 

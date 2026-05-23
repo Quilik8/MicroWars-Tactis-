@@ -70,6 +70,7 @@ export class WaterSweep {
         this.color = rawColor;
         this.colorCss = '#' + rawColor.toString(16).padStart(6, '0');
         this.alpha = config.alpha || 0.42;
+        this.preventMultiple = config.preventMultiple || false;
 
         this._spawnTimer = this.initialDelay;
         this._isAlerting = false;
@@ -129,7 +130,7 @@ export class WaterSweep {
             );
             const startRadius = typeof pattern.startRadius === 'number'
                 ? pattern.startRadius * minDim
-                : (-width - (speed * 4));
+                : (speed < 0 ? maxRadius + width : -width - (speed * 4));
 
             return {
                 kind: 'radial',
@@ -237,10 +238,13 @@ export class WaterSweep {
                 this._spawnTimer = this.cooldown;
             }
         } else {
-            this._spawnTimer -= dt;
-            if (this._spawnTimer <= 0) {
-                this._isAlerting = true;
-                this._alertTimer = this.alertDuration;
+            // Si preventMultiple es true y hay sweeps activos, pausamos el cooldown
+            if (!this.preventMultiple || this._activeBars.length === 0) {
+                this._spawnTimer -= dt;
+                if (this._spawnTimer <= 0) {
+                    this._isAlerting = true;
+                    this._alertTimer = this.alertDuration;
+                }
             }
         }
 
@@ -255,8 +259,14 @@ export class WaterSweep {
                 this._applyRadialDamage(active, allUnits);
                 this._drawRadial(active);
 
-                if (active.radius > active.maxRadius + active.width) {
-                    this._activeBars.splice(i, 1);
+                if (active.speed >= 0) {
+                    if (active.radius > active.maxRadius + active.width) {
+                        this._activeBars.splice(i, 1);
+                    }
+                } else {
+                    if (active.radius + active.width < 0) {
+                        this._activeBars.splice(i, 1);
+                    }
                 }
             } else {
                 active.scalar += active.speed * dt;
@@ -324,19 +334,35 @@ export class WaterSweep {
         const centerX = active.nx * centerScalar;
         const centerY = active.ny * centerScalar;
 
+        // 1. Halo/glow exterior (difuso y ancho)
         this._drawQuad(
-            centerX - (active.nx * active.width * 0.2),
-            centerY - (active.ny * active.width * 0.2),
+            centerX,
+            centerY,
             active.nx,
             active.ny,
             active.tx,
             active.ty,
-            active.width * 0.42,
+            active.width * 1.6,
             active.halfLen,
-            active.color,
-            0.06
+            0x00e5ff, // Cyan glow
+            0.05
         );
 
+        // 2. Estela trasera
+        this._drawQuad(
+            centerX - (active.nx * active.width * 0.3),
+            centerY - (active.ny * active.width * 0.3),
+            active.nx,
+            active.ny,
+            active.tx,
+            active.ty,
+            active.width * 0.40,
+            active.halfLen,
+            active.color,
+            0.08
+        );
+
+        // 3. Cuerpo principal
         this._drawQuad(
             centerX,
             centerY,
@@ -350,22 +376,24 @@ export class WaterSweep {
             active.alpha
         );
 
+        // 4. Frente brillante cyan
         this._drawQuad(
-            centerX + (active.nx * active.width * 0.42),
-            centerY + (active.ny * active.width * 0.42),
+            centerX + (active.nx * active.width * 0.39),
+            centerY + (active.ny * active.width * 0.39),
             active.nx,
             active.ny,
             active.tx,
             active.ty,
-            active.width * 0.18,
+            active.width * 0.22,
             active.halfLen,
             0x4dd0e1,
-            0.58
+            0.60
         );
 
+        // 5. Espuma blanca delantera
         this._drawQuad(
-            centerX + (active.nx * active.width * 0.48),
-            centerY + (active.ny * active.width * 0.48),
+            centerX + (active.nx * active.width * 0.475),
+            centerY + (active.ny * active.width * 0.475),
             active.nx,
             active.ny,
             active.tx,
@@ -373,7 +401,7 @@ export class WaterSweep {
             active.width * 0.05,
             active.halfLen,
             0xffffff,
-            0.26
+            0.35
         );
     }
 
@@ -387,17 +415,25 @@ export class WaterSweep {
         const midRadius = Math.max(0, innerRadius + ((outerRadius - innerRadius) * 0.5));
         const ringWidth = Math.max(2, outerRadius - innerRadius);
 
-        this._gfx.circle(active.centerX, active.centerY, Math.max(0, midRadius - (ringWidth * 0.28)));
-        this._gfx.stroke({ color: active.color, alpha: 0.09, width: ringWidth * 0.55 });
+        // 1. Halo/glow exterior
+        this._gfx.circle(active.centerX, active.centerY, midRadius);
+        this._gfx.stroke({ color: 0x00e5ff, alpha: 0.04, width: ringWidth * 1.6 });
 
+        // 2. Estela trasera
+        this._gfx.circle(active.centerX, active.centerY, Math.max(0, midRadius - (ringWidth * 0.3)));
+        this._gfx.stroke({ color: active.color, alpha: 0.08, width: ringWidth * 0.40 });
+
+        // 3. Cuerpo principal
         this._gfx.circle(active.centerX, active.centerY, midRadius);
         this._gfx.stroke({ color: active.color, alpha: active.alpha, width: ringWidth });
 
-        this._gfx.circle(active.centerX, active.centerY, Math.max(0, outerRadius - (ringWidth * 0.1)));
-        this._gfx.stroke({ color: 0x4dd0e1, alpha: 0.55, width: Math.max(2, ringWidth * 0.18) });
+        // 4. Frente brillante cyan
+        this._gfx.circle(active.centerX, active.centerY, Math.max(0, outerRadius - (ringWidth * 0.11)));
+        this._gfx.stroke({ color: 0x4dd0e1, alpha: 0.60, width: Math.max(2, ringWidth * 0.22) });
 
-        this._gfx.circle(active.centerX, active.centerY, Math.max(0, outerRadius - 2));
-        this._gfx.stroke({ color: 0xffffff, alpha: 0.22, width: 2 });
+        // 5. Espuma blanca exterior
+        this._gfx.circle(active.centerX, active.centerY, Math.max(0, outerRadius - 1.5));
+        this._gfx.stroke({ color: 0xffffff, alpha: 0.35, width: 3 });
     }
 
     _getNextSpawnDelay() {
@@ -596,21 +632,37 @@ export class WaterSweep {
         ctx.save();
 
         if (nextPattern.kind === 'radial') {
-            const world = game.world;
-            const screenX = (nextPattern.centerX * (world ? world.scale.x : 1)) + (world ? world.position.x : 0);
-            const screenY = (nextPattern.centerY * (world ? world.scale.y : 1)) + (world ? world.position.y : 0);
-            const baseRadius = 22 + (progress * 26);
-            ctx.globalAlpha = pulse * 0.7;
-            ctx.strokeStyle = this.colorCss;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(screenX, screenY, baseRadius, 0, Math.PI * 2);
-            ctx.stroke();
+            if (nextPattern.speed < 0) {
+                // Implosión: Dibujar marco en los bordes de la pantalla
+                ctx.globalAlpha = pulse * 0.7;
+                ctx.strokeStyle = this.colorCss;
+                ctx.lineWidth = 6;
+                // Marco que se engrosa/achica ligeramente con el progreso
+                const inset = progress * 15;
+                ctx.strokeRect(inset, inset, game.width - inset * 2, game.height - inset * 2);
+                
+                ctx.globalAlpha = 0.16;
+                ctx.fillRect(0, 0, game.width, inset); // Arriba
+                ctx.fillRect(0, game.height - inset, game.width, inset); // Abajo
+                ctx.fillRect(0, inset, inset, game.height - inset * 2); // Izquierda
+                ctx.fillRect(game.width - inset, inset, inset, game.height - inset * 2); // Derecha
+            } else {
+                const world = game.world;
+                const screenX = (nextPattern.centerX * (world ? world.scale.x : 1)) + (world ? world.position.x : 0);
+                const screenY = (nextPattern.centerY * (world ? world.scale.y : 1)) + (world ? world.position.y : 0);
+                const baseRadius = 22 + (progress * 26);
+                ctx.globalAlpha = pulse * 0.7;
+                ctx.strokeStyle = this.colorCss;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, baseRadius, 0, Math.PI * 2);
+                ctx.stroke();
 
-            ctx.globalAlpha = 0.16;
-            ctx.beginPath();
-            ctx.arc(screenX, screenY, baseRadius + 14, 0, Math.PI * 2);
-            ctx.stroke();
+                ctx.globalAlpha = 0.16;
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, baseRadius + 14, 0, Math.PI * 2);
+                ctx.stroke();
+            }
         } else {
             ctx.globalAlpha = pulse * 0.9;
             ctx.fillStyle = this.colorCss;

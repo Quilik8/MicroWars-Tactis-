@@ -302,8 +302,8 @@ export class Node {
                 // Paso 2: Ordenar por cercanía (los más cercanos mueren primero)
                 victims.sort((a, b) => a.distSq - b.distSq);
 
-                // Paso 3: Calcular bajas = 1 base + 5% de la densidad
-                const killCount = Math.min(victims.length, 1 + Math.floor(victims.length * 0.05));
+                // Paso 3: Calcular bajas = 1 base + 20% de la densidad
+                const killCount = Math.min(victims.length, 1 + Math.floor(victims.length * 0.20));
 
                 for (let k = 0; k < killCount; k++) {
                     victims[k].unit.pendingRemoval = true;

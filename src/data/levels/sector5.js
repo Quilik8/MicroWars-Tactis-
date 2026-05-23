@@ -24,21 +24,23 @@ export const sector5 = {
         },
         difficultyOverrides: {
             easy: {
-                aggressionMult: 0.45,
+                aggressionMult: 0.40,
                 maxRouteCasualtyRatio: 0.05,
+                minPostCaptureGarrison: 10,
                 antiPendulum: {
-                    recaptureCooldownSec: 18,
-                    flipPenalty: 1100
+                    recaptureCooldownSec: 12,
+                    flipPenalty: 1200
                 }
             },
             hard: {
-                aggressionMult: 1.00,
+                aggressionMult: 1.10,
                 hazardPolicy: 'cautious',
-                maxRouteCasualtyRatio: 0.18,
-                minEvolutionGarrison: 28,
+                maxRouteCasualtyRatio: 0.22,
+                minEvolutionGarrison: 24,
+                minPostCaptureGarrison: 22,
                 antiPendulum: {
-                    recaptureCooldownSec: 10,
-                    flipPenalty: 650
+                    recaptureCooldownSec: 3,
+                    flipPenalty: 400
                 }
             }
         }
@@ -60,7 +62,7 @@ export const sector5 = {
                 node('e2_base', 0.88, 0.82, 'fuego', 'gigante', 130)
             ],
             waterSweeps: [
-                { speed: 20, width: 0.032, cooldown: 37, initialDelay: 15, color: WATER_COLOR, alpha: 0.42 }
+                { speed: 20, width: 0.065, cooldown: 37, initialDelay: 15, color: WATER_COLOR, alpha: 0.42 }
             ]
         },
         {
@@ -68,14 +70,14 @@ export const sector5 = {
             description: 'Una rafaga circular nace en el centro y se expande hacia los bordes.\nExpandete primero por la periferia y empuja al nucleo despues del paso del anillo.',
             nodes: [
                 node('p_base', 0.10, 0.84, 'player', 'gigante', 150),
+                node('p_inner', 0.18, 0.76, 'neutral', 'enjambre', 20),
                 node('rim_1', 0.22, 0.66, 'neutral', 'normal', 20),
                 node('rim_2', 0.22, 0.30, 'neutral', 'normal', 20),
                 node('rim_3', 0.50, 0.90, 'neutral', 'normal', 20),
                 node('rim_4', 0.78, 0.72, 'neutral', 'normal', 20),
                 node('rim_5', 0.82, 0.24, 'neutral', 'normal', 20),
                 node('inner_1', 0.42, 0.46, 'neutral', 'enjambre', 20),
-                node('inner_2', 0.58, 0.54, 'neutral', 'enjambre', 20),
-                node('enemy_core', 0.50, 0.50, 'enemy', 'gigante', 190)
+                node('enemy_core', 0.50, 0.50, 'enemy', 'gigante', 150)
             ],
             waterSweeps: [
                 {
@@ -83,8 +85,8 @@ export const sector5 = {
                     centerX: 0.50,
                     centerY: 0.50,
                     speed: 26,
-                    width: 0.065,
-                    cooldown: 22,
+                    width: 0.085,
+                    cooldown: 27,
                     initialDelay: 10,
                     color: WATER_COLOR,
                     alpha: 0.38
@@ -106,41 +108,54 @@ export const sector5 = {
             ],
             waterSweeps: [
                 {
-                    cooldown: 11,
-                    initialDelay: 8,
-                    width: 0.032,
+                    cooldown: 3,
+                    initialDelay: 6,
+                    preventMultiple: true,
+                    width: 0.065,
                     color: WATER_COLOR,
                     alpha: 0.40,
                     sequence: [
-                        { direction: 'down', speed: 28 },
-                        { direction: 'left', speed: 24 },
-                        { direction: 'up-left', speed: 26 },
-                        { direction: 'right', speed: 23 },
-                        { direction: 'down-right', speed: 27 }
+                        { direction: 'down', speed: 38 },
+                        { direction: 'left', speed: 34 },
+                        { direction: 'up-left', speed: 36 },
+                        { direction: 'right', speed: 33 },
+                        { direction: 'down-right', speed: 37 }
                     ]
                 }
             ]
         },
         {
-            name: 'Nivel 25: El Embudo Inundado',
-            description: 'Todo converge en el centro mientras rafagas desde abajo barren el embudo.\nReagrupa fuera de la marea y cruza solo cuando la ventana este limpia.',
+            name: 'Nivel 25: Convergencia',
+            description: 'La marea nace en los bordes y se contrae hacia el centro de forma letal.\nLucha desde las cuatro esquinas cardinales mientras el mapa se encoge.',
             nodes: [
-                node('p_base', 0.10, 0.12, 'player', 'gigante', 150),
-                node('funnel_l1', 0.28, 0.24, 'neutral', 'normal', 20),
-                node('funnel_l2', 0.42, 0.40, 'neutral', 'normal', 20),
-                node('funnel_r1', 0.28, 0.76, 'neutral', 'normal', 20),
-                node('funnel_r2', 0.42, 0.60, 'neutral', 'normal', 20),
-                node('center', 0.60, 0.50, 'neutral', 'enjambre', 20),
-                node('enemy_front', 0.78, 0.50, 'enemy', 'normal', 70),
-                node('enemy_core', 0.92, 0.50, 'enemy', 'gigante', 180)
+                // Bases (Jugador y 3 Enemigos) más separadas
+                node('p_base', 0.50, 0.90, 'player', 'gigante', 150),
+                node('e_base1', 0.50, 0.10, 'enemy', 'gigante', 150),
+                node('e_base2', 0.10, 0.50, 'fuego', 'gigante', 150),
+                node('e_base3', 0.90, 0.50, 'tejedoras', 'gigante', 150),
+                // Nodos circulares en el centro más espaciados
+                node('center_1', 0.50, 0.30, 'neutral', 'enjambre', 30),
+                node('center_2', 0.50, 0.70, 'neutral', 'enjambre', 30),
+                node('center_3', 0.30, 0.50, 'neutral', 'enjambre', 30),
+                node('center_4', 0.70, 0.50, 'neutral', 'enjambre', 30),
+                // Nodo central
+                node('core', 0.50, 0.50, 'neutral', 'gigante', 60),
+                // Nodos esparcidos en las diagonales más hacia las esquinas
+                node('diag_1', 0.25, 0.25, 'neutral', 'normal', 25),
+                node('diag_2', 0.75, 0.75, 'neutral', 'normal', 25),
+                node('diag_3', 0.25, 0.75, 'neutral', 'normal', 25),
+                node('diag_4', 0.75, 0.25, 'neutral', 'normal', 25)
             ],
             waterSweeps: [
                 {
-                    direction: 'up',
-                    speed: 30,
-                    width: 0.034,
-                    cooldown: 12,
-                    initialDelay: 7,
+                    kind: 'radial',
+                    centerX: 0.50,
+                    centerY: 0.50,
+                    speed: -35, // Velocidad negativa para implosión
+                    width: 0.085,
+                    cooldown: 8,
+                    initialDelay: 5,
+                    preventMultiple: true,
                     color: WATER_COLOR,
                     alpha: 0.40
                 }
@@ -148,26 +163,42 @@ export const sector5 = {
         },
         {
             name: 'Nivel 26: Ida y Vuelta',
-            description: 'La rafaga funciona como un pendulo: cruza el mapa y luego regresa.\nDebes leer la oscilacion y atacar justo en el hueco correcto.',
+            description: 'La rafaga funciona como un pendulo: cruza el mapa, descansa un instante, y luego regresa.\nDebes leer la oscilacion y atacar justo en el hueco correcto.',
             nodes: [
-                node('p_base', 0.10, 0.50, 'player', 'gigante', 150),
-                node('lane_1', 0.24, 0.30, 'neutral', 'normal', 20),
-                node('lane_2', 0.40, 0.50, 'neutral', 'enjambre', 20),
-                node('lane_3', 0.56, 0.30, 'neutral', 'normal', 20),
-                node('lane_4', 0.72, 0.50, 'neutral', 'normal', 20),
-                node('enemy_top', 0.88, 0.24, 'enemy', 'normal', 60),
-                node('enemy_core', 0.92, 0.68, 'enemy', 'gigante', 180)
+                // Jugador a la izquierda
+                node('p_base', 0.08, 0.50, 'player', 'gigante', 150),
+                node('p_front', 0.20, 0.50, 'neutral', 'tanque', 40),
+                
+                // Islas centrales superior, centro, inferior
+                node('mid_top_1', 0.35, 0.25, 'neutral', 'normal', 20),
+                node('mid_top_2', 0.60, 0.25, 'neutral', 'enjambre', 30),
+                
+                node('mid_cen_1', 0.40, 0.50, 'neutral', 'normal', 20),
+                node('mid_cen_2', 0.55, 0.50, 'neutral', 'gigante', 50),
+                
+                node('mid_bot_1', 0.35, 0.75, 'neutral', 'normal', 20),
+                node('mid_bot_2', 0.60, 0.75, 'neutral', 'enjambre', 30),
+                
+                // 3 Enemigos a la derecha
+                node('e_base_top', 0.88, 0.20, 'enemy', 'gigante', 150),
+                node('e_base_mid', 0.95, 0.50, 'fuego', 'gigante', 150),
+                node('e_base_bot', 0.88, 0.80, 'tejedoras', 'gigante', 150),
+                
+                // Defensas enemigas
+                node('e_def_top', 0.75, 0.35, 'neutral', 'tanque', 30),
+                node('e_def_bot', 0.75, 0.65, 'neutral', 'tanque', 30)
             ],
             waterSweeps: [
                 {
-                    cooldown: 9,
+                    cooldown: 1, // 1 segundo exacto de pausa antes de la alerta
                     initialDelay: 6,
-                    width: 0.032,
+                    width: 0.065,
                     color: WATER_COLOR,
                     alpha: 0.42,
+                    preventMultiple: true,
                     sequence: [
-                        { direction: 'right', speed: 24 },
-                        { direction: 'left', speed: 24 }
+                        { direction: 'right', speed: 38 },
+                        { direction: 'left', speed: 38 }
                     ]
                 }
             ]

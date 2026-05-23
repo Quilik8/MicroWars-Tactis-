@@ -4,6 +4,8 @@ import { PIXI } from '../core/engine.js';
 import { WaterSweep } from '../systems/water_sweep.js';
 import { LightSweep } from '../systems/light_sweep.js';
 import { IntermittentBarrier } from '../systems/intermittent_barrier.js';
+import { t, tf } from '../i18n/translations.js';
+import { localizeLevel } from '../i18n/content_translations.js';
 
 export class LevelManager {
     constructor(game, world, ui, sfx, music) {
@@ -68,7 +70,7 @@ export class LevelManager {
             if (!localStorage.getItem('microwars_game_beaten')) {
                 localStorage.setItem('microwars_game_beaten', 'true');
                 setTimeout(() => {
-                    alert("¡FELICIDADES COMPANDANTE!\n\nHas conquistado todos los sectores, doblegado a las especies rivales y asegurado la supervivencia absoluta de tu colonia.\n\nEl enjambre perdurará gracias a tus increíbles tácticas.\n\n¡Gracias por jugar MicroWars Tactics!");
+                    alert(t('alert.gameBeaten'));
                 }, 200);
             }
         } else {
@@ -262,6 +264,7 @@ export class LevelManager {
             for (let ibCfg of levelData.intermittentBarriers) {
                 const ib = new IntermittentBarrier(ibCfg);
                 ib.initGraphics(PIXI, this.game.layerNodes);
+                ib.update(0, cx, cy);
                 this.world.intermittentBarriers.push(ib);
             }
         }
@@ -322,8 +325,9 @@ export class LevelManager {
         const introTitle  = document.getElementById('introTitle');
         const introDesc   = document.getElementById('introDesc');
         const introScreen = document.getElementById('levelIntro');
-        if (introTitle) introTitle.innerText = levelData.name || `SECTOR ${sectorIndex + 1} - NIVEL ${absoluteLevelNumber}`;
-        if (introDesc)  introDesc.innerText  = levelData.description || "Acaba con el nido enemigo.";
+        const localizedLevel = localizeLevel(levelData, absoluteLevelNumber);
+        if (introTitle) introTitle.innerText = localizedLevel.name || tf('intro.defaultTitle', { sector: sectorIndex + 1, level: absoluteLevelNumber });
+        if (introDesc)  introDesc.innerText  = localizedLevel.description || t('intro.defaultDesc');
         if (introScreen) {
             introScreen.classList.remove('hidden');
             introScreen.classList.add('active');

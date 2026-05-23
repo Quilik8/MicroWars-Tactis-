@@ -327,6 +327,7 @@ export class WorldManager {
         if (gameState !== 'PLAYING' || isPaused) return;
 
         this.simTime += dt;
+        this.updateIntermittentBarriers(dt);
         this.updateNodeCounts();
         PhysicsManager.updateGrid(this);
         PhysicsManager.updatePhysics(this, dt);
@@ -392,6 +393,18 @@ export class WorldManager {
         }
     }
 
+    updateIntermittentBarriers(dt) {
+        let intermittentBarrierChanged = false;
+        for (let ib of this.intermittentBarriers) {
+            if (ib.update(dt, this.game.width, this.game.height)) {
+                intermittentBarrierChanged = true;
+            }
+        }
+        if (intermittentBarrierChanged) {
+            this.rebuildNavigation();
+        }
+    }
+
     updateNodeCounts() {
         for (let n of this.nodes) {
             if (!n.population) n.population = {};
@@ -438,11 +451,6 @@ export class WorldManager {
         // update() de cada rayo de luz: gestiona reset de nodos marcados
         for (let sweep of this.lightSweeps) {
             sweep.update(dt, this.allUnits, this.nodes, this.game);
-        }
-
-        // update() de barreras intermitentes
-        for (let ib of this.intermittentBarriers) {
-            ib.update(dt, this.game.width, this.game.height);
         }
 
         let hoveredNode = null;

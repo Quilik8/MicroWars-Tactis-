@@ -150,8 +150,7 @@ game.onUpdate = (dt) => {
             ai.update(dt, world.nodes, world.allUnits, enemyFaction, pId);
         }
 
-        const fps = game.app ? Math.round(game.app.ticker.FPS) : 0;
-        let pUnits = 0, pPower = 0, eUnits = 0, eNodes = 0, pNodes = 0;
+        let pUnits = 0, eUnits = 0, eNodes = 0, pNodes = 0;
 
         for (const n of world.nodes) {
             if (n.owner === pId) pNodes++;
@@ -159,11 +158,10 @@ game.onUpdate = (dt) => {
         }
         for (const u of world.allUnits) {
             if (u.pendingRemoval) continue;
-            if (u.faction === pId) { pUnits++; pPower += (u.power || 1); }
+            if (u.faction === pId) pUnits++;
             else if (u.faction !== 'neutral') eUnits++;
         }
 
-        ui.updateHUD(fps, pUnits, pPower);
         level.checkVictory(dt, pNodes, eNodes, pUnits, eUnits);
     }
 };
@@ -182,7 +180,7 @@ window.addEventListener('load', async () => {
     world.init(game.app);
     input.init();
     campaign.init();
-    ui.renderSectorGrid(SECTORS, level.state, (sectorIdx, levelIdx) => {
+    ui.renderSectorGrid(SECTORS, level, (sectorIdx, levelIdx) => {
         ai.setDifficulty(currentDifficulty);
         level.loadLevel(sectorIdx, levelIdx);
     });
