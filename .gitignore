@@ -9,6 +9,10 @@ Desktop.ini
 # Temp files
 tmp/
 *.log
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
 
 # Project specific ignores
 # (Add any large assets or sensitive data if applicable)

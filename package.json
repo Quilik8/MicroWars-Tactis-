@@ -1,0 +1,13 @@
+{
+  "name": "microwars-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "powershell -ExecutionPolicy Bypass -File tools/prepare-dist.ps1",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}
