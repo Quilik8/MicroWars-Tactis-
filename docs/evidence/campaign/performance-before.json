@@ -1,0 +1,66 @@
+{
+  "times": {
+    "fullRenderMs": {
+      "median": 75.30000001192093,
+      "p95": 109.69999998807907,
+      "max": 109.69999998807907
+    },
+    "cameraMs": {
+      "median": 3.199999988079071,
+      "p95": 4,
+      "max": 14.900000005960464
+    },
+    "saveMs": {
+      "median": 6.199999988079071,
+      "p95": 9.200000017881393,
+      "max": 9.200000017881393
+    },
+    "create300Ms": {
+      "median": 653.4000000059605,
+      "p95": 734.8000000119209,
+      "max": 734.8000000119209
+    }
+  },
+  "isolation": [
+    {
+      "faction": "carpinteras",
+      "territory": 0,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "fuego",
+      "territory": 33,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 62,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "bala",
+      "territory": 157,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "cortadoras",
+      "territory": 253,
+      "accessibleWithoutOtherCapitals": 295
+    },
+    {
+      "faction": "negras",
+      "territory": 269,
+      "accessibleWithoutOtherCapitals": 294
+    }
+  ],
+  "dom": 1792,
+  "tickerStarted": true,
+  "renderer": "webgl",
+  "idle": {
+    "seconds": 2,
+    "taskMs": 3.629,
+    "scriptMs": 1.365
+  },
+  "errors": [],
+  "environment": "Headless Edge, software WebGL SwiftShader, 1280x720; timings are comparative, not hardware FPS."
+}

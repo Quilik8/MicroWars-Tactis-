@@ -1,3 +1,6 @@
+import { START_PROFILES } from '../campaign/rules.js';
+import { factionEmblem } from '../campaign/faction_emblems.js';
+import { ct } from '../campaign/campaign_i18n.js';
 /**
  * DOM and UI Manager for MicroWars
  */
@@ -214,6 +217,7 @@ export class UIManager {
     }
 
     applyLanguage() {
+        if (this.gameState === 'CAMPAIGN') window.campaign?.visuals?.render();
         applyTranslations(document);
         this.updatePauseButton();
 
@@ -319,7 +323,7 @@ export class UIManager {
         `;
 
         this.nodeTooltip.classList.remove('hidden');
-        
+
         // Asignar temporalmente para obtener el tamaño real
         this.nodeTooltip.style.left = `${screenX + node.radius * world.scale.x + 10}px`;
         this.nodeTooltip.style.top = `${screenY - 40}px`;
@@ -381,7 +385,7 @@ export class UIManager {
         if (remember) {
             this.sectorGridState = { sectors, levelState, onSelectLevel };
         }
-        
+
         let grid = root.querySelector('.level-grid');
         if (grid) grid.style.display = 'none';
 
@@ -432,17 +436,21 @@ export class UIManager {
 
             trail.innerHTML = ''; // reset nodes
             sector.levels.forEach((lvl, lIdx) => {
-                const localizedLevel = localizeLevel(lvl, absoluteStart + lIdx + 1);
+                const absoluteLevel = absoluteStart + lIdx + 1;
+                const localizedLevel = localizeLevel(lvl, absoluteLevel);
+                const isUnlocked = absoluteLevel <= (levelState.unlockedLevels || 1);
                 const nodeWrap = document.createElement('div');
-                nodeWrap.className = 'level-node-wrapper';
+                nodeWrap.className = `level-node-wrapper ${isUnlocked ? 'unlocked' : 'locked'}`;
                 nodeWrap.innerHTML = `
-                    <div class="level-node">${absoluteStart + lIdx + 1}</div>
+                    <div class="level-node">${isUnlocked ? absoluteLevel : 'LOCK'}</div>
                     <div class="level-info">
                         <div class="level-info-title">${localizedLevel.name}</div>
                         <div class="level-info-desc">${localizedLevel.description}</div>
                     </div>
                 `;
-                nodeWrap.onclick = () => onSelectLevel(sIdx, lIdx);
+                nodeWrap.onclick = () => {
+                    if (isUnlocked) onSelectLevel(sIdx, lIdx);
+                };
                 trail.appendChild(nodeWrap);
             });
             levelContainer.classList.add('active');
@@ -453,9 +461,11 @@ export class UIManager {
         sectors.forEach((sector, sIdx) => {
             const localizedSector = localizeSector(sector, sIdx + 1);
             const card = document.createElement('div');
+            card.setAttribute('role', 'button'); card.tabIndex = 0;
+            card.onkeydown = event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); card.click(); } };
             card.className = `sector-macro-card`;
             card.dataset.idx = sIdx;
-            
+
             // Elegir un bio background basado en el index (+1 o específico al sector)
             const bgClass = `bg-bio-${(sIdx % 7) + 1}`;
             const borderClass = `border-bio-${(sIdx % 7) + 1}`;
@@ -499,7 +509,7 @@ export class UIManager {
             }
 
             gallery.appendChild(card);
-            
+
             // Radar node
             const rNode = document.createElement('div');
             rNode.className = 'ft-node';
@@ -540,7 +550,7 @@ export class UIManager {
             isDown = false;
             gallery.style.scrollSnapType = 'x mandatory';
             gallery.style.cursor = 'grab';
-            
+
             if (!dragged) {
                 // Fue un click real, abrir niveles
                 const card = e.target.closest('.sector-macro-card');
@@ -589,6 +599,10 @@ export class UIManager {
 
     setGameState(state, options = {}) {
         this.gameState = state;
+        // SVG campaign is event driven; do not render the hidden tactical world.
+        const ticker=window.campaign?.game?.app?.ticker;
+        if(ticker){if(state==='CAMPAIGN')ticker.stop();else if(!this.isPaused)ticker.start();}
+        if (this.callbacks.onGameStateChanged) this.callbacks.onGameStateChanged(state);
 
         const isIngame = (state === 'PLAYING' || state === 'VICTORY' || state === 'GAMEOVER');
 
@@ -647,11 +661,13 @@ export class UIManager {
     renderFactionSelection(factions, onSelect) {
         const grid = document.querySelector('.faction-grid');
         if (!grid) return;
-        grid.innerHTML = '';
+        grid.innerHTML = '';document.getElementById('btnConfirmFaction')?.remove();
 
         factions.forEach(f => {
             const localizedFaction = localizeFaction(f);
             const card = document.createElement('div');
+            card.setAttribute('role', 'button'); card.tabIndex = 0;
+            card.onkeydown = event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); card.click(); } };
             card.className = `faction-card ${f.isPremium ? 'premium-locked' : ''}`;
 
             const colorHex = '#' + f.color.toString(16).padStart(6, '0');
@@ -659,15 +675,20 @@ export class UIManager {
             card.style.setProperty('--f-color-alpha', colorHex + '44');
 
             card.innerHTML = `
-                <div class="faction-icon" style="background: ${colorHex}"></div>
+                <div class="faction-icon" style="color: ${colorHex}">${factionEmblem(f.id)}</div>
                 <h3>${localizedFaction.name}</h3>
-                <div class="faction-trait">${localizedFaction.trait}</div>
-                <div class="faction-desc">${localizedFaction.description}</div>
-                <div class="difficulty-badge diff-${(f.difficulty || 'normal').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}">${localizedFaction.difficulty || ''}</div>
+
+                <div class="faction-desc">${ct('autoTrait.'+f.id)}</div><p class="faction-start">${ct('profile.'+f.id)}</p><small>${ct('profileProvisional')}</small>
+                <div class="difficulty-badge diff-${(f.difficulty || 'normal').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}">${ct('startingDifficulty')}: ${ct(START_PROFILES[f.id]?.difficulty||'normal')}</div>
             `;
 
             if (!f.isPremium) {
-                card.onclick = () => onSelect(f);
+                card.onclick = () => {
+                    grid.querySelectorAll('.faction-card').forEach(c=>{c.classList.toggle('selected',c===card);c.setAttribute('aria-pressed',String(c===card));});
+                    let confirm=document.getElementById('btnConfirmFaction');
+                    if(!confirm){confirm=document.createElement('button');confirm.id='btnConfirmFaction';confirm.className='primary-btn';document.querySelector('#factionSelection .campaign-footer').prepend(confirm);}
+                    confirm.textContent=ct('startCampaign')+' · '+localizedFaction.name;confirm.onclick=async()=>{if(confirm.disabled)return;confirm.disabled=true;confirm.setAttribute('aria-busy','true');confirm.textContent=ct('creatingCampaign');await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));try{onSelect(f);}finally{confirm.disabled=false;confirm.removeAttribute('aria-busy');confirm.textContent=ct('startCampaign')+' · '+localizedFaction.name;}};
+                };
             } else {
                 card.onclick = () => alert(t('alert.premiumFaction'));
             }

@@ -9,8 +9,7 @@
  *  - Las partículas de ácido se dispersan desde el punto de impacto.
  *  - Un solo disparo afecta al grupo completo — sin iterar hormiga por hormiga.
  */
-import * as PIXI from 'pixi.js';
-import { NodeRenderer } from './node_renderer.js';
+import { NodeRenderer } from './node_renderer.js?v=rts-balance-thorns-20261029-1';
 import {
     ARTILLERY_BASE_INTERVAL,
     ARTILLERY_FIRE_INTERVAL,
@@ -92,7 +91,7 @@ export class Node {
         // ──────────────────────────────────────────────────────────
 
         // ── Espinoso: temporizador determinista de ráfaga ──────────
-        // Mata exactamente 1 unidad cada ESPINOSO_KILL_INTERVAL segundos (~3/s).
+        // Aplica un punto de daño cada ESPINOSO_KILL_INTERVAL segundos (4/s).
         // Sin Math.random(): resultado predecible e independiente del grupo.
         this.espinosoTimer = 0;
 
@@ -259,18 +258,15 @@ export class Node {
         }
 
         // ─────────────────────────────────────────────────────────
-        // 1. ESPINOSO: Aura de daño proporcional a la densidad
-        //    Base: 1 baja garantizada + 5% de enemigos en el aura.
-        //    Enviar 10 → mata 1. Enviar 200 → mata 11. Enviar 400 → mata 21.
-        //    Determinista, sin azar, escala con la densidad del enjambre atacante.
-        // ─────────────────────────────────────────────────────────
+        // Espinas: presupuesto fijo de 4 puntos por segundo para todo el aura.
+        // Cada cuerpo pesado resiste tres impactos; no escala con la multitud.
         if (this.evolution === 'espinoso') {
             this.espinosoTimer += dt;
 
             // Procesar todas las ráfagas acumuladas en este frame
             // (importante para dt grandes o game-speed x4)
-            while (this.espinosoTimer >= Node.ESPINOSO_KILL_INTERVAL) {
-                this.espinosoTimer -= Node.ESPINOSO_KILL_INTERVAL;
+            while (this.espinosoTimer + 1e-9 >= Node.ESPINOSO_KILL_INTERVAL) {
+                this.espinosoTimer = Math.max(0, this.espinosoTimer - Node.ESPINOSO_KILL_INTERVAL);
 
                 const espinosoRange = this.radius + Node.ESPINOSO_AURA_EXTRA;
                 const rangeSq = espinosoRange * espinosoRange;
@@ -302,12 +298,9 @@ export class Node {
                 // Paso 2: Ordenar por cercanía (los más cercanos mueren primero)
                 victims.sort((a, b) => a.distSq - b.distSq);
 
-                // Paso 3: Calcular bajas = 1 base + 20% de la densidad
-                const killCount = Math.min(victims.length, 1 + Math.floor(victims.length * 0.20));
-
-                for (let k = 0; k < killCount; k++) {
-                    victims[k].unit.pendingRemoval = true;
-                }
+                const victim = victims[0].unit;
+                victim.thornDamageTaken = (victim.thornDamageTaken || 0) + 1;
+                if (victim.thornDamageTaken >= (victim.power || 1)) victim.pendingRemoval = true;
 
                 if (this.flashTimer <= 0) {
                     this.flashTargetColor = 0xff6666;

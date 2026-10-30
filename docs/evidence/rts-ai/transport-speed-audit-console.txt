@@ -1,0 +1,38 @@
+{
+  "boarding": {
+    "1": {
+      "cases": 20,
+      "withinTolerance": 20,
+      "maxError": 0
+    },
+    "4": {
+      "cases": 20,
+      "withinTolerance": 20,
+      "maxError": 0
+    }
+  },
+  "landing": {
+    "1": {
+      "cases": 20,
+      "withinTolerance": 20,
+      "maxError": 0
+    },
+    "4": {
+      "cases": 20,
+      "withinTolerance": 20,
+      "maxError": 0
+    }
+  },
+  "poison": {
+    "1": {
+      "cases": 20,
+      "withinTolerance": 20,
+      "maxError": 0
+    },
+    "4": {
+      "cases": 20,
+      "withinTolerance": 20,
+      "maxError": 0
+    }
+  }
+}

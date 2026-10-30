@@ -84,14 +84,8 @@ export class NavigationStaticBake {
     static buildFromWorld(world, options = {}) {
         const nodes = world.nodes || [];
         let barriers = world.barriers ? [...world.barriers] : [];
-        if (world.intermittentBarriers && world.intermittentBarriers.length > 0) {
-            for (let ib of world.intermittentBarriers) {
-                const activeBounds = ib.getActiveBounds();
-                if (activeBounds && activeBounds.length > 0) {
-                    barriers = barriers.concat(activeBounds);
-                }
-            }
-        }
+        // Temporary gates belong to the temporal evaluator and physical collision,
+        // not the permanent topology (opening a gate must not rebuild the graph).
         const zones = world.zones || [];
         const hazards = world.hazards || [];
         const worldWidth = world.game ? world.game.width : 1920;

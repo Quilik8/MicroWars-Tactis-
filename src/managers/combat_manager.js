@@ -4,6 +4,7 @@ import {
     deriveHeavyBodies,
     deriveLightBodies
 } from '../simulation/deterministic_rules.js';
+import { getCombatDamage, getCaptureSpeed } from '../simulation/deterministic_rules.js';
 
 // Cache de factionData por id para evitar FACTIONS.find() en el hot path
 const _factionCache = {};
@@ -46,19 +47,32 @@ export class CombatManager {
                         let nAttacker = p[otherF] || 0;
                         let nDefender = p[f] || 0;
                         
-                        let pairings = Math.min(nAttacker, nDefender);
-                        let overwhelm = Math.max(0, nAttacker - 2 * nDefender);
-                        
-                        let baseRate  = 0.12; 
-                        let bonusRate = 0.08;
-                        
-                        totalDamage += (pairings * baseRate) + (overwhelm * bonusRate);
+                        totalDamage += getCombatDamage(nAttacker, nDefender);
                     }
-                    CombatManager.killNPower(world, node, f, totalDamage);
+                    const killed = CombatManager.killNPower(world, node, f,
+                        totalDamage * (world.campaignModifiers?.[f]?.fragility || 1)) || 0;
+                    for (const attacker of factionIds) {
+                        if (attacker === f || !world.campaignModifiers?.[attacker]?.leech || !killed) continue;
+                        node.campaignLeech ??= {};
+                        node.campaignLeech[attacker] = (node.campaignLeech[attacker] || 0) + killed;
+                        const born = Math.min(Math.floor(node.campaignLeech[attacker] / 3), Math.max(0, 3000 - world.allUnits.length));
+                        if (born) { node.campaignLeech[attacker] -= born * 3; world.spawnUnitsAt(node, attacker, born); }
+                    }
                 }
             }
         } else {
             node.combatTimer = 0;
+        }
+
+        if (world.campaignModifiers) {
+            for (const f of factionIds) if (f !== node.owner && world.campaignModifiers[f]?.burn) {
+                node.campaignBurn = { faction: f, remaining: 5, timer: node.campaignBurn?.timer || 0 };
+            }
+            const burn = node.campaignBurn;
+            if (burn && burn.faction !== node.owner && burn.remaining > 0) {
+                burn.remaining -= dt; burn.timer += dt;
+                if (burn.timer >= 1) { burn.timer -= 1; CombatManager.killNPower(world, node, node.owner, 1); }
+            }
         }
 
         // Control de Conquista por tiempos (El Anillo)
@@ -93,9 +107,7 @@ export class CombatManager {
                 if (enemiesCount > 3) {
                     if (node.conquestProgress > 0) node.conqueringFaction = mainAttacker;
                 } else {
-                    let conquestSpeed = 0.15;
-                    if (attackerCount < 50)  conquestSpeed = 0.05;
-                    if (attackerCount > 250) conquestSpeed = 0.35;
+                    const conquestSpeed = getCaptureSpeed(attackerCount);
 
                     node.conqueringFaction  = mainAttacker;
                     node.conquestProgress  += conquestSpeed * dt;
@@ -165,6 +177,7 @@ export class CombatManager {
         applyDamageToComposition(lightBodies, heavyBodies, carry, damage, CombatManager._damageScratch);
         node.combatDamageCarry[faction] = CombatManager._damageScratch.damageCarry;
 
+        const intended = CombatManager._damageScratch.killedLight + CombatManager._damageScratch.killedHeavy;
         let killLight = CombatManager._damageScratch.killedLight | 0;
         let killHeavy = CombatManager._damageScratch.killedHeavy | 0;
         if (killLight <= 0 && killHeavy <= 0) return;
@@ -176,7 +189,7 @@ export class CombatManager {
 
             const dx = u.x - node.x;
             const dy = u.y - node.y;
-            if (u.state !== 'idle' && (dx * dx + dy * dy >= node.radius * node.radius * 6.25)) continue;
+            if (u.state !== 'idle' && (dx * dx + dy * dy >= node.radius * node.radius * 2.25)) continue;
 
             u.pendingRemoval = true;
             killLight--;
@@ -189,7 +202,7 @@ export class CombatManager {
 
             const dx = u.x - node.x;
             const dy = u.y - node.y;
-            if (u.state !== 'idle' && (dx * dx + dy * dy >= node.radius * node.radius * 6.25)) continue;
+            if (u.state !== 'idle' && (dx * dx + dy * dy >= node.radius * node.radius * 2.25)) continue;
 
             u.pendingRemoval = true;
             killHeavy--;
@@ -201,12 +214,13 @@ export class CombatManager {
 
             const dx = u.x - node.x;
             const dy = u.y - node.y;
-            if (u.state !== 'idle' && (dx * dx + dy * dy >= node.radius * node.radius * 6.25)) continue;
+            if (u.state !== 'idle' && (dx * dx + dy * dy >= node.radius * node.radius * 2.25)) continue;
 
             u.pendingRemoval = true;
             if ((u.power || 1) > 1) killHeavy--;
             else killLight--;
         }
+        return intended - Math.max(0, killLight) - Math.max(0, killHeavy);
     }
 }
 

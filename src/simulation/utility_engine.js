@@ -190,6 +190,8 @@ export class UtilityEngine {
         // -1 = no threat. Pre-allocated, written each eval cycle.
         this._doomsdayTTI = new Float32Array(MAX_NODES);
         this._neutralizeTTI = new Float32Array(MAX_NODES);
+        this._doomsdayTTI.fill(-1);
+        this._neutralizeTTI.fill(-1);
         this._doomsdayActive = false;
 
         this._strategyFocus = null;
@@ -238,6 +240,8 @@ export class UtilityEngine {
 
     /** Reset for new level. */
     reset() {
+        this._doomsdayTTI.fill(-1);
+        this._neutralizeTTI.fill(-1);
         this._evalHead    = 0;
         this._evalCount   = 0;
         this._cmdCount    = 0;

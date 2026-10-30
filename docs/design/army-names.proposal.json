@@ -1,0 +1,555 @@
+{
+  "status": "Bancos de propuesta; no conectados al juego",
+  "armyFormat": "{formation} {place} «{epithet}»",
+  "commanderFormat": "{name} — {epithet}",
+  "maxArmyNameLength": 40,
+  "banks": {
+    "carpinteras": {
+      "formations": [
+        "Guardia",
+        "Columna",
+        "Custodia",
+        "Vanguardia",
+        "Patrulla",
+        "Reserva",
+        "Cuña",
+        "Compañía"
+      ],
+      "places": [
+        "del Cedro",
+        "del Duramen",
+        "de la Corteza",
+        "del Tronco",
+        "del Nogal",
+        "de la Savia",
+        "del Roble",
+        "de la Astilla",
+        "del Nudo",
+        "de la Veta",
+        "del Refugio",
+        "del Tocón"
+      ],
+      "epithets": [
+        "Nudo Firme",
+        "Veta Clara",
+        "Astilla",
+        "Raíz Honda",
+        "Corteza",
+        "Nogal",
+        "Cuña",
+        "Savia",
+        "Refugio",
+        "Cedro",
+        "Duramen",
+        "Tocón"
+      ],
+      "commanderNames": [
+        "Ámbar",
+        "Nara",
+        "Savia",
+        "Veta",
+        "Olma",
+        "Cedra",
+        "Teca",
+        "Nerva"
+      ],
+      "validArmyNameCount": 1076,
+      "commanderNameCount": 95,
+      "examples": [
+        "Columna de la Astilla «Cedro»",
+        "Columna de la Astilla «Corteza»",
+        "Columna de la Astilla «Cuña»"
+      ]
+    },
+    "negras": {
+      "formations": [
+        "Columna",
+        "Patrulla",
+        "Cadena",
+        "Guardia",
+        "Reserva",
+        "Vanguardia",
+        "Escolta",
+        "Compañía"
+      ],
+      "places": [
+        "del Sendero",
+        "del Umbral",
+        "de la Raíz",
+        "del Tránsito",
+        "del Camino",
+        "del Surco",
+        "de la Sombra",
+        "del Retorno",
+        "del Paso",
+        "del Cruce",
+        "del Vado",
+        "del Enlace"
+      ],
+      "epithets": [
+        "Rastro",
+        "Retorno",
+        "Umbral",
+        "Enlace",
+        "Sombra",
+        "Cruce",
+        "Paso Firme",
+        "Surco",
+        "Camino",
+        "Tránsito",
+        "Eco",
+        "Raíz"
+      ],
+      "commanderNames": [
+        "Ónix",
+        "Nera",
+        "Sombra",
+        "Tara",
+        "Nora",
+        "Laja",
+        "Umbra",
+        "Vela"
+      ],
+      "validArmyNameCount": 1080,
+      "commanderNameCount": 95,
+      "examples": [
+        "Cadena de la Raíz «Camino»",
+        "Cadena de la Raíz «Cruce»",
+        "Cadena de la Raíz «Eco»"
+      ]
+    },
+    "tejedoras": {
+      "formations": [
+        "Trenza",
+        "Patrulla",
+        "Columna",
+        "Vanguardia",
+        "Enlace",
+        "Guardia",
+        "Avanzada",
+        "Custodia"
+      ],
+      "places": [
+        "del Rocío",
+        "de la Rama",
+        "del Dosel",
+        "del Nudo",
+        "de la Hebra",
+        "del Brote",
+        "de la Brisa",
+        "del Follaje",
+        "del Enlace",
+        "de la Copa",
+        "del Tallo",
+        "del Tejido"
+      ],
+      "epithets": [
+        "Hebra",
+        "Nudo",
+        "Brisa",
+        "Rocío",
+        "Trenza",
+        "Dosel",
+        "Lazo",
+        "Tejido",
+        "Rama",
+        "Follaje",
+        "Enlace",
+        "Tallo"
+      ],
+      "commanderNames": [
+        "Liana",
+        "Hebra",
+        "Brisa",
+        "Nila",
+        "Rocía",
+        "Tila",
+        "Enea",
+        "Vara"
+      ],
+      "validArmyNameCount": 1049,
+      "commanderNameCount": 94,
+      "examples": [
+        "Avanzada de la Brisa «Dosel»",
+        "Avanzada de la Brisa «Enlace»",
+        "Avanzada de la Brisa «Follaje»"
+      ]
+    },
+    "cortadoras": {
+      "formations": [
+        "Corte",
+        "Cuadrilla",
+        "Columna",
+        "Guardia",
+        "Patrulla",
+        "Reserva",
+        "Custodia",
+        "Vanguardia"
+      ],
+      "places": [
+        "del Brote",
+        "de la Hoja",
+        "del Corte",
+        "del Huerto",
+        "del Tallo",
+        "de la Espiga",
+        "del Jardín",
+        "de la Cosecha",
+        "del Hongo",
+        "de la Penca",
+        "del Trébol",
+        "del Semillero"
+      ],
+      "epithets": [
+        "Brote",
+        "Cosecha",
+        "Nervadura",
+        "Corte",
+        "Espiga",
+        "Hoja",
+        "Penca",
+        "Trébol",
+        "Semilla",
+        "Huerto",
+        "Tallo",
+        "Hongo"
+      ],
+      "commanderNames": [
+        "Brote",
+        "Penca",
+        "Trébola",
+        "Espiga",
+        "Nera",
+        "Lima",
+        "Dalia",
+        "Nerva"
+      ],
+      "validArmyNameCount": 1061,
+      "commanderNameCount": 93,
+      "examples": [
+        "Columna de la Cosecha «Brote»",
+        "Columna de la Cosecha «Corte»",
+        "Columna de la Cosecha «Espiga»"
+      ]
+    },
+    "fuego": {
+      "formations": [
+        "Brasa",
+        "Cuña",
+        "Columna",
+        "Vanguardia",
+        "Guardia",
+        "Patrulla",
+        "Reserva",
+        "Avanzada"
+      ],
+      "places": [
+        "del Rescoldo",
+        "de la Ceniza",
+        "del Cobre",
+        "del Umbral",
+        "del Mediodía",
+        "del Calor",
+        "de la Brasa",
+        "del Sol",
+        "del Pedernal",
+        "del Ocaso",
+        "de la Lumbre",
+        "del Carbón"
+      ],
+      "epithets": [
+        "Ascua",
+        "Rescoldo",
+        "Ceniza",
+        "Cobre",
+        "Lumbre",
+        "Brasa",
+        "Ocaso",
+        "Chispa",
+        "Sol",
+        "Carbón",
+        "Calor",
+        "Pedernal"
+      ],
+      "commanderNames": [
+        "Ascua",
+        "Cendra",
+        "Ígnea",
+        "Cora",
+        "Brasa",
+        "Aura",
+        "Sira",
+        "Lumbre"
+      ],
+      "validArmyNameCount": 1061,
+      "commanderNameCount": 93,
+      "examples": [
+        "Avanzada de la Brasa «Ascua»",
+        "Avanzada de la Brasa «Calor»",
+        "Avanzada de la Brasa «Carbón»"
+      ]
+    },
+    "bala": {
+      "formations": [
+        "Mandíbula",
+        "Cuña",
+        "Columna",
+        "Guardia",
+        "Vanguardia",
+        "Patrulla",
+        "Custodia",
+        "Reserva"
+      ],
+      "places": [
+        "del Pulso",
+        "del Aguijón",
+        "del Asedio",
+        "del Umbral",
+        "de la Presa",
+        "de la Muesca",
+        "del Cerco",
+        "del Impacto",
+        "del Bastión",
+        "del Nido",
+        "del Filo",
+        "del Quiebre"
+      ],
+      "epithets": [
+        "Pulso",
+        "Muesca",
+        "Cerco",
+        "Filo",
+        "Impacto",
+        "Bastión",
+        "Quiebre",
+        "Presión",
+        "Mandíbula",
+        "Nervio",
+        "Asedio",
+        "Aguijón"
+      ],
+      "commanderNames": [
+        "Muesca",
+        "Roca",
+        "Nerva",
+        "Fera",
+        "Daga",
+        "Vara",
+        "Tensa",
+        "Caoba"
+      ],
+      "validArmyNameCount": 1068,
+      "commanderNameCount": 95,
+      "examples": [
+        "Columna de la Muesca «Aguijón»",
+        "Columna de la Muesca «Asedio»",
+        "Columna de la Muesca «Bastión»"
+      ]
+    },
+    "mutantes": {
+      "formations": [
+        "Brotes",
+        "Vanguardia",
+        "Columna",
+        "Guardia"
+      ],
+      "places": [
+        "del Brote",
+        "de la Grieta",
+        "del Eco",
+        "de la Savia",
+        "del Cambio",
+        "del Limo",
+        "de la Mancha",
+        "del Umbral"
+      ],
+      "epithets": [
+        "Eco",
+        "Grieta",
+        "Brote",
+        "Mancha",
+        "Cambio",
+        "Limo",
+        "Savia",
+        "Umbral"
+      ],
+      "commanderNames": [
+        "Vira",
+        "Eco",
+        "Grieta",
+        "Nexa"
+      ],
+      "validArmyNameCount": 217,
+      "commanderNameCount": 30,
+      "examples": [
+        "Brotes de la Grieta «Cambio»",
+        "Brotes de la Grieta «Eco»",
+        "Brotes de la Grieta «Limo»"
+      ]
+    },
+    "termitas": {
+      "formations": [
+        "Cuadrilla",
+        "Galería",
+        "Columna",
+        "Guardia"
+      ],
+      "places": [
+        "del Túnel",
+        "del Tabique",
+        "del Sustrato",
+        "de la Galería",
+        "del Nido",
+        "del Arco",
+        "del Pilar",
+        "del Polvo"
+      ],
+      "epithets": [
+        "Pilar",
+        "Sustrato",
+        "Arco",
+        "Polvo",
+        "Túnel",
+        "Tabique",
+        "Galería",
+        "Nido"
+      ],
+      "commanderNames": [
+        "Alba",
+        "Marga",
+        "Tiza",
+        "Arca"
+      ],
+      "validArmyNameCount": 217,
+      "commanderNameCount": 32,
+      "examples": [
+        "Columna de la Galería «Arco»",
+        "Columna de la Galería «Nido»",
+        "Columna de la Galería «Pilar»"
+      ]
+    },
+    "avispas": {
+      "formations": [
+        "Escuadra",
+        "Patrulla",
+        "Ala",
+        "Vanguardia"
+      ],
+      "places": [
+        "del Viento",
+        "del Sol",
+        "del Vuelo",
+        "del Aguijón",
+        "del Aire",
+        "del Dosel",
+        "de la Cima",
+        "del Círculo"
+      ],
+      "epithets": [
+        "Cima",
+        "Ráfaga",
+        "Vuelo",
+        "Aguijón",
+        "Dosel",
+        "Aire",
+        "Sol",
+        "Círculo"
+      ],
+      "commanderNames": [
+        "Vespa",
+        "Cira",
+        "Aura",
+        "Ráfaga"
+      ],
+      "validArmyNameCount": 228,
+      "commanderNameCount": 31,
+      "examples": [
+        "Ala de la Cima «Aguijón»",
+        "Ala de la Cima «Aire»",
+        "Ala de la Cima «Círculo»"
+      ]
+    },
+    "arañas": {
+      "formations": [
+        "Nidada",
+        "Trama",
+        "Guardia",
+        "Vanguardia"
+      ],
+      "places": [
+        "de la Trama",
+        "del Hilo",
+        "del Rocío",
+        "del Rincón",
+        "de la Seda",
+        "del Ancla",
+        "del Velo",
+        "del Umbral"
+      ],
+      "epithets": [
+        "Seda",
+        "Trama",
+        "Ancla",
+        "Hilo",
+        "Rocío",
+        "Velo",
+        "Rincón",
+        "Lazo"
+      ],
+      "commanderNames": [
+        "Seda",
+        "Tela",
+        "Ancla",
+        "Niva"
+      ],
+      "validArmyNameCount": 221,
+      "commanderNameCount": 30,
+      "examples": [
+        "Guardia de la Seda «Ancla»",
+        "Guardia de la Seda «Hilo»",
+        "Guardia de la Seda «Lazo»"
+      ]
+    },
+    "escarabajos": {
+      "formations": [
+        "Cohorte",
+        "Guardia",
+        "Columna",
+        "Vanguardia"
+      ],
+      "places": [
+        "del Caparazón",
+        "del Arco",
+        "del Bastión",
+        "del Musgo",
+        "del Cerco",
+        "del Suelo",
+        "del Tronco",
+        "del Paso"
+      ],
+      "epithets": [
+        "Bastión",
+        "Caparazón",
+        "Cerco",
+        "Arco",
+        "Musgo",
+        "Suelo",
+        "Paso",
+        "Tronco"
+      ],
+      "commanderNames": [
+        "Élitro",
+        "Arca",
+        "Cora",
+        "Marga"
+      ],
+      "validArmyNameCount": 224,
+      "commanderNameCount": 32,
+      "examples": [
+        "Cohorte del Arco «Bastión»",
+        "Cohorte del Arco «Caparazón»",
+        "Cohorte del Arco «Cerco»"
+      ]
+    }
+  }
+}

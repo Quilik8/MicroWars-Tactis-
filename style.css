@@ -1578,6 +1578,15 @@ html {
     transform: scale(1.2);
 }
 
+.level-node-wrapper.locked {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.level-node-wrapper.locked:hover {
+    transform: none;
+}
+
 .level-node {
     width: 60px;
     height: 60px;
@@ -1600,6 +1609,15 @@ html {
     border-color: #5dade2;
     background: rgba(93, 173, 226, 0.2);
     box-shadow: 0 0 30px rgba(93, 173, 226, 0.6);
+}
+
+.level-node-wrapper.locked .level-node,
+.level-node-wrapper.locked:hover .level-node {
+    border-color: rgba(255,255,255,0.18);
+    background: rgba(40,40,40,0.9);
+    color: #888;
+    font-size: 0.7rem;
+    box-shadow: none;
 }
 
 .level-node-wrapper:hover {

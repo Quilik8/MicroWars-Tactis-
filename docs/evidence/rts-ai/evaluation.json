@@ -1,0 +1,847 @@
+{
+  "method": "Headless actual Unit, Node, PhysicsManager, CombatManager; scripted orders, seeded formations. Not human playtesting or GPU/render profiling.",
+  "hardware": {
+    "cpu": "AMD A8-6410 APU with AMD Radeon R5 Graphics    ",
+    "platform": "win32",
+    "node": "v24.14.0"
+  },
+  "precision": [
+    {
+      "kind": "plain",
+      "seeds": 20,
+      "passed": 20,
+      "worstError": 0,
+      "zeroArrivalViable": 0,
+      "fullForecastMs": {
+        "p50": 238.29320000000007,
+        "p95": 834.2633,
+        "p99": 834.2633,
+        "max": 834.2633
+      }
+    },
+    {
+      "kind": "poison",
+      "seeds": 20,
+      "passed": 20,
+      "worstError": 0,
+      "zeroArrivalViable": 0,
+      "fullForecastMs": {
+        "p50": 156.60050000000047,
+        "p95": 266.8310999999994,
+        "p99": 266.8310999999994,
+        "max": 266.8310999999994
+      }
+    },
+    {
+      "kind": "overlap",
+      "seeds": 20,
+      "passed": 20,
+      "worstError": 0,
+      "zeroArrivalViable": 0,
+      "fullForecastMs": {
+        "p50": 125.97730000000229,
+        "p95": 218.17329999999856,
+        "p99": 218.17329999999856,
+        "max": 218.17329999999856
+      }
+    },
+    {
+      "kind": "three_factions",
+      "seeds": 20,
+      "passed": 20,
+      "worstError": 0,
+      "zeroArrivalViable": 0,
+      "fullForecastMs": {
+        "p50": 140.59529999999359,
+        "p95": 177.24079999999958,
+        "p99": 177.24079999999958,
+        "max": 177.24079999999958
+      }
+    }
+  ],
+  "matches": [
+    {
+      "mode": "reference",
+      "difficulty": "easy",
+      "duration": 40.00000000000029,
+      "owners": [
+        "enemy",
+        "enemy",
+        "player"
+      ],
+      "aiMs": {
+        "p50": 0.026799999999639113,
+        "p95": 0.1864999999961583,
+        "p99": 1.5257000000055996,
+        "max": 27.12290000000212
+      },
+      "simulationMs": {
+        "p50": 0.41469999999389984,
+        "p95": 2.0830000000059954,
+        "p99": 4.888900000005378,
+        "max": 10.977500000000873
+      }
+    },
+    {
+      "mode": "reference",
+      "difficulty": "normal",
+      "duration": 40.00000000000029,
+      "owners": [
+        "enemy",
+        "enemy",
+        "player"
+      ],
+      "aiMs": {
+        "p50": 0.029099999999743886,
+        "p95": 0.1555000000007567,
+        "p99": 1.2044000000023516,
+        "max": 6.686900000000605
+      },
+      "simulationMs": {
+        "p50": 0.42379999999684514,
+        "p95": 1.5434999999997672,
+        "p99": 4.280400000003283,
+        "max": 7.870799999996962
+      }
+    },
+    {
+      "mode": "reference",
+      "difficulty": "hard",
+      "duration": 40.00000000000029,
+      "owners": [
+        "enemy",
+        "enemy",
+        "player"
+      ],
+      "aiMs": {
+        "p50": 0.02629999999771826,
+        "p95": 0.41939999999885913,
+        "p99": 1.393499999998312,
+        "max": 6.438099999999395
+      },
+      "simulationMs": {
+        "p50": 0.41810000000259606,
+        "p95": 1.5986999999950058,
+        "p99": 4.3804999999993015,
+        "max": 13.327400000001944
+      }
+    },
+    {
+      "mode": "progressive",
+      "difficulty": "easy",
+      "duration": 40.00000000000029,
+      "owners": [
+        "enemy",
+        "player",
+        "player"
+      ],
+      "aiMs": {
+        "p50": 0.6752999999953317,
+        "p95": 1.1572999999989406,
+        "p99": 3.8012999999991735,
+        "max": 6.73410000000149
+      },
+      "simulationMs": {
+        "p50": 0.5617999999958556,
+        "p95": 2.346899999996822,
+        "p99": 4.442399999999907,
+        "max": 5.94369999999617
+      },
+      "diagnostics": {
+        "metrics": {
+          "frames": 1200,
+          "forecasts": 4,
+          "orders": 0,
+          "vetoes": 0,
+          "stale": 1,
+          "overruns": 9,
+          "snapshots": 4,
+          "reactions": 2,
+          "jobsCompleted": 1,
+          "forecastSteps": 40753,
+          "cacheHits": 0
+        },
+        "timings": {
+          "observation": 0.0004999999946448952,
+          "planning": 0.6385999999984051,
+          "execution": 0.0022000000026309863,
+          "preparation": 0.009400000002642628
+        },
+        "workCosts": {
+          "clone": {
+            "count": 92,
+            "total": 14.627699999960896,
+            "max": 4.029099999999744
+          },
+          "counts": {
+            "count": 1059,
+            "total": 45.52049999980227,
+            "max": 1.4205000000001746
+          },
+          "physics64": {
+            "count": 6775,
+            "total": 149.0945000001011,
+            "max": 4.088099999993574
+          },
+          "forces": {
+            "count": 22201,
+            "total": 237.46339999945485,
+            "max": 4.1480999999985215
+          },
+          "position128": {
+            "count": 258,
+            "total": 43.72069999999076,
+            "max": 4.789599999996426
+          },
+          "node": {
+            "count": 657,
+            "total": 33.10589999997319,
+            "max": 3.8646000000007916
+          },
+          "transition": {
+            "count": 288,
+            "total": 37.668999999987136,
+            "max": 4.284699999996519
+          },
+          "separation": {
+            "count": 9423,
+            "total": 180.06689999983064,
+            "max": 3.4690999999947962
+          }
+        },
+        "worker": {
+          "enabled": false,
+          "completed": 0,
+          "cpuMs": 0,
+          "pending": 0,
+          "error": null
+        },
+        "milliseconds": {
+          "p50": 0.6634000000049127,
+          "p95": 0.9907999999995809,
+          "p99": 3.4135999999998603,
+          "max": 5.213599999995495
+        },
+        "factions": [
+          {
+            "faction": "enemy",
+            "visits": 40753,
+            "decisions": 0,
+            "reactions": 2,
+            "history": []
+          }
+        ]
+      }
+    },
+    {
+      "mode": "progressive",
+      "difficulty": "normal",
+      "duration": 40.00000000000029,
+      "owners": [
+        "enemy",
+        "player",
+        "player"
+      ],
+      "aiMs": {
+        "p50": 0.6728000000002794,
+        "p95": 1.2415999999939231,
+        "p99": 2.951100000005681,
+        "max": 7.510399999999208
+      },
+      "simulationMs": {
+        "p50": 0.5314999999973224,
+        "p95": 2.119800000000396,
+        "p99": 4.524199999999837,
+        "max": 5.751299999996263
+      },
+      "diagnostics": {
+        "metrics": {
+          "frames": 1200,
+          "forecasts": 4,
+          "orders": 0,
+          "vetoes": 0,
+          "stale": 0,
+          "overruns": 3,
+          "snapshots": 3,
+          "reactions": 2,
+          "jobsCompleted": 0,
+          "forecastSteps": 42017,
+          "cacheHits": 0
+        },
+        "timings": {
+          "observation": 0.0005000000019208528,
+          "planning": 0.6805999999996857,
+          "execution": 0.0017000000007101335,
+          "preparation": 0.004099999998288695
+        },
+        "workCosts": {
+          "clone": {
+            "count": 87,
+            "total": 11.925499999939348,
+            "max": 1.9747999999963213
+          },
+          "counts": {
+            "count": 1109,
+            "total": 47.269699999756995,
+            "max": 1.3107999999992899
+          },
+          "physics64": {
+            "count": 6987,
+            "total": 149.7259999998205,
+            "max": 4.908999999999651
+          },
+          "forces": {
+            "count": 22861,
+            "total": 233.0762000004106,
+            "max": 2.7465999999985797
+          },
+          "position128": {
+            "count": 257,
+            "total": 36.16230000011274,
+            "max": 1.7174999999988358
+          },
+          "node": {
+            "count": 690,
+            "total": 29.9095000000234,
+            "max": 1.5528999999951338
+          },
+          "transition": {
+            "count": 298,
+            "total": 26.32760000001872,
+            "max": 0.5405999999929918
+          },
+          "separation": {
+            "count": 9728,
+            "total": 202.88819999969564,
+            "max": 3.872799999997369
+          }
+        },
+        "worker": {
+          "enabled": false,
+          "completed": 0,
+          "cpuMs": 0,
+          "pending": 0,
+          "error": null
+        },
+        "milliseconds": {
+          "p50": 0.6642999999967287,
+          "p95": 1.2868999999991502,
+          "p99": 3.121400000003632,
+          "max": 7.483599999999569
+        },
+        "factions": [
+          {
+            "faction": "enemy",
+            "visits": 42017,
+            "decisions": 0,
+            "reactions": 2,
+            "history": []
+          }
+        ]
+      }
+    },
+    {
+      "mode": "progressive",
+      "difficulty": "hard",
+      "duration": 40.00000000000029,
+      "owners": [
+        "enemy",
+        "player",
+        "player"
+      ],
+      "aiMs": {
+        "p50": 0.6728999999977532,
+        "p95": 0.9663000000000466,
+        "p99": 2.4645000000018626,
+        "max": 7.803099999997357
+      },
+      "simulationMs": {
+        "p50": 0.5455999999976484,
+        "p95": 2.4877999999953317,
+        "p99": 4.364600000000792,
+        "max": 13.981599999999162
+      },
+      "diagnostics": {
+        "metrics": {
+          "frames": 1200,
+          "forecasts": 4,
+          "orders": 0,
+          "vetoes": 0,
+          "stale": 0,
+          "overruns": 4,
+          "snapshots": 3,
+          "reactions": 2,
+          "jobsCompleted": 0,
+          "forecastSteps": 44069,
+          "cacheHits": 0
+        },
+        "timings": {
+          "observation": 0.0003999999971711077,
+          "planning": 0.6511000000027707,
+          "execution": 0.0022000000026309863,
+          "preparation": 0.002599999999802094
+        },
+        "workCosts": {
+          "clone": {
+            "count": 87,
+            "total": 11.741300000037882,
+            "max": 2.1033000000024913
+          },
+          "counts": {
+            "count": 1176,
+            "total": 48.824000000015076,
+            "max": 3.754000000000815
+          },
+          "physics64": {
+            "count": 7412,
+            "total": 145.9843999997829,
+            "max": 2.3386000000027707
+          },
+          "forces": {
+            "count": 24202,
+            "total": 250.7542999997895,
+            "max": 5.159599999999045
+          },
+          "position128": {
+            "count": 277,
+            "total": 33.360300000007555,
+            "max": 0.6350999999995111
+          },
+          "node": {
+            "count": 732,
+            "total": 33.86449999992328,
+            "max": 1.7118999999947846
+          },
+          "transition": {
+            "count": 310,
+            "total": 23.119100000003527,
+            "max": 1.7181000000055064
+          },
+          "separation": {
+            "count": 9873,
+            "total": 188.87239999923622,
+            "max": 3.91019999999844
+          }
+        },
+        "worker": {
+          "enabled": false,
+          "completed": 0,
+          "cpuMs": 0,
+          "pending": 0,
+          "error": null
+        },
+        "milliseconds": {
+          "p50": 0.6638999999995576,
+          "p95": 0.9009000000005472,
+          "p99": 2.1789999999964493,
+          "max": 5.442900000001828
+        },
+        "factions": [
+          {
+            "faction": "enemy",
+            "visits": 44069,
+            "decisions": 0,
+            "reactions": 2,
+            "history": []
+          }
+        ]
+      }
+    }
+  ],
+  "stress": [
+    {
+      "count": 1000,
+      "factions": 6,
+      "nests": 42,
+      "aiMs": {
+        "p50": 0.6979000000064843,
+        "p95": 2.4277000000001863,
+        "p99": 4.850700000002689,
+        "max": 14.882499999999709
+      },
+      "phases": {
+        "observation": {
+          "p50": 0.0006999999968684278,
+          "p95": 0.14860000000044238,
+          "p99": 0.3269000000000233,
+          "max": 1.2134000000005472
+        },
+        "preparation": {
+          "p50": 0.012000000002444722,
+          "p95": 0.05819999999948777,
+          "p99": 0.9519000000000233,
+          "max": 14.505500000006577
+        },
+        "planning": {
+          "p50": 0.6593999999968219,
+          "p95": 2.120600000002014,
+          "p99": 4.0798999999969965,
+          "max": 5.701900000000023
+        },
+        "execution": {
+          "p50": 0.002799999994749669,
+          "p95": 0.014000000002852175,
+          "p99": 0.029999999998835847,
+          "max": 0.031899999994493555
+        }
+      },
+      "heapBytes": 67207056,
+      "diagnostics": {
+        "metrics": {
+          "frames": 240,
+          "forecasts": 6,
+          "orders": 0,
+          "vetoes": 0,
+          "stale": 0,
+          "overruns": 4,
+          "snapshots": 6,
+          "reactions": 0,
+          "jobsCompleted": 0,
+          "forecastSteps": 2650,
+          "cacheHits": 0
+        },
+        "timings": {
+          "observation": 0.0004000000044470653,
+          "planning": 0.6442999999999302,
+          "execution": 0.0012999999962630682,
+          "preparation": 0.005699999994249083
+        },
+        "workCosts": {
+          "clone": {
+            "count": 750,
+            "total": 94.96969999995781,
+            "max": 5.453600000000733
+          },
+          "counts": {
+            "count": 186,
+            "total": 25.265800000044692,
+            "max": 3.791000000004715
+          },
+          "physics64": {
+            "count": 372,
+            "total": 9.030100000025413,
+            "max": 0.09419999999954598
+          },
+          "forces": {
+            "count": 242,
+            "total": 4.671599999906903,
+            "max": 0.48399999999674037
+          },
+          "separation": {
+            "count": 1100,
+            "total": 45.25220000008994,
+            "max": 1.4844000000011874
+          }
+        },
+        "worker": {
+          "enabled": false,
+          "completed": 0,
+          "cpuMs": 0,
+          "pending": 0,
+          "error": null
+        },
+        "milliseconds": {
+          "p50": 0.693200000001525,
+          "p95": 2.41990000000078,
+          "p99": 4.841100000005099,
+          "max": 14.705699999998615
+        },
+        "factions": [
+          {
+            "faction": "enemy",
+            "visits": 442,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "fuego",
+            "visits": 442,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "negras",
+            "visits": 441,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "tejedoras",
+            "visits": 441,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "bala",
+            "visits": 442,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "carpinteras",
+            "visits": 442,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          }
+        ]
+      }
+    },
+    {
+      "count": 5000,
+      "factions": 6,
+      "nests": 42,
+      "aiMs": {
+        "p50": 0.7045999999972992,
+        "p95": 2.1863000000012107,
+        "p99": 4.5625,
+        "max": 16.476599999994505
+      },
+      "phases": {
+        "observation": {
+          "p50": 0.0005000000019208528,
+          "p95": 0.12190000000555301,
+          "p99": 0.17500000000291038,
+          "max": 0.2389000000039232
+        },
+        "preparation": {
+          "p50": 0.008099999999103602,
+          "p95": 0.04869999999937136,
+          "p99": 0.9324999999953434,
+          "max": 16.04699999999866
+        },
+        "planning": {
+          "p50": 0.6652000000030966,
+          "p95": 1.9760999999998603,
+          "p99": 3.688800000003539,
+          "max": 6.322000000000116
+        },
+        "execution": {
+          "p50": 0.0019000000029336661,
+          "p95": 0.01630000000295695,
+          "p99": 0.025500000003376044,
+          "max": 0.10840000000462169
+        }
+      },
+      "heapBytes": 76922992,
+      "diagnostics": {
+        "metrics": {
+          "frames": 240,
+          "forecasts": 6,
+          "orders": 0,
+          "vetoes": 0,
+          "stale": 0,
+          "overruns": 3,
+          "snapshots": 6,
+          "reactions": 0,
+          "jobsCompleted": 0,
+          "forecastSteps": 1633,
+          "cacheHits": 0
+        },
+        "timings": {
+          "observation": 0.0003999999971711077,
+          "planning": 0.6584000000002561,
+          "execution": 0.0013000000035390258,
+          "preparation": 0.004899999999906868
+        },
+        "workCosts": {
+          "clone": {
+            "count": 1633,
+            "total": 182.1347999999416,
+            "max": 6.306899999995949
+          }
+        },
+        "worker": {
+          "enabled": false,
+          "completed": 0,
+          "cpuMs": 0,
+          "pending": 0,
+          "error": null
+        },
+        "milliseconds": {
+          "p50": 0.7001999999993131,
+          "p95": 2.161099999997532,
+          "p99": 4.5526000000027125,
+          "max": 16.361799999998766
+        },
+        "factions": [
+          {
+            "faction": "enemy",
+            "visits": 272,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "fuego",
+            "visits": 272,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "negras",
+            "visits": 272,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "tejedoras",
+            "visits": 272,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "bala",
+            "visits": 273,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "carpinteras",
+            "visits": 272,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          }
+        ]
+      }
+    },
+    {
+      "count": 10000,
+      "factions": 6,
+      "nests": 42,
+      "aiMs": {
+        "p50": 0.69720000000234,
+        "p95": 2.098599999997532,
+        "p99": 6.352200000001176,
+        "max": 42.03489999999874
+      },
+      "phases": {
+        "observation": {
+          "p50": 0.0005000000019208528,
+          "p95": 0.13750000000436557,
+          "p99": 0.17549999999755528,
+          "max": 0.3470999999990454
+        },
+        "preparation": {
+          "p50": 0.007499999999708962,
+          "p95": 0.0507999999972526,
+          "p99": 1.3513999999995576,
+          "max": 41.86159999999654
+        },
+        "planning": {
+          "p50": 0.6639999999970314,
+          "p95": 1.8197999999974854,
+          "p99": 5.894100000004983,
+          "max": 6.456100000003062
+        },
+        "execution": {
+          "p50": 0.0019000000029336661,
+          "p95": 0.015500000001338776,
+          "p99": 0.02569999999832362,
+          "max": 0.03229999999894062
+        }
+      },
+      "heapBytes": 104890768,
+      "diagnostics": {
+        "metrics": {
+          "frames": 240,
+          "forecasts": 6,
+          "orders": 0,
+          "vetoes": 0,
+          "stale": 0,
+          "overruns": 5,
+          "snapshots": 6,
+          "reactions": 0,
+          "jobsCompleted": 0,
+          "forecastSteps": 1873,
+          "cacheHits": 0
+        },
+        "timings": {
+          "observation": 0.0004000000044470653,
+          "planning": 0.7051999999966938,
+          "execution": 0.0014000000010128133,
+          "preparation": 0.006699999998090789
+        },
+        "workCosts": {
+          "clone": {
+            "count": 1873,
+            "total": 186.89120000008552,
+            "max": 6.444499999997788
+          }
+        },
+        "worker": {
+          "enabled": false,
+          "completed": 0,
+          "cpuMs": 0,
+          "pending": 0,
+          "error": null
+        },
+        "milliseconds": {
+          "p50": 0.691900000005262,
+          "p95": 2.0843000000022585,
+          "p99": 6.345099999998638,
+          "max": 42.00759999999718
+        },
+        "factions": [
+          {
+            "faction": "enemy",
+            "visits": 312,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "fuego",
+            "visits": 312,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "negras",
+            "visits": 312,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "tejedoras",
+            "visits": 312,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "bala",
+            "visits": 313,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          },
+          {
+            "faction": "carpinteras",
+            "visits": 312,
+            "decisions": 0,
+            "reactions": 0,
+            "history": []
+          }
+        ]
+      }
+    }
+  ],
+  "acceptance": {
+    "arrivalPrecision": true,
+    "headlessBudget": false,
+    "graphicalAndHuman": "pending"
+  }
+}

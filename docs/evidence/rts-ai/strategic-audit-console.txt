@@ -1,0 +1,186 @@
+
+> microwars-prototype@0.1.1 evaluate:rts-ai
+> node tools/rts-tactical-audit.mjs
+
+{
+  "catalogue": {
+    "sectors": 6,
+    "levels": 31,
+    "inactive": [
+      "sector7.js is not imported by the active catalogue"
+    ]
+  },
+  "milliseconds": {
+    "samples": 1860,
+    "p50": 0.8065000000001419,
+    "p95": 3.8824999999999363,
+    "p99": 9.521400000000085,
+    "max": 39.14960000000019
+  },
+  "events": {
+    "easy": {
+      "failures": 0,
+      "latencyMs": {
+        "samples": 20,
+        "p50": 50,
+        "p95": 50,
+        "p99": 50,
+        "max": 50
+      }
+    },
+    "normal": {
+      "failures": 0,
+      "latencyMs": {
+        "samples": 20,
+        "p50": 50,
+        "p95": 50,
+        "p99": 50,
+        "max": 50
+      }
+    },
+    "hard": {
+      "failures": 0,
+      "latencyMs": {
+        "samples": 20,
+        "p50": 50,
+        "p95": 50,
+        "p99": 50,
+        "max": 50
+      }
+    }
+  },
+  "illegal": [],
+  "noOpeningOrder": [
+    {
+      "sector": "sector-6",
+      "level": 4,
+      "difficulty": "easy",
+      "reasons": [
+        "analysis_pending"
+      ]
+    },
+    {
+      "sector": "sector-6",
+      "level": 4,
+      "difficulty": "normal",
+      "reasons": [
+        "terrain_window"
+      ]
+    },
+    {
+      "sector": "sector-6",
+      "level": 4,
+      "difficulty": "hard",
+      "reasons": [
+        "terrain_window"
+      ]
+    }
+  ],
+  "stress": [
+    {
+      "units": 984,
+      "milliseconds": {
+        "p50": 1.5152000000002772,
+        "p95": 5.454899999999725,
+        "p99": 8.243399999999838,
+        "max": 8.243399999999838
+      },
+      "visits": [
+        {
+          "faction": "enemy",
+          "visits": 13
+        },
+        {
+          "faction": "fuego",
+          "visits": 13
+        },
+        {
+          "faction": "tejedoras",
+          "visits": 13
+        },
+        {
+          "faction": "bala",
+          "visits": 14
+        },
+        {
+          "faction": "negras",
+          "visits": 13
+        },
+        {
+          "faction": "cortadoras",
+          "visits": 14
+        }
+      ]
+    },
+    {
+      "units": 4992,
+      "milliseconds": {
+        "p50": 1.6941000000001623,
+        "p95": 5.739900000000034,
+        "p99": 8.425900000000183,
+        "max": 8.425900000000183
+      },
+      "visits": [
+        {
+          "faction": "enemy",
+          "visits": 13
+        },
+        {
+          "faction": "fuego",
+          "visits": 13
+        },
+        {
+          "faction": "tejedoras",
+          "visits": 13
+        },
+        {
+          "faction": "bala",
+          "visits": 14
+        },
+        {
+          "faction": "negras",
+          "visits": 13
+        },
+        {
+          "faction": "cortadoras",
+          "visits": 14
+        }
+      ]
+    },
+    {
+      "units": 9984,
+      "milliseconds": {
+        "p50": 1.543500000000222,
+        "p95": 7.476200000000063,
+        "p99": 11.99369999999999,
+        "max": 11.99369999999999
+      },
+      "visits": [
+        {
+          "faction": "enemy",
+          "visits": 13
+        },
+        {
+          "faction": "fuego",
+          "visits": 13
+        },
+        {
+          "faction": "tejedoras",
+          "visits": 13
+        },
+        {
+          "faction": "bala",
+          "visits": 14
+        },
+        {
+          "faction": "negras",
+          "visits": 13
+        },
+        {
+          "faction": "cortadoras",
+          "visits": 14
+        }
+      ]
+    }
+  ]
+}

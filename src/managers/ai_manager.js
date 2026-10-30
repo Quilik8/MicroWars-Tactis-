@@ -1,3 +1,4 @@
+import { RTSAIRuntime } from '../simulation/rts_ai_runtime.js?v=rts-balance-thorns-20261029-1';
 /**
  * AI Manager — MicroWars v4 (Pilar 5: Motor de Utilidad)
  *
@@ -12,13 +13,13 @@
  *           acumulación ×N que aceleraba artificialmente la IA.
  */
 
-import { UtilityEngine } from '../simulation/utility_engine.js';
+import { UtilityEngine } from '../simulation/utility_engine.js?v=rts-balance-thorns-20261029-1';
 import { PredictiveCombatSimulator } from '../simulation/predictive_combat_simulator.js';
 import { OptimalDeploymentSolver } from '../simulation/optimal_deployment_solver.js';
 import { OpportunityAnalyzer } from '../simulation/opportunity_analyzer.js';
 import { NavigationGameStateView, PathEvaluationResult } from '../navigation/navigation_system.js';
 
-export class AIManager {
+export class LegacyAIManager {
     /**
      * @param {object} config
      * @param {string} [config.difficulty='normal']  'easy'|'normal'|'hard'
@@ -145,4 +146,58 @@ export class AIManager {
     getOpportunityAnalyzer() {
         return this._opportunityAnalyzer;
     }
+}
+
+
+/** Public coordinator. Reference engine is only instantiated for developer comparisons. */
+export class AIManager {
+    constructor(config = {}) {
+        this.config = config;
+        this.world = config.worldRef;
+        this.difficulty = config.difficulty || 'normal';
+        this.mode = config.mode === 'reference' ? 'reference' : 'progressive';
+        this.runtime = new RTSAIRuntime(config);
+        this.debug = typeof location !== 'undefined' && new URLSearchParams(location.search).has('ai-debug');
+        this._nextDebug = 0;
+        this.reference = null;
+        if (typeof window !== 'undefined') window.__rtsAI = this;
+    }
+    setMode(mode) {
+        if (!['reference', 'progressive'].includes(mode)) throw new Error('Unknown RTS AI mode');
+        this.reset(); this.mode = mode;
+        if (mode === 'reference') this.reference ??= new LegacyAIManager({ ...this.config, difficulty: this.difficulty, worldRef: this.world });
+    }
+    setDifficulty(d) {
+        this.difficulty = d; this.runtime.setDifficulty(d); this.reference?.setDifficulty(d);
+    }
+    reset() { this.runtime.reset(); this.reference?.reset(); this._nextDebug = 0; this._compatTime = undefined; }
+    updateAll(dt, factions, playerFaction = 'player') {
+        if (!this.world) return;
+        this.runtime.world = this.world;
+        if (this.mode === 'reference') {
+            this.reference ??= new LegacyAIManager({ ...this.config, difficulty: this.difficulty });
+            for (const f of factions) this.reference.update(dt, this.world.nodes, this.world.allUnits, f, playerFaction);
+        } else this.runtime.updateAll(dt, factions, playerFaction);
+        if (this.debug && this.world.simTime >= this._nextDebug) {
+            this._nextDebug = this.world.simTime + 2;
+            document.documentElement.dataset.rtsAiDiagnostics = JSON.stringify(this.diagnostics());
+        }
+    }
+    // Compatibility for integrations outside main.js; one observation per world instant.
+    update(dt, nodes, units, aiFaction = 'enemy', playerFaction = 'player') {
+        if (!this.world) return;
+        if (this._compatTime === this.world.simTime) return;
+        this._compatTime = this.world.simTime;
+        const factions = new Set();
+        for (const n of nodes) if (n.owner !== playerFaction && n.owner !== 'neutral') factions.add(n.owner);
+        for (const u of units) if (!u.pendingRemoval && u.faction !== playerFaction && u.faction !== 'neutral') factions.add(u.faction);
+        this.updateAll(dt, [...factions], playerFaction);
+    }
+    diagnostics() { return this.runtime.diagnostics(); }
+    // Explicit local export only. Never uploads or sends telemetry.
+    exportDiagnostics() {
+        return JSON.stringify({ schema: 'microwars-rts-ai-activity-1', createdAt: new Date().toISOString(),
+            difficulty: this.difficulty, ...this.diagnostics() }, null, 2);
+    }
+    getOpportunityAnalyzer() { return this.reference?.getOpportunityAnalyzer() || null; }
 }

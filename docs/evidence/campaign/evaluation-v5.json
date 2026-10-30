@@ -1,0 +1,242 @@
+{
+  "seed": 20261019,
+  "method": "Deterministic heuristic player using legal orders and visible military information. All rivals, threats and events active; no force boosts or scripted winners. Not a human balance assessment.",
+  "reports": [
+    {
+      "faction": "carpinteras",
+      "goal": "picnic",
+      "winner": "fuego",
+      "victory": "picnic",
+      "round": 24,
+      "battles": 80,
+      "thirdParties": 3,
+      "moves": 96,
+      "distinctBattleTerritories": 46,
+      "maxArmies": 26,
+      "remainingMajors": [
+        "carpinteras",
+        "negras",
+        "fuego"
+      ],
+      "playerVeterans": [
+        {
+          "victories": 0,
+          "training": 0
+        },
+        {
+          "victories": 0,
+          "training": 0
+        },
+        {
+          "victories": 0,
+          "training": 1
+        },
+        {
+          "victories": 2,
+          "training": 1
+        },
+        {
+          "victories": 0,
+          "training": 1
+        },
+        {
+          "victories": 0,
+          "training": 1
+        }
+      ],
+      "roundMs": {
+        "median": 35.1853000000001,
+        "p95": 69.67909999999983,
+        "max": 70.54340000000002
+      }
+    },
+    {
+      "faction": "carpinteras",
+      "goal": "domination",
+      "winner": "fuego",
+      "victory": "picnic",
+      "round": 24,
+      "battles": 80,
+      "thirdParties": 3,
+      "moves": 96,
+      "distinctBattleTerritories": 46,
+      "maxArmies": 26,
+      "remainingMajors": [
+        "carpinteras",
+        "negras",
+        "fuego"
+      ],
+      "playerVeterans": [
+        {
+          "victories": 0,
+          "training": 0
+        },
+        {
+          "victories": 0,
+          "training": 0
+        },
+        {
+          "victories": 0,
+          "training": 1
+        },
+        {
+          "victories": 2,
+          "training": 1
+        },
+        {
+          "victories": 0,
+          "training": 1
+        },
+        {
+          "victories": 0,
+          "training": 1
+        }
+      ],
+      "roundMs": {
+        "median": 21.17070000000058,
+        "p95": 34.3791999999994,
+        "max": 34.75659999999971
+      }
+    },
+    {
+      "faction": "tejedoras",
+      "goal": "picnic",
+      "winner": "rivals",
+      "victory": "capitalLost",
+      "round": 19,
+      "battles": 45,
+      "thirdParties": 2,
+      "moves": 72,
+      "distinctBattleTerritories": 35,
+      "maxArmies": 26,
+      "remainingMajors": [
+        "carpinteras",
+        "negras",
+        "fuego"
+      ],
+      "playerVeterans": [],
+      "roundMs": {
+        "median": 18.017100000000028,
+        "p95": 26.711299999999937,
+        "max": 26.711299999999937
+      }
+    },
+    {
+      "faction": "tejedoras",
+      "goal": "domination",
+      "winner": "tejedoras",
+      "victory": "domination",
+      "round": 64,
+      "battles": 79,
+      "thirdParties": 1,
+      "moves": 259,
+      "distinctBattleTerritories": 57,
+      "maxArmies": 26,
+      "remainingMajors": [
+        "tejedoras"
+      ],
+      "playerVeterans": [
+        {
+          "victories": 14,
+          "training": 0
+        },
+        {
+          "victories": 6,
+          "training": 1
+        },
+        {
+          "victories": 3,
+          "training": 1
+        },
+        {
+          "victories": 1,
+          "training": 1
+        },
+        {
+          "victories": 4,
+          "training": 1
+        },
+        {
+          "victories": 0,
+          "training": 1
+        }
+      ],
+      "roundMs": {
+        "median": 14.434699999999793,
+        "p95": 22.163900000000467,
+        "max": 26.74459999999999
+      }
+    },
+    {
+      "faction": "bala",
+      "goal": "picnic",
+      "winner": "rivals",
+      "victory": "capitalLost",
+      "round": 15,
+      "battles": 31,
+      "thirdParties": 1,
+      "moves": 46,
+      "distinctBattleTerritories": 28,
+      "maxArmies": 20,
+      "remainingMajors": [
+        "carpinteras",
+        "negras",
+        "fuego"
+      ],
+      "playerVeterans": [],
+      "roundMs": {
+        "median": 15.832300000000032,
+        "p95": 20.546699999998964,
+        "max": 20.546699999998964
+      }
+    },
+    {
+      "faction": "bala",
+      "goal": "domination",
+      "winner": "negras",
+      "victory": "picnic",
+      "round": 147,
+      "battles": 166,
+      "thirdParties": 3,
+      "moves": 368,
+      "distinctBattleTerritories": 47,
+      "maxArmies": 20,
+      "remainingMajors": [
+        "carpinteras",
+        "negras",
+        "bala"
+      ],
+      "playerVeterans": [
+        {
+          "victories": 4,
+          "training": 2
+        },
+        {
+          "victories": 0,
+          "training": 1
+        },
+        {
+          "victories": 1,
+          "training": 1
+        },
+        {
+          "victories": 3,
+          "training": 1
+        },
+        {
+          "victories": 5,
+          "training": 2
+        },
+        {
+          "victories": 2,
+          "training": 2
+        }
+      ],
+      "roundMs": {
+        "median": 10.035499999999956,
+        "p95": 17.62710000000152,
+        "max": 22.591599999999744
+      }
+    }
+  ]
+}

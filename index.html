@@ -4,18 +4,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MicroWars: Swarm Tactics</title>
+    <title>MicroWars: Tácticas de Enjambre</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="src/campaign/campaign.css">
 
     <script type="importmap">
     {
-        "imports": {
-            "pixi.js": "https://cdn.jsdelivr.net/npm/pixi.js@8.9.1/dist/pixi.mjs"
-        }
+    "imports": {
+        "pixi.js": "./src/vendor/pixi.mjs",
+        "./src/core/engine.js": "./src/core/engine.js?v=rts-balance-thorns-20261029-1",
+        "./src/entities/node.js": "./src/entities/node.js?v=rts-balance-thorns-20261029-1",
+        "./src/entities/node_renderer.js": "./src/entities/node_renderer.js?v=rts-balance-thorns-20261029-1",
+        "./src/entities/unit.js": "./src/entities/unit.js?v=rts-balance-thorns-20261029-1",
+        "./src/managers/ai_manager.js": "./src/managers/ai_manager.js?v=rts-balance-thorns-20261029-1",
+        "./src/managers/world_manager.js": "./src/managers/world_manager.js?v=rts-balance-thorns-20261029-1",
+        "./src/managers/physics_manager.js": "./src/managers/physics_manager.js?v=rts-balance-thorns-20261029-1",
+        "./src/managers/combat_manager.js": "./src/managers/combat_manager.js?v=rts-balance-thorns-20261029-1",
+        "./src/navigation/nav_graph_store.js": "./src/navigation/nav_graph_store.js?v=rts-balance-thorns-20261029-1",
+        "./src/systems/light_sweep.js": "./src/systems/light_sweep.js?v=rts-balance-thorns-20261029-1",
+        "./src/simulation/utility_engine.js": "./src/simulation/utility_engine.js?v=rts-balance-thorns-20261029-1",
+        "./src/simulation/ai_doomsday.js": "./src/simulation/ai_doomsday.js?v=rts-balance-thorns-20261029-1",
+        "./src/simulation/rts_ai_runtime.js": "./src/simulation/rts_ai_runtime.js?v=rts-balance-thorns-20261029-1",
+        "./src/simulation/rts_world_rules.js": "./src/simulation/rts_world_rules.js?v=rts-balance-thorns-20261029-1",
+        "./src/simulation/rts_snapshot.js": "./src/simulation/rts_snapshot.js?v=rts-balance-thorns-20261029-1",
+        "./src/simulation/rts_forecast.js": "./src/simulation/rts_forecast.js?v=rts-balance-thorns-20261029-1",
+        "./src/simulation/rts_settled_forecast.js": "./src/simulation/rts_settled_forecast.js?v=rts-balance-thorns-20261029-1",
+        "./src/simulation/rts_tactical.js": "./src/simulation/rts_tactical.js?v=rts-balance-thorns-20261029-1",
+        "./src/simulation/ai_config.js": "./src/simulation/ai_config.js?v=rts-balance-thorns-20261029-1",
+        "./src/managers/level_manager.js": "./src/managers/level_manager.js?v=rts-balance-thorns-20261029-1",
+        "./src/simulation/rts_investment.js": "./src/simulation/rts_investment.js?v=rts-balance-thorns-20261029-1",
+        "./src/simulation/rts_regions.js": "./src/simulation/rts_regions.js?v=rts-balance-thorns-20261029-1",
+        "./src/simulation/rts_transport.js": "./src/simulation/rts_transport.js?v=rts-balance-thorns-20261029-1",
+        "./src/simulation/rts_worker_service.js": "./src/simulation/rts_worker_service.js?v=rts-balance-thorns-20261029-1"
     }
+}
     </script>
 
-    <script type="module" src="main.js?v=20260521_menu3"></script>
+    <script type="module" src="main.js?v=rts-balance-thorns-20261029-1"></script>
 </head>
 
 <body>
@@ -50,7 +76,7 @@
             <h1 data-i18n="menu.title">MicroWars</h1>
             <h2 data-i18n="menu.subtitle">Tácticas de Enjambre</h2>
             <div class="menu-buttons">
-                <button id="btnCampaign" class="primary-btn" style="display: none;" data-i18n="menu.campaign">MODO CAMPAÑA</button>
+                <button id="btnCampaign" class="primary-btn" data-i18n="menu.campaign">MODO CAMPAÑA</button>
                 <button id="btnLevels" class="primary-btn play-btn" data-i18n="menu.play">JUGAR</button>
                 <a id="btnDownload" class="secondary-btn" href="https://quilik.itch.io/microwars" target="_blank" rel="noopener noreferrer" data-i18n="menu.download" data-i18n-title="menu.downloadReady" title="Descargar en itch.io">DESCARGA</a>
             </div>
@@ -68,7 +94,7 @@
                 <div class="difficulty-buttons">
                     <button class="diff-select-btn diff-easy"   data-difficulty="easy"   data-i18n="difficulty.easy" data-i18n-title="difficulty.easyTitle" title="La IA comete errores, ataca lento y rara vez coordina.">FÁCIL</button>
                     <button class="diff-select-btn diff-normal" data-difficulty="normal" data-i18n="difficulty.normal" data-i18n-title="difficulty.normalTitle" title="Comportamiento equilibrado. La IA expande, evoluciona y ataca con ritmo normal.">NORMAL</button>
-                    <button class="diff-select-btn diff-hard"   data-difficulty="hard"   data-i18n="difficulty.hard" data-i18n-title="difficulty.hardTitle" title="La IA actúa rápido, coordina flancos y hace rush temprano.">DIFÍCIL</button>
+                    <button class="diff-select-btn diff-hard"   data-difficulty="hard"   data-i18n="difficulty.hard" data-i18n-title="difficulty.hardTitle" title="La IA actúa rápido, coordina flancos y ataca desde el principio.">DIFÍCIL</button>
                 </div>
                 <!-- Descripción dinámica de la dificultad activa -->
                 <div class="difficulty-desc" id="difficultyDesc">Comportamiento equilibrado.</div>
@@ -134,7 +160,7 @@
             <div class="credits-panel">
                 <button id="btnCloseCredits" class="credits-close" type="button" aria-label="Cerrar">×</button>
                 <h2 id="creditsTitle" data-i18n="credits.title">Créditos</h2>
-                <p data-i18n="credits.greeting">Hola, jugador. Gracias por jugar MicroWars: Swarm Tactics.</p>
+                <p data-i18n="credits.greeting">Hola, jugador. Gracias por jugar MicroWars: Tácticas de Enjambre.</p>
                 <p class="credits-creator" data-i18n="credits.creator">Creado por Quilik.</p>
                 <p><span data-i18n="credits.contactLabel">Contacto</span>: <a href="mailto:proyecto001a.u.t.o.r@gmail.com">proyecto001a.u.t.o.r@gmail.com</a></p>
                 <button id="btnCreditsOk" class="secondary-btn" type="button" data-i18n="credits.close">Cerrar</button>
@@ -146,8 +172,8 @@
     <div id="sendBar" class="hidden">
         <span id="sendLabel"><span data-i18n="hud.send">Enviar</span>: <strong id="sendPct">50%</strong></span>
         <input type="range" id="sendSlider" min="10" max="100" step="10" value="50">
-        <button id="btnZoomOut" class="hud-btn" data-i18n="hud.zoomOut">- Zoom</button>
-        <button id="btnZoomIn" class="hud-btn" data-i18n="hud.zoomIn">+ Zoom</button>
+        <button id="btnZoomOut" class="hud-btn" data-i18n="hud.zoomOut">− Alejar</button>
+        <button id="btnZoomIn" class="hud-btn" data-i18n="hud.zoomIn">+ Acercar</button>
         <button id="btnRestartLevel" class="hud-btn" style="margin-right: 10px;" data-i18n="hud.restart">🔄 Reiniciar</button>
         <button id="btnSurrender" class="hud-btn surrender-btn" data-i18n="hud.surrender">RETIRADA AL SECTOR</button>
     </div>

@@ -1,7 +1,10 @@
 $ErrorActionPreference = "Stop"
 
-$root = Split-Path -Parent $PSScriptRoot
-$dist = Join-Path $root "dist"
+$root = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
+$dist = [IO.Path]::GetFullPath((Join-Path $root "dist"))
+
+if (!$dist.StartsWith($root + [IO.Path]::DirectorySeparatorChar) -or [IO.Path]::GetFileName($dist) -ne 'dist') { throw "Invalid distribution path" }
+if ((Test-Path -LiteralPath $dist) -and ((Get-Item -LiteralPath $dist).Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw "Distribution target cannot be a link" }
 
 if (Test-Path $dist) {
     Remove-Item -LiteralPath $dist -Recurse -Force

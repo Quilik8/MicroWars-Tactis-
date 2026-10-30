@@ -1,10 +1,11 @@
-import { Unit } from '../entities/unit.js';
-import { Node } from '../entities/node.js';
+import { updateNodeCounts, processRegen, issueTroopOrder } from '../simulation/rts_world_rules.js?v=rts-balance-thorns-20261029-1';
+import { Unit } from '../entities/unit.js?v=rts-balance-thorns-20261029-1';
+import { Node } from '../entities/node.js?v=rts-balance-thorns-20261029-1';
 import { SpatialHashGrid } from '../core/logic_grid.js';
-import { PIXI } from '../core/engine.js';
+import { PIXI } from '../core/engine.js?v=rts-balance-thorns-20261029-1';
 import { FACTIONS } from '../campaign/faction_data.js';
-import { CombatManager } from './combat_manager.js';
-import { PhysicsManager } from './physics_manager.js';
+import { CombatManager } from './combat_manager.js?v=rts-balance-thorns-20261029-1';
+import { PhysicsManager } from './physics_manager.js?v=rts-balance-thorns-20261029-1';
 import { NavigationSystem } from '../navigation/navigation_system.js';
 import { getNodeSeed, hashStringSeed, mixSeeds, placeUnitInCircle } from '../simulation/deterministic_layout.js';
 
@@ -22,6 +23,7 @@ export class WorldManager {
         this.zones = [];
         this.hazards = [];
         this.travelingIds = [];
+        this.aiTravelingUnits = [];
         this.neighbors = [];
         this.menuAnts = [];
         this.textures = {};
@@ -105,6 +107,11 @@ export class WorldManager {
     }
 
     attachSprite(unit) {
+        const modifiers = this.campaignModifiers?.[unit.faction];
+        if (modifiers && !unit.campaignAdjusted) {
+            unit.speed *= modifiers.speed;
+            unit.campaignAdjusted = true;
+        }
         const tex = this.textures[unit.faction] || this.textures.player || this.textures.neutral;
         if (!tex) { console.warn("No texture found for faction:", unit.faction); return; }
         const sprite = new PIXI.Sprite(tex);
@@ -326,6 +333,7 @@ export class WorldManager {
         }
         if (gameState !== 'PLAYING' || isPaused) return;
 
+        this.lastSimulationStep = dt;
         this.simTime += dt;
         this.updateIntermittentBarriers(dt);
         this.updateNodeCounts();
@@ -400,40 +408,10 @@ export class WorldManager {
                 intermittentBarrierChanged = true;
             }
         }
-        if (intermittentBarrierChanged) {
-            this.rebuildNavigation();
-        }
+        if (intermittentBarrierChanged) this.aiEnvironmentRevision = (this.aiEnvironmentRevision || 0) + 1;
     }
 
-    updateNodeCounts() {
-        for (let n of this.nodes) {
-            if (!n.population) n.population = {};
-            if (!n.power)      n.power      = {};
-            const c = n.counts, pop = n.population, pw = n.power;
-            for (const k in c)   c[k]   = 0;
-            for (const k in pop) pop[k] = 0;
-            for (const k in pw)  pw[k]  = 0;
-        }
-
-        const CAPTURE_DIST_MULT = 2.5;
-        for (let u of this.allUnits) {
-            if (u.pendingRemoval || !u.targetNode) continue;
-            const node = u.targetNode;
-            const p = u.power || 1;
-            const f = u.faction;
-            const dx = u.x - node.x, dy = u.y - node.y;
-            const distSq = dx * dx + dy * dy;
-            const capSq  = (node.radius * CAPTURE_DIST_MULT) ** 2;
-            if (u.state === 'idle' || distSq < capSq) {
-                if (node.counts[f] === undefined) {
-                    node.counts[f] = 0; node.population[f] = 0; node.power[f] = 0;
-                }
-                node.counts[f]++;
-                node.population[f] += p;
-                node.power[f]      += p;
-            }
-        }
-    }
+    updateNodeCounts() { updateNodeCounts(this); }
 
     processSimulation(dt, SFX) {
         PhysicsManager.processArrivals(this);
@@ -469,53 +447,7 @@ export class WorldManager {
         if (this.ui) this.ui.showNodeTooltip(node);
     }
 
-    processRegen(nodeIdx, dt) {
-        const node = this.nodes[nodeIdx];
-        if (node.pendingEvolution) {
-            node.pendingEvolutionEtaSec -= dt;
-            if (node.pendingEvolutionEtaSec < 0) node.pendingEvolutionEtaSec = 0;
-            if (node.pendingEvolutionEtaSec <= 0 && node.owner !== 'neutral') {
-                node.completeEvolution();
-            }
-        }
-
-        if (node.owner === 'neutral' || node.type === 'tunel') return;
-        const faction = node.owner;
-        if (node.population[faction] >= node.maxUnits) return;
-        if (this.allUnits.length >= 3000) return;
-
-        node.regenTimer += dt;
-        let interval = node.regenInterval;
-        if (node.evolution === 'tanque') interval *= 1.5;
-        let projectedPower = node.population[faction] || 0;
-
-        while (node.regenTimer >= interval) {
-            const spawnPower = node.evolution === 'tanque' ? 3 : 1;
-            if (projectedPower >= node.maxUnits) break;
-            if (this.allUnits.length >= 3000) break;
-
-            node.regenTimer -= interval;
-            const seed = this.nextUnitSeed(node, faction);
-            const u = new Unit(node.x, node.y, faction, seed);
-            this.positionUnitInNode(u, node, 0.7, projectedPower | 0);
-            if (node.evolution === 'tanque') u.power = 3;
-
-            if (node.tunnelTo && node.tunnelTo.owner === node.owner && node.type !== 'tunel') {
-                u.targetNode = node.tunnelTo;
-                u.homeNode   = node;
-                u.state      = 'traveling';
-                u.speedMult  = 2.0;
-            } else {
-                u.targetNode = node;
-                u.homeNode   = node;
-                u.state      = 'idle';
-                u.speedMult  = 1.0;
-            }
-            this.attachSprite(u);
-            this.allUnits.push(u);
-            projectedPower += spawnPower;
-        }
-    }
+    processRegen(nodeIdx, dt) { processRegen(this, this.nodes[nodeIdx], dt); }
 
     cleanupUnits() {
         let i = this.allUnits.length - 1;
@@ -544,17 +476,7 @@ export class WorldManager {
         if (count < 1 && eligible > 0 && percent > 0) count = 1;
         if (count === 0) return;
 
-        let sent = 0;
-        for (let u of this.allUnits) {
-            if (sent >= count) break;
-            if (u.faction === faction && !u.pendingRemoval &&
-                u.targetNode === fromNode && u.state === 'idle') {
-                u.targetNode = toNode;
-                u.state      = 'traveling';
-                u.speedMult  = 1.0;
-                sent++;
-            }
-        }
+        return issueTroopOrder(this, fromNode, toNode, count, faction);
     }
 
     recallToHome(targetNode, faction = 'player') {

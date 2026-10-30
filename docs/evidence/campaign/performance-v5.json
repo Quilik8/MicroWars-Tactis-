@@ -1,0 +1,572 @@
+{
+  "times": {
+    "fullRenderMs": {
+      "median": 11.5,
+      "p95": 13.400000005960464,
+      "max": 13.400000005960464
+    },
+    "changedSceneRenderMs": {
+      "median": 17.400000005960464,
+      "p95": 29.200000017881393,
+      "max": 29.200000017881393
+    },
+    "selectionMs": {
+      "median": 14.5,
+      "p95": 90.69999998807907,
+      "max": 90.69999998807907
+    },
+    "cameraMs": {
+      "median": 7.600000023841858,
+      "p95": 10.699999988079071,
+      "max": 32.900000005960464
+    },
+    "saveMs": {
+      "median": 10.900000005960464,
+      "p95": 13.900000005960464,
+      "max": 13.900000005960464
+    },
+    "create300Ms": {
+      "median": 1610.4000000059605,
+      "p95": 1994.5999999940395,
+      "max": 1994.5999999940395
+    }
+  },
+  "isolation": [
+    {
+      "faction": "carpinteras",
+      "territory": 0,
+      "accessibleWithoutOtherCapitals": 295
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 21,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "fuego",
+      "territory": 33,
+      "accessibleWithoutOtherCapitals": 295
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 35,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 36,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 37,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 38,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 39,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 40,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 41,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 42,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 43,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "fuego",
+      "territory": 54,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "fuego",
+      "territory": 55,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 56,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 58,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 59,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 62,
+      "accessibleWithoutOtherCapitals": 295
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 63,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "fuego",
+      "territory": 71,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "fuego",
+      "territory": 72,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 73,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 80,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 81,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "fuego",
+      "territory": 87,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 88,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 95,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "fuego",
+      "territory": 100,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "fuego",
+      "territory": 101,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 102,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 103,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 110,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "fuego",
+      "territory": 117,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 119,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 120,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 121,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 126,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 127,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 128,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 129,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 134,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 136,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "bala",
+      "territory": 137,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "fuego",
+      "territory": 138,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 140,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 141,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 142,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 143,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 147,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 148,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 150,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 154,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 155,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 156,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "bala",
+      "territory": 157,
+      "accessibleWithoutOtherCapitals": 295
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 158,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 159,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 160,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 161,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 170,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 171,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 172,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 173,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 174,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 175,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "cortadoras",
+      "territory": 176,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "cortadoras",
+      "territory": 177,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "cortadoras",
+      "territory": 178,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "cortadoras",
+      "territory": 179,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "cortadoras",
+      "territory": 180,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "cortadoras",
+      "territory": 181,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "carpinteras",
+      "territory": 191,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 192,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 193,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "cortadoras",
+      "territory": 198,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "cortadoras",
+      "territory": 199,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 210,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "cortadoras",
+      "territory": 218,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 222,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 223,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 224,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 228,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 229,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "cortadoras",
+      "territory": 236,
+      "accessibleWithoutOtherCapitals": 295
+    },
+    {
+      "faction": "negras",
+      "territory": 239,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 240,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 241,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 242,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 243,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 244,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 246,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 247,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 248,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 249,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 254,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 255,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 258,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 259,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 260,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 261,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 262,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 263,
+      "accessibleWithoutOtherCapitals": 294
+    },
+    {
+      "faction": "negras",
+      "territory": 269,
+      "accessibleWithoutOtherCapitals": 295
+    }
+  ],
+  "dom": 2563,
+  "tickerStarted": false,
+  "renderer": "webgl",
+  "idle": {
+    "seconds": 2,
+    "taskMs": 5.581999999999999,
+    "scriptMs": 1.711
+  },
+  "strategy": {
+    "initialDenseArmies": 32,
+    "rounds": 6,
+    "combats": 22,
+    "thirdParties": 1,
+    "roundMs": {
+      "median": 44.29999998211861,
+      "p95": 107.59999999403954
+    },
+    "tickerStarted": false
+  },
+  "errors": [],
+  "environment": "Headless Edge, software WebGL SwiftShader, 1280x720; comparative timings, not hardware FPS. Dense scenario adds legal-position armies for load measurement only; six full AI/threat/event rounds measured without DOM or save cost. RTS remains stopped."
+}

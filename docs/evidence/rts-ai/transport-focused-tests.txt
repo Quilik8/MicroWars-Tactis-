@@ -1,0 +1,34 @@
+✔ regional geometry distinguishes true bridges from a node next to an open corridor (50.6502ms)
+✔ logistics uses one shared payment, supports removal and respects reserves (3.5061ms)
+✔ automatic logistics follows a necessary detour without spending a committed defense (10.9438ms)
+✔ ferry can open a useful route through a wall and shortlist both boarding and landing (7.4228ms)
+✔ portal oracle evaluates the exit rather than ownership of an already owned entry (236.5513ms)
+✔ reverse regrouping needs a changed situation rather than a new score (26.1709ms)
+✔ twenty physical-reference seeds: ferry (5677.0793ms)
+✔ twenty physical-reference seeds: shared_poison (5645.1211ms)
+✔ x1 and x4 scheduled opportunities retain competent responses without changing acceleration (66.4119ms)
+✔ portal activation shares the player rule and cannot ping-pong without an objective (4.7171ms)
+✔ portal activation forecast reaches an enemy exit from stationed troops (86.1008ms)
+✖ twenty physical-reference seeds: ferry landing across a wall (555.9815ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 11
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22749.8368
+
+✖ failing tests:
+
+test at tests\rts-transport.test.js:96:1
+✖ twenty physical-reference seeds: ferry landing across a wall (555.9815ms)
+  Error: Work did not finish within deterministic quota
+      at finish (file:///C:/Users/jp_va/Documents/Proyecto%20hormiga/tests/helpers/rts-world.js:86:11)
+      at TestContext.<anonymous> (file:///C:/Users/jp_va/Documents/Proyecto%20hormiga/tests/rts-transport.test.js:101:18)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7)

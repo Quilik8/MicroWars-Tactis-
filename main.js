@@ -8,6 +8,8 @@ import { CampaignCore } from './src/campaign/campaign_core.js';
 import { SFX, resumeAudio, startMusic, stopMusic } from './src/managers/audio.js';
 import { FACTIONS } from './src/campaign/faction_data.js';
 import { SECTORS } from './src/data/levels.js';
+import { BASE_FACTIONS } from './src/campaign/rules.js';
+import { gameStorage } from './src/platform/storage.js';
 
 // ══════════════════════════════════════════════════════════════
 // CONFIGURACIÓN Y BOOTSTRAP
@@ -28,14 +30,14 @@ let currentDifficulty = _loadDifficulty();
 
 function _loadDifficulty() {
     try {
-        const saved = localStorage.getItem('microwars_difficulty');
+        const saved = gameStorage.getItem('microwars_difficulty');
         if (['easy', 'normal', 'hard'].includes(saved)) return saved;
     } catch (e) {}
     return 'normal';
 }
 
 function _saveDifficulty(d) {
-    try { localStorage.setItem('microwars_difficulty', d); } catch (e) {}
+    try { gameStorage.setItem('microwars_difficulty', d); } catch (e) {}
 }
 
 function setDifficulty(d) {
@@ -64,7 +66,7 @@ const ui = new UIManager({
     },
     onSpawnMenuAnts:      () => world.spawnMenuAnts(),
     onClearMenuAnts:      () => world.clearMenuAnts(),
-    onClearLevel:         () => world.clearLevel(),
+    onClearLevel:         () => { input._deselect(); world.clearLevel(); },
     onStartMusic:         (type, idx) => startMusic(type, idx),
     onStopMusic:          () => stopMusic(),
     onVictory:            () => SFX.victory(),
@@ -79,7 +81,7 @@ const ui = new UIManager({
     onSetSpeed:           (speed) => setGameSpeed(speed),
     onSetDifficulty:      (d) => setDifficulty(d),   // ← NUEVO
     onRenderFactions:     () => {
-        ui.renderFactionSelection(FACTIONS, (selectedFaction) => {
+        ui.renderFactionSelection(FACTIONS.filter(f => BASE_FACTIONS.includes(f.id)), (selectedFaction) => {
             campaign.setPlayerFaction(selectedFaction);
             ui.setGameState('CAMPAIGN');
         });
@@ -92,7 +94,7 @@ const campaign = new CampaignCore(game, ui);
 const input    = new InputManager(game, world, ui, SFX, campaign);
 const level    = new LevelManager(game, world, ui, SFX, {
     start: startMusic,
-    onAIReset: () => ai.reset()
+    onAIReset: () => { input._deselect(); ai.reset(); }
 });
 
 window.campaign = campaign;
@@ -143,12 +145,10 @@ game.onUpdate = (dt) => {
     if (ui.gameState === 'PLAYING' && !ui.isPaused) {
         input.validateState();
 
-        const pId = campaign.isStarted ? (campaign.playerFaction?.id || 'player') : 'player';
+        const pId = 'player';
 
         const activeEnemies = getActiveAIFactions(world.nodes, world.allUnits, pId);
-        for (const enemyFaction of activeEnemies) {
-            ai.update(dt, world.nodes, world.allUnits, enemyFaction, pId);
-        }
+        ai.updateAll(dt, activeEnemies, pId);
 
         let pUnits = 0, eUnits = 0, eNodes = 0, pNodes = 0;
 
@@ -162,7 +162,7 @@ game.onUpdate = (dt) => {
             else if (u.faction !== 'neutral') eUnits++;
         }
 
-        level.checkVictory(dt, pNodes, eNodes, pUnits, eUnits);
+        if (!campaign.updateBattle(dt, pNodes)) level.checkVictory(dt, pNodes, eNodes, pUnits, eUnits);
     }
 };
 
@@ -175,11 +175,15 @@ game.onDraw = (ctx) => {
 // INICIALIZACIÓN
 // ══════════════════════════════════════════════════════════════
 window.addEventListener('load', async () => {
+    currentDifficulty = _loadDifficulty();
+    level.loadProgress();
     ui.init();
     await game.init();
     world.init(game.app);
     input.init();
     campaign.init();
+    campaign.connect(level, world);
+    document.getElementById('btnCampaign').onclick = () => ui.setGameState(campaign.state.model ? 'CAMPAIGN' : 'FACTIONS');
     ui.renderSectorGrid(SECTORS, level, (sectorIdx, levelIdx) => {
         ai.setDifficulty(currentDifficulty);
         level.loadLevel(sectorIdx, levelIdx);

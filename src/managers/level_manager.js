@@ -1,3 +1,4 @@
+import { mergeAIStrategy } from '../simulation/ai_config.js';
 import { SECTORS } from '../data/levels.js';
 import { Node } from '../entities/node.js';
 import { PIXI } from '../core/engine.js';
@@ -6,6 +7,8 @@ import { LightSweep } from '../systems/light_sweep.js';
 import { IntermittentBarrier } from '../systems/intermittent_barrier.js';
 import { t, tf } from '../i18n/translations.js';
 import { localizeLevel } from '../i18n/content_translations.js';
+import { ct } from '../campaign/campaign_i18n.js';
+import { gameStorage } from '../platform/storage.js';
 
 export class LevelManager {
     constructor(game, world, ui, sfx, music) {
@@ -18,7 +21,7 @@ export class LevelManager {
 
         this.currentSectorIndex = 0;
         this.currentLevelIndex = 0;
-        this.unlockedLevels = 999;
+        this.unlockedLevels = 1;
 
         this._levelStartGrace = 0;
         this._GRACE_DURATION = 1.5;
@@ -27,23 +30,19 @@ export class LevelManager {
     }
 
     loadProgress() {
-        const saved = localStorage.getItem('microwars_save');
+        let saved = null;
+        try { saved = gameStorage.getItem('microwars_save'); } catch (e) { /* Campaign reports storage errors separately. */ }
         if (saved) {
             try {
                 this.unlockedLevels = JSON.parse(saved).unlockedLevels || 1;
             } catch (e) { console.error("Error loading save:", e); }
         }
-        // ── MODO DESARROLLO ──────────────────────────────────────────────────────
-        // Todos los niveles permanecen desbloqueados durante la fase de pruebas.
-        // Esto permite iterar, resetear el navegador y probar cualquier nivel
-        // sin necesidad de completar los anteriores.
-        // ANTES DE PRODUCCIÓN: eliminar esta línea para activar el progreso real.
-        // ────────────────────────────────────────────────────────────────────────
-        this.unlockedLevels = 999;
+        // Campaign and skirmish progress use separate save records.
+        this.unlockedLevels = Math.max(1, this.unlockedLevels || 1);
     }
 
     saveProgress() {
-        localStorage.setItem('microwars_save', JSON.stringify({ unlockedLevels: this.unlockedLevels }));
+        gameStorage.setItem('microwars_save', JSON.stringify({ unlockedLevels: this.unlockedLevels }));
     }
 
     loadNextLevel() {
@@ -67,8 +66,8 @@ export class LevelManager {
             // Regresamos al menú de sectores
             this.ui.setGameState('LEVELS', { returnToSector: true });
             
-            if (!localStorage.getItem('microwars_game_beaten')) {
-                localStorage.setItem('microwars_game_beaten', 'true');
+            if (!gameStorage.getItem('microwars_game_beaten')) {
+                gameStorage.setItem('microwars_game_beaten', 'true');
                 setTimeout(() => {
                     alert(t('alert.gameBeaten'));
                 }, 200);
@@ -79,17 +78,28 @@ export class LevelManager {
         }
     }
 
-    loadLevel(sectorIndex, levelIndex) {
+    loadLevel(sectorIndex, levelIndex, campaignSetup = null) {
+        this.campaignEncounter = campaignSetup?.encounter || null;
+        this.campaignOutcome = campaignSetup?.onOutcome || null;
+        this.world.campaignModifiers = campaignSetup?.modifiers || null;
+        if (!campaignSetup) {
+            for (const id of ['campaignRetreat','campaignBattleMenu']) { const control=document.getElementById(id); if(control)control.hidden=true; }
+            for (const id of ['btnSurrender','btnRestartLevel']) document.getElementById(id).hidden=false;
+        }
         if (sectorIndex >= SECTORS.length) sectorIndex = 0;
         if (levelIndex >= SECTORS[sectorIndex].levels.length) levelIndex = 0;
+        const absoluteLevel = this.getAbsoluteLevelNumber(sectorIndex, levelIndex);
+        if (!campaignSetup && absoluteLevel > this.unlockedLevels) {
+            return;
+        }
         
         this.currentSectorIndex = sectorIndex;
         this.currentLevelIndex = levelIndex;
         this._levelStartGrace = 0;
 
         this.ui.setGameState('PLAYING');
-        this.world.clearLevel();
         if (this.onAIReset) this.onAIReset();
+        this.world.clearLevel();
         
         // clearLevel() destroys all layerNodes children, including _barrierGfx.
         // We must drop the reference so it can be re-created if the new level needs it.
@@ -102,10 +112,10 @@ export class LevelManager {
         const cx = this.game.width  || window.innerWidth;
         const cy = this.game.height || window.innerHeight;
         const currentSector = SECTORS[sectorIndex];
-        const levelData = currentSector.levels[levelIndex];
+        const levelData = campaignSetup?.level || currentSector.levels[levelIndex];
 
         // Mapeo global para input
-        this.world.allowEvolutions = currentSector.config ? currentSector.config.allowEvolutions : true;
+        this.world.allowEvolutions = campaignSetup ? true : (currentSector.config ? currentSector.config.allowEvolutions : true);
 
         // Actualizar título global de intro si existe el callback
         const sectorName = currentSector.name;
@@ -177,6 +187,7 @@ export class LevelManager {
         }
 
         for (let n of this.world.nodes) {
+            n.campaignModifiers = this.world.campaignModifiers;
             this.world.createNodeGfx(n);
             const nData = levelData.nodes[n.navIndex];
             if (nData.evolution) {
@@ -325,7 +336,7 @@ export class LevelManager {
         const introTitle  = document.getElementById('introTitle');
         const introDesc   = document.getElementById('introDesc');
         const introScreen = document.getElementById('levelIntro');
-        const localizedLevel = localizeLevel(levelData, absoluteLevelNumber);
+        const localizedLevel = campaignSetup ? {name: campaignSetup.title, description: campaignSetup.description} : localizeLevel(levelData, absoluteLevelNumber);
         if (introTitle) introTitle.innerText = localizedLevel.name || tf('intro.defaultTitle', { sector: sectorIndex + 1, level: absoluteLevelNumber });
         if (introDesc)  introDesc.innerText  = localizedLevel.description || t('intro.defaultDesc');
         if (introScreen) {
@@ -344,56 +355,14 @@ export class LevelManager {
         if (this.startMusic) this.startMusic('LEVEL', sectorIndex);
     }
 
+    loadCampaignEncounter(setup, encounter, onOutcome, modifiers) {
+        this.loadLevel(setup.sectorIndex, 0, { ...setup, encounter, onOutcome, modifiers,
+            title: ct(encounter.type) + ' · ' + ct(encounter.region),
+            description: ct('objective') });
+    }
+
     _mergeAIStrategy(sectorStrategy, levelStrategy) {
-        if (!sectorStrategy && !levelStrategy) return null;
-
-        const merged = JSON.parse(JSON.stringify(sectorStrategy || {}));
-        const levelClone = levelStrategy ? JSON.parse(JSON.stringify(levelStrategy)) : null;
-        if (!levelClone) return merged;
-
-        Object.assign(merged, levelClone);
-
-        if (sectorStrategy && sectorStrategy.difficultyOverrides) {
-            merged.difficultyOverrides = JSON.parse(JSON.stringify(sectorStrategy.difficultyOverrides));
-        }
-        if (levelClone.difficultyOverrides) {
-            if (!merged.difficultyOverrides) merged.difficultyOverrides = {};
-            for (const diff in levelClone.difficultyOverrides) {
-                merged.difficultyOverrides[diff] = {
-                    ...(merged.difficultyOverrides[diff] || {}),
-                    ...levelClone.difficultyOverrides[diff],
-                };
-            }
-        }
-
-        if (sectorStrategy && sectorStrategy.factions) {
-            merged.factions = JSON.parse(JSON.stringify(sectorStrategy.factions));
-        }
-        if (levelClone.factions) {
-            if (!merged.factions) merged.factions = {};
-            for (const faction in levelClone.factions) {
-                merged.factions[faction] = {
-                    ...(merged.factions[faction] || {}),
-                    ...levelClone.factions[faction],
-                };
-
-                const sectorDiff = merged.factions[faction].difficultyOverrides || null;
-                const levelDiff = levelClone.factions[faction].difficultyOverrides || null;
-                if (sectorDiff || levelDiff) {
-                    merged.factions[faction].difficultyOverrides = {
-                        ...(sectorDiff || {}),
-                    };
-                    for (const diff in (levelDiff || {})) {
-                        merged.factions[faction].difficultyOverrides[diff] = {
-                            ...(merged.factions[faction].difficultyOverrides[diff] || {}),
-                            ...levelDiff[diff],
-                        };
-                    }
-                }
-            }
-        }
-
-        return merged;
+        return mergeAIStrategy(sectorStrategy, levelStrategy);
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -402,6 +371,16 @@ export class LevelManager {
     checkVictory(dt, playerNodes, enemyNodes, playerUnits, enemyUnits) {
         this._levelStartGrace += dt;
         if (this._levelStartGrace < this._GRACE_DURATION) return null;
+
+        if (this.campaignEncounter) {
+            if (playerNodes === 0 && playerUnits === 0) {
+                this.campaignOutcome({ playerWon: false }); return false;
+            }
+            if (enemyNodes === 0 && enemyUnits === 0) {
+                this.campaignOutcome({ playerWon: true }); return true;
+            }
+            return null;
+        }
 
         // Derrota
         if (playerNodes === 0 && playerUnits === 0) {
@@ -435,7 +414,20 @@ export class LevelManager {
     }
 
     onLevelComplete() {
-        // Estructura libre para testeo
+        const completedLevel = this.getAbsoluteLevelNumber(this.currentSectorIndex, this.currentLevelIndex);
+        if (completedLevel >= this.unlockedLevels) {
+            this.unlockedLevels = completedLevel + 1;
+            this.saveProgress();
+            if (this.ui?.refreshSectorGrid) this.ui.refreshSectorGrid(this.currentSectorIndex);
+        }
+    }
+
+    getAbsoluteLevelNumber(sectorIndex, levelIndex) {
+        let absolute = 0;
+        for (let i = 0; i < sectorIndex; i++) {
+            absolute += SECTORS[i]?.levels?.length || 0;
+        }
+        return absolute + levelIndex + 1;
     }
 
     // ─────────────────────────────────────────────────────────────────

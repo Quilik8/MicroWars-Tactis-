@@ -1,0 +1,207 @@
+{
+  "times": {
+    "fullRenderMs": {
+      "median": 11.5,
+      "p95": 16,
+      "max": 16
+    },
+    "changedSceneRenderMs": {
+      "median": 14.700000017881393,
+      "p95": 19.899999976158142,
+      "max": 19.899999976158142
+    },
+    "selectionMs": {
+      "median": 12.300000011920929,
+      "p95": 57.29999998211861,
+      "max": 57.29999998211861
+    },
+    "cameraMs": {
+      "median": 5.5,
+      "p95": 7.4000000059604645,
+      "max": 30.5
+    },
+    "saveMs": {
+      "median": 5.5,
+      "p95": 5.800000011920929,
+      "max": 5.800000011920929
+    },
+    "create300Ms": {
+      "median": 976.6999999880791,
+      "p95": 1173.0999999940395,
+      "max": 1173.0999999940395
+    }
+  },
+  "isolation": [
+    {
+      "faction": "carpinteras",
+      "territory": 0,
+      "accessibleWithoutOtherCapitals": 295
+    },
+    {
+      "faction": "fuego",
+      "territory": 33,
+      "accessibleWithoutOtherCapitals": 295
+    },
+    {
+      "faction": "tejedoras",
+      "territory": 62,
+      "accessibleWithoutOtherCapitals": 295
+    },
+    {
+      "faction": "bala",
+      "territory": 157,
+      "accessibleWithoutOtherCapitals": 295
+    },
+    {
+      "faction": "cortadoras",
+      "territory": 236,
+      "accessibleWithoutOtherCapitals": 295
+    },
+    {
+      "faction": "negras",
+      "territory": 269,
+      "accessibleWithoutOtherCapitals": 295
+    }
+  ],
+  "dom": 2509,
+  "tickerStarted": false,
+  "renderer": "webgl",
+  "idle": {
+    "seconds": 2,
+    "taskMs": 6.783999999999999,
+    "scriptMs": 3.4050000000000002
+  },
+  "tacticalCpu": [
+    {
+      "label": "existing campaign RTS template",
+      "samples": 120,
+      "units": 542,
+      "nodes": 4,
+      "updateMs": {
+        "median": 1.4000000059604645,
+        "p95": 14.900000005960464,
+        "max": 126.90000000596046
+      },
+      "parts": {
+        "updateNodeCounts": {
+          "median": 0.19999998807907104,
+          "p95": 2.2999999821186066,
+          "max": 10.900000005960464
+        },
+        "updateGrid": {
+          "median": 0.09999999403953552,
+          "p95": 0.4000000059604645,
+          "max": 9.900000005960464
+        },
+        "updatePhysics": {
+          "median": 0.9000000059604645,
+          "p95": 9.599999994039536,
+          "max": 94
+        },
+        "processArrivals": {
+          "median": 0,
+          "p95": 0.10000002384185791,
+          "max": 0.4000000059604645
+        },
+        "processSimulation": {
+          "median": 0.10000002384185791,
+          "p95": 0.800000011920929,
+          "max": 5.799999982118607
+        },
+        "cleanupUnits": {
+          "median": 0,
+          "p95": 0.09999999403953552,
+          "max": 0.30000001192092896
+        }
+      }
+    },
+    {
+      "label": "synthetic stationary reinforcements, approximately 1500 extra units",
+      "samples": 120,
+      "units": 2042,
+      "nodes": 4,
+      "updateMs": {
+        "median": 5.9000000059604645,
+        "p95": 22.400000005960464,
+        "max": 40.30000001192093
+      },
+      "parts": {
+        "updateNodeCounts": {
+          "median": 0.9000000059604645,
+          "p95": 3.600000023841858,
+          "max": 5.9000000059604645
+        },
+        "updateGrid": {
+          "median": 0.20000001788139343,
+          "p95": 1.600000023841858,
+          "max": 3.2000000178813934
+        },
+        "updatePhysics": {
+          "median": 3.9000000059604645,
+          "p95": 15.699999988079071,
+          "max": 38.80000001192093
+        },
+        "processArrivals": {
+          "median": 0,
+          "p95": 0.5,
+          "max": 4.600000023841858
+        },
+        "processSimulation": {
+          "median": 0.19999998807907104,
+          "p95": 0.800000011920929,
+          "max": 4.800000011920929
+        },
+        "cleanupUnits": {
+          "median": 0,
+          "p95": 0.19999998807907104,
+          "max": 2.5999999940395355
+        }
+      }
+    },
+    {
+      "label": "synthetic mass movement",
+      "samples": 120,
+      "units": 2046,
+      "nodes": 4,
+      "updateMs": {
+        "median": 8.699999988079071,
+        "p95": 16.900000005960464,
+        "max": 30.400000005960464
+      },
+      "parts": {
+        "updateNodeCounts": {
+          "median": 0.30000001192092896,
+          "p95": 0.7000000178813934,
+          "max": 5.5
+        },
+        "updateGrid": {
+          "median": 0.19999998807907104,
+          "p95": 0.5999999940395355,
+          "max": 3.100000023841858
+        },
+        "updatePhysics": {
+          "median": 3.2000000178813934,
+          "p95": 8.799999982118607,
+          "max": 20.599999994039536
+        },
+        "processArrivals": {
+          "median": 0.10000002384185791,
+          "p95": 0.29999998211860657,
+          "max": 1
+        },
+        "processSimulation": {
+          "median": 0.20000001788139343,
+          "p95": 0.5,
+          "max": 1
+        },
+        "cleanupUnits": {
+          "median": 0,
+          "p95": 0.10000002384185791,
+          "max": 0.19999998807907104
+        }
+      }
+    }
+  ],
+  "errors": [],
+  "environment": "Headless Edge, software WebGL SwiftShader, 1280x720; timings are comparative, not hardware FPS. Tactical CPU uses 120 fixed simulation steps per scenario, excludes GPU rendering, with lightweight timing instrumentation."
+}

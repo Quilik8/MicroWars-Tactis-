@@ -1,0 +1,34 @@
+✔ no phantom imminent hazard on construction, easy scan, or reset (27.7814ms)
+✔ permanent wall is forbidden; temporary gate remains a physical graph edge (52.5085ms)
+✔ live/reference parity and isolation: plain (515.053ms)
+✔ live/reference parity and isolation: poison (560.0026ms)
+✔ live/reference parity and isolation: zones (465.9102ms)
+✔ live/reference parity and isolation: three_factions (517.7809ms)
+✔ live/reference parity and isolation: thorn (395.6287ms)
+✔ live/reference parity and isolation: artillery (503.2934ms)
+✔ live/reference parity and isolation: water (416.6926ms)
+✔ live/reference parity and isolation: light (541.367ms)
+✔ live/reference parity and isolation: gate (457.3879ms)
+✔ live/reference parity and isolation: mobile (352.1283ms)
+✔ live/reference parity and isolation: tunnel (435.0375ms)
+✔ whole poisonous map: large cohort reaches and captures; tiny cohort cannot (465.4479ms)
+✔ forecast arrivals match actual scripted dispatch with same physical steps (7499.9945ms)
+✔ faction without a nest is retained; >32 nests and independent fair scheduling (150.6014ms)
+✔ exact order counts, no double spend, no future order mutation (2.9723ms)
+✔ reaction is delayed and events are bounded, including another AI (9.1896ms)
+✔ stationary reduction preserves separate three-way combat, training and capture (2075.6244ms)
+✔ runtime expands under scripted opposition and can cancel future orders without redirects (4726.0979ms)
+✔ allied target exclusions and names of other factions are respected (3.408ms)
+✔ worker uses the same exact forecast, bounded requests, cancellation and reset (3289.1676ms)
+✔ faction iteration order cannot leak another faction future commands (236.6022ms)
+✔ binary worker transport preserves exact unit state and composition (9.2483ms)
+✔ waiting dispatch uses the absolute forecast clock, not the completion time of the worker (3.923ms)
+✔ expired environmental forecast cannot dispatch and adapts preparation lead (3.9718ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 24865.6206

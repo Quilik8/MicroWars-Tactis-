@@ -84,6 +84,8 @@ function estimateWaterThreatTTIForNode(ws, node, world) {
  * @param {object} world
  */
 export function scanDoomsdayThreats(engine, nodes, aiFaction, world) {
+    engine._doomsdayTTI.fill(-1);
+    engine._neutralizeTTI.fill(-1);
     if (!world) return;
     const wDoom = engine._weights[W_DOOMSDAY_AWARENESS];
     if (wDoom < 0.01) {

@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-27",
+  "url": "http://127.0.0.1:5173/?ai-debug=1",
+  "scenario": "Sector 1, Nivel 1, real Pixi/WebGL runtime, passive player",
+  "method": "Read opt-in DOM diagnostics and frame profile after starting the level through visible controls; screenshot confirms neutral capture and traveling reinforcements.",
+  "ai": { "frames": 4310, "orders": 6, "forecasts": 56, "jobsCompleted": 44, "workerCompleted": 47, "workerPending": 1, "workerCpuMs": 14535.5, "workerError": null, "mainThreadRollingMs": { "p50": 0.1, "p95": 0.3, "p99": 2.2, "max": 4.2 } },
+  "frameProfile": {
+    "samples": 600,
+    "updateMs": { "p50": 2.2, "p95": 3.2, "p99": 5.1 },
+    "overlayMs": { "p50": 0.1, "p95": 0.2, "p99": 0.3 },
+    "renderCpuMs": { "p50": 1.2, "p95": 2.0, "p99": 2.8 },
+    "frameIntervalMs": { "p50": 16.7, "p95": 16.8, "p99": 17.1 }
+  },
+  "limits": ["Single scenario, not a balance verdict", "Renderer measurement is CPU submission time, not GPU time", "Extreme stress and full difficulty/terrain playtesting are separate", "Earlier cached-module startup errors were corrected by versioning the static module graph"]
+}

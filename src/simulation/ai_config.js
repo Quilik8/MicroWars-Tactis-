@@ -107,6 +107,11 @@ function adaptLegacy(raw) {
  * antiPendulum y hazards se mergen a un nivel.
  * factions y difficultyOverrides se mergen por key.
  */
+export function mergeAIStrategy(base, override) {
+    if (!base && !override) return null;
+    return deepMerge(base || {}, override || {});
+}
+
 function deepMerge(base, override) {
     if (!override) return base ? { ...base } : {};
     if (!base) return { ...override };
@@ -143,7 +148,7 @@ function deepMerge(base, override) {
             }
             for (const fk in val) {
                 if (typeof val[fk] === 'object' && val[fk] !== null) {
-                    result[key][fk] = { ...(result[key][fk] || {}), ...val[fk] };
+                    result[key][fk] = deepMerge(result[key][fk] || {}, val[fk]);
                 } else {
                     result[key][fk] = val[fk];
                 }

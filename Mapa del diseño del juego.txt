@@ -74,8 +74,8 @@ Esta fase consolida la visión original, transformando el juego de niveles aisla
 
 *   **Mecánicas de Infección:**
     *   **El Parásito y la Purga:** Sistema avanzado de infiltración táctica. Se envían unidades invisibles que infectan la producción enemiga desde adentro. Incluye la mecánica de limpieza (Purga), permitiendo al jugador sacrificar unidades propias para erradicar la infección de sus nodos.
-*   **La Campaña de "Anillos Concéntricos":**
-    *   **Tablero Dinámico:** Implementación total del mapa estratégico circular con 6 facciones compitiendo simultáneamente por alcanzar el centro del entorno.
+*   **La Campaña del Jardín Orgánico:**
+    *   **Tablero Dinámico:** Implementación del jardín orgánico y asimétrico con 6 facciones por turnos; victoria por capitales o defensa del Gran Picnic. Véase docs/CAMPAIGN.md.
     *   **Elementos Roguelike:** Activación de los Puntos de Interés Épicos, el Árbol de Evolución Global y la obtención de Mutaciones Aleatorias Raras al conquistar territorios clave.
     *   **Gestión de Unidades:** Sistema de Enjambres Veteranos con nombres personalizados, acumulación de experiencia por combate y la regla de Muerte Permanente (Permadeath) al perder una batalla.
 *   **El Mundo Vivo:**
@@ -112,7 +112,7 @@ La estrategia financiera se basa en eliminar cualquier barrera de entrada para c
 El despliegue del juego se realiza en fases, utilizando los ingresos de una etapa para financiar los costos de la siguiente, manteniendo un riesgo financiero de cero.
 
 *   **Fase 1: Validación en Itch.io:** Publicación inicial como juego web (PWA). Itch.io permite donaciones voluntarias ("paga lo que quieras") y la venta de los primeros paquetes de skins. Esta fase sirve para pulir el juego con el *feedback* de la comunidad y recaudar los primeros $100 USD.
-*   **Fase 2: Portales de Juegos Web (Poki / CrazyGames):** Una vez que el juego es estable y divertido, se somete a portales masivos. Estas plataformas ofrecen un modelo de ingreso compartido (50/50 o similar) basado en anuncios que el jugador ve antes de empezar o para obtener recompensas no críticas. El tráfico masivo de estos sitios proporciona visibilidad global sin costo de publicidad.
+*   **Fase 2: Portales de Juegos Web (pendiente de replanteo):** El intento de distribución en CrazyGames fue rechazado y su integración se retiró. Cualquier otra plataforma se evaluará más adelante, una vez que el juego sea estable y divertido. Estas plataformas ofrecen un modelo de ingreso compartido (50/50 o similar) basado en anuncios que el jugador ve antes de empezar o para obtener recompensas no críticas. El tráfico masivo de estos sitios proporciona visibilidad global sin costo de publicidad.
 *   **Fase 3: Salto a Steam (PC):** Con los $100 USD recaudados en las fases previas, se paga la tarifa de *Steam Direct*. El juego se publica como "Free-to-Play" con las Facciones DLC como contenido descargable de pago. Se utiliza la infraestructura de Steam para gestionar logros, estadísticas y la visibilidad orgánica de la tienda.
 *   **Fase 4: Expansión a Móvil (Android/iOS):** Utilizando el mismo código web, se empaqueta la aplicación para las tiendas móviles, donde el modelo de facciones DLC y skins premium es altamente aceptado.
 
@@ -175,51 +175,25 @@ El sigilo y la infiltración añaden una capa de riesgo interno constante.
     *   *Efecto:* Las hormigas sanas del nodo gastan sus fuerzas para eliminar a las infectadas en un combate 1 a 1.
     *   *Sin Penalización de Tiempo:* A diferencia de otras mecánicas, la purga no paraliza el nodo. Se gastan las tropas necesarias y el juego continúa sin interrupciones, manteniendo el ritmo frenético del RTS.
     
-## PARTE 5: La Campaña y El Tablero Estratégico (Macro-Gestión)
+## PARTE 5: La Campaña y El Tablero Estratégico (diseño actualizado)
 
-### 1. El Tablero Estratégico: El Gran Jardín (Grand Strategy)
+La especificación vigente y autocontenida se encuentra en docs/CAMPAIGN.md. Sustituye las reglas de campaña anteriores donde haya diferencias. Los valores de equilibrio son provisionales para evaluación.
 
-La campaña principal se desarrolla en un mapa topográfico masivo y orgánico, compuesto por un volumen de entre 300 y 500 **Territorios** (puntos de batalla). Este diseño adopta un enfoque de Gran Estrategia, obligando a los jugadores a gestionar fronteras irregulares, líneas de suministro y múltiples frentes de guerra simultáneos.
+Prioridad de desarrollo acordada: antes de ampliar enemigos y arte del RTS, una futura iteración probará el juego estratégico con resolución automática de los enfrentamientos. Permitirá evaluar movimiento, sucesos y grandes amenazas. Esta modalidad todavía no está implementada; véase docs/CAMPAIGN.md.
 
-*   **Estructura Regional:** Los territorios se agrupan en Regiones o Biomas (ej. El Arenero, El Césped, El Asfalto). Cada región posee características geográficas únicas que definen el aspecto visual y los obstáculos de las batallas RTS en esa zona.
-*   **Puntos de Inicio Asimétricos:** Las 6 facciones comienzan en posiciones geográficas radicalmente distintas. La dificultad de la campaña de una facción está directamente vinculada a su exposición territorial (iniciar en un rincón protegido vs. iniciar en el centro absoluto rodeado de 5 facciones enemigas).
-*   **Cuellos de Botella (High Risk / High Reward):** El tránsito entre regiones está bloqueado por territorios fronterizos fortificados. Estos puntos exigen asaltos masivos o tácticas impecables, obligando al jugador a decidir entre un ataque directo temprano de alto riesgo, o invertir turnos en expandir su imperio localmente para construir una fuerza superior antes de cruzar la frontera.
-*   **Condiciones de Victoria Dual:** El jugador decide su meta. Victoria A: Conquistar y asegurar el territorio central masivo ("El Gran Picnic"). Victoria B: Aniquilar a los 5 nidos capitales de las facciones rivales, dominando la totalidad del jardín.
+La campaña se desarrolla en un jardín orgánico de 300–500 territorios, con 300 en el atlas inicial. Su geografía principal es reconocible y asimétrica; la semilla varía encuentros y recompensas. No se utiliza una estructura de anillos concéntricos. Una run sigue rutas variables y no exige conquistar todos los territorios.
 
+El jugador actúa con sus ejércitos y después termina turno; los rivales actúan secuencialmente con orden rotatorio. Cada ejército puede moverse a un vecino o atacar una vez. Las fuerzas vacías no defienden territorios ordinarios; las capitales y encuentros especiales sí poseen defensa propia. La geografía es conocida, pero la información militar depende de observación y conserva su último turno visto.
 
-### 2. Territorios, Plantillas y Dificultad Procedimental
- Para soportar la escala de cientos de batallas sin monotonía, los mapas RTS se generan combinando diseño manual y modificadores automáticos.
+Los ejércitos conservan nombre, veteranía y tres espacios de mutación. Un novato despliega al 50%, y cada victoria defendida añade 10 puntos porcentuales hasta el 100%. No se transportan recuentos exactos de tropas ni se aumenta el límite de los nodos. Se puede retirar manteniendo un nodo propio durante ocho segundos, con destino registrado y penalización de preparación. La aniquilación elimina definitivamente al ejército.
 
-*   **Plantillas Base:** El juego cuenta con decenas de diseños topográficos fijos creados a mano, asignados según la región del mapa estratégico.
-*   **Modificadores Matemáticos:** Al atacar un territorio, el motor inyecta variables según el nivel de dificultad (la facción del jugador). En una campaña de dificultad "Infernal", un territorio común carga automáticamente Nidos de Artillería neutrales y una mayor tasa de eventos climáticos hostiles, asegurando que las zonas "fáciles" escalen en agresividad.
-*   **Territorios Épicos (Puntos de Interés):** Territorios singulares custodiados permanentemente por la Amenaza B (Depredadores). Su conquista activa el menú de mutación, permitiendo elegir mejoras de alto nivel para potenciar al ejército atacante.
+La capital original ingresa dos Puntos de Evolución por turno. Reclutar cuesta seis y los nuevos ejércitos actúan desde el siguiente turno. Hay recompensas por primeras conquistas y mejoras globales de Incubación, Instrucción y Reserva del nido. Las mutaciones proceden de lugares épicos. Recapturar repetidamente no permite generar puntos infinitos.
 
+Capturar una capital elimina a su facción, disuelve sus ejércitos y transfiere sus territorios al vencedor; concede parte de sus puntos y una adaptación genética consumible. La capital conquistada no añade otro centro de reclutamiento o ingresos.
 
-### 3. Gestión de Ejércitos: Enjambres Veteranos y Despliegue
+Se gana al ser la última facción principal o al conquistar el Gran Picnic y resistir tres rondas completas de rivales. Bala y el Picnic son lugares distintos. El contador se reinicia al cambiar de dueño. La resolución automática exige haber vencido manualmente la plantilla, excluye capitales/guardianes épicos/Picnic y consume la acción del vencedor en su siguiente turno.
 
-El jugador administra fichas de ejército en el tablero estratégico que representan batallones masivos en movimiento. La progresión de estas fichas otorga ventajas tácticas inmediatas al iniciar una escaramuza.
-
-> *   **Reclutamiento de Nuevos Frentes:** Para gestionar la expansión en un mapa de escala masiva, un solo ejército es insuficiente. El jugador puede invertir los Puntos de Evolución (obtenidos al conquistar territorios) directamente en su Nido Capital para "engendrar" nuevas fichas de ejército. Estos nuevos batallones nacen como ejércitos novatos (iniciando sus batallas al 50% de capacidad de despliegue) y deben ser enviados a las fronteras para ganar su propia veteranía. Esto permite defender múltiples cuellos de botella simultáneamente.
-> *   **Capacidad de Despliegue Inicial (Veteranía):** La experiencia ganada por un ejército tras una victoria no incrementa el límite máximo de tropas del nivel, sino su velocidad de arranque. Un ejército novato inicia la batalla RTS con su hormiguero principal al 50% de su capacidad. Al acumular experiencia y conquistar territorios, el porcentaje inicial escala gradualmente (60%, 70%, 80%) hasta llegar al 100%. Un ejército veterano inicia la partida con sus bases completamente llenas, permitiendo ejecutar asaltos arrolladores en los primeros segundos del nivel.
-> *   **Mutaciones Pasivas:** Junto al aumento de capacidad inicial, los ejércitos veteranos desarrollan resistencias y habilidades especiales exclusivas (ej. inmunidad a las telarañas, mayor resistencia al ácido), individualizando cada batallón según su historial de combate.
-> *   **Regla de Muerte Permanente (Permadeath):** La aniquilación de un ejército en un mapa RTS conlleva la eliminación definitiva de la ficha en el tablero estratégico. El jugador pierde instantáneamente su porcentaje de despliegue inicial alto y sus mutaciones acumuladas, forzando la creación de una ficha de ejército nueva de nivel base desde su capital.
-
-
-### 4. Dinámica de Guerra y Asimilación Genética
-La campaña es una carrera de 6 bandos donde la eliminación de competidores fortalece a los supervivientes.
-
-*   **Conflictos Multi-Bando:** Las facciones de la IA avanzan de forma independiente hacia el centro. El jugador debe decidir si intercepta a sus rivales para frenar su avance o si acelera su propia ruta hacia el objetivo.
-*   **Recompensas por Aniquilación:** Al capturar el último nodo de una facción enemiga y eliminarla del tablero, el jugador asimila parte de sus Puntos de Evolución acumulados.
-*   **Habilidades Consumibles:** La eliminación de un rival otorga una habilidad especial basada en el ADN de la facción derrotada. Estas habilidades son de uso limitado (objetos consumibles) y permiten activar ventajas críticas en batallas posteriores de alta dificultad.
-
-
-### 5. Resolución de Batallas y Auto-Resolver
-
-El sistema de juego equilibra el diseño de niveles con la agilidad necesaria para mantener el ritmo de una campaña de 300+ territorios.
-> *   **Sistema de Auto-Resolver:** El tablero permite calcular el resultado de una batalla de forma matemática e instantánea, cruzando los atributos del Enjambre Veterano contra las defensas del territorio. Esta opción se habilita exclusivamente para territorios cuyas plantillas topográficas ya han sido superadas manualmente por el jugador en turnos anteriores. El uso de esta herramienta agiliza la campaña a cambio de un coste garantizado de pausa, el ejercito se queda ahi un turno sin moverse.
-> *   **Estrategia de Evitación:** El jugador visualiza las características ambientales del territorio RTS desde el tablero antes de declarar el ataque. Esta información permite trazar rutas de expansión que esquivan biomas hostiles para su facción o localizar deliberadamente terrenos geográficos que beneficien las mutaciones de sus Enjambres Veteranos.
-
-
+La campaña se guarda separada de las escaramuzas. Los guardados del antiguo tablero de anillos requieren una campaña nueva. El multijugador queda para una etapa futura; los nuevos enemigos y escenarios se desarrollarán después sobre el contrato de encuentros. Singularity mantiene su independencia. CrazyGames fue rechazado y su integración no forma parte de la distribución vigente.
 
 # DOCUMENTO DE DISEÑO DE JUEGO (GDD)
 ## PARTE 6A: Entorno, Clima y Evolución de Nodos
@@ -373,3 +347,7 @@ La infraestructura multijugador implementa un sistema robusto que facilita el ju
 *   **Sincronización Lockstep Determinista:** La arquitectura de red transmite exclusivamente las acciones (inputs) del jugador, acompañadas de su marca de tiempo exacta (Tick). El sistema envía paquetes de datos minúsculos del tipo: *"En el Tick 450, el Jugador 1 ordenó enviar el 50% de las tropas del Nodo A hacia el Nodo B"*. 
 *   **Simulación Idéntica:** Ambos clientes (ordenadores) ejecutan el motor matemático del juego de forma estrictamente determinista. Al recibir los mismos inputs en los mismos *ticks*, ambas máquinas calculan y renderizan la posición exacta de las maximo 3,000 tropas localmente de forma idéntica, manteniendo la sincronización perfecta de la partida.
 *   **Signaling Server Gratuito:** El emparejamiento inicial para que las dos computadoras se encuentren en internet se realiza mediante un servidor de señalización básico alojado en capas gratuitas (Firebase o Render). Una vez completado el protocolo de enlace (*handshake*), el servidor se aparta y los jugadores continúan comunicándose directamente por la ruta P2P.
+
+
+## ACTUALIZACIÓN APROBADA — CAMPAÑA AUTOMÁTICA V5 (19/10/2026)
+La campaña vigente se describe de forma consolidada en docs/CAMPAIGN.md: atlas orgánico de 300 territorios, seis colonias seleccionables, cinco identidades adicionales, comandantes y veteranía persistentes, combate automático de dos o tres bandos, enclaves de presupuesto finito, grandes amenazas y sucesos temporales. Puede completarse por Picnic o dominación sin abrir el RTS. Esta fase sustituye las reglas antiguas de anillos y la obligación de combatir manualmente capitales/Picnic. El futuro RTS se incorporará plantilla a plantilla. La dificultad de cada inicio y los coeficientes siguen siendo provisionales. Multijugador, sincronización en nube y las afirmaciones de rendimiento de apartados antiguos no describen funciones verificadas de esta entrega. Singularity es independiente.

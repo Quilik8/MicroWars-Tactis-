@@ -1,5 +1,4 @@
-import * as PIXI from 'pixi.js';
-import { Node } from './node.js';
+import { Node } from './node.js?v=rts-balance-thorns-20261029-1';
 
 export class NodeRenderer {
     static redraw(node, factionData = null) {

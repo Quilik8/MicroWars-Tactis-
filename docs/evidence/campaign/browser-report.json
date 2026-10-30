@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "territories": 300,
+  "viewports": [
+    "1280x720",
+    "1920x1080",
+    "390x844"
+  ],
+  "scenarios": [
+    "v5 automatic campaign",
+    "independent army and commander naming",
+    "300 land territories",
+    "water geometry",
+    "optional panel",
+    "complete initial garden",
+    "overlay controls",
+    "collapsible controls",
+    "drag/drop staging",
+    "return to origin",
+    "draft reload",
+    "end turn commits orders",
+    "automatic outcome",
+    "RTS ticker remains stopped",
+    "save/load",
+    "rival turn",
+    "marker size",
+    "keyboard",
+    "pan",
+    "pinch",
+    "languages",
+    "separate skirmish progress"
+  ],
+  "errors": [],
+  "evidence": "C:\\Users\\jp_va\\Documents\\Proyecto hormiga\\docs\\evidence\\campaign"
+}

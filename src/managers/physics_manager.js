@@ -1,31 +1,51 @@
+import { orbitalPosition } from '../simulation/rts_transport.js';
 import { SpatialHashGrid } from '../core/logic_grid.js';
-import { Node } from '../entities/node.js';
-import { CombatManager } from './combat_manager.js';
+import { CombatManager } from './combat_manager.js?v=rts-balance-thorns-20261029-1';
 
 export class PhysicsManager {
     static updateGrid(world) {
+        for (const _ of this.updateGridWork(world)) { /* synchronous live path */ }
+    }
+
+    static *updateGridWork(world) {
+        let work = 0;
         if (world.grid.boundsWidth !== world.game.width || world.grid.boundsHeight !== world.game.height) {
             world.grid = new SpatialHashGrid(world.game.width, world.game.height, world.gridSize, 10000);
+            world.rebuildNavigation?.();
         }
         if (world.navigation && world.navigation.store) {
             world.grid.setSurfaceStore(world.navigation.store);
         }
         world.grid.clear();
         world.travelingIds.length = 0;
+        world.aiTravelingUnits ??= [];
+        world.aiTravelingUnits.length = 0;
+        world.aiGridRevision = (world.aiGridRevision || 0) + 1;
 
         for (let i = 0; i < world.allUnits.length; i++) {
+            if (++work % 16 === 0) yield 'physics64';
             let u = world.allUnits[i];
             if (u.pendingRemoval) continue;
             world.grid.insert(i, u.x | 0, u.y | 0);
             if (u.state === 'traveling') {
                 world.travelingIds.push(i);
+                world.aiTravelingUnits.push(u);
+                u.aiTravelStamp = world.aiGridRevision;
             }
         }
     }
 
     static updatePhysics(world, dt) {
+        for (const _ of this.updatePhysicsWork(world, dt)) { /* synchronous live path */ }
+    }
+
+    static *updatePhysicsWork(world, dt) {
+        let work = 0;
         // Traveling units
         for (let i = 0; i < world.travelingIds.length; i++) {
+            // A dense swarm can have thousands of separation neighbours. Yield per
+            // traveler so one dense nest cannot monopolise the forecast scheduler.
+            yield 'forces';
             let u = world.allUnits[world.travelingIds[i]];
             if (!u.targetNode) continue;
             let targetR = u.targetNode.radius;
@@ -53,7 +73,7 @@ export class PhysicsManager {
             } else {
                 world.neighbors.length = 0;
             }
-            u.updateForces(
+            yield* u.updateForcesWork(
                 dt,
                 targetX,
                 targetY,
@@ -67,6 +87,7 @@ export class PhysicsManager {
 
         // Idle units (orbit)
         for (let u of world.allUnits) {
+            if (++work % 16 === 0) yield 'physics64';
             if (u.state !== 'idle' || !u.targetNode) continue;
             let tn = u.targetNode;
             u.personalTheta += dt * (0.3 + u.personalR * 0.5) * (u.faction === 'player' ? 1 : -1);
@@ -91,13 +112,18 @@ export class PhysicsManager {
             if (u.vx !== 0 || u.vy !== 0) u.angle = Math.atan2(u.vy, u.vx);
         }
 
-        for (let u of world.allUnits) u.updatePosition(dt);
+        for (let u of world.allUnits) { u.updatePosition(dt); if (++work % 128 === 0) yield 'position128'; }
 
-        this.resolveBarriers(world);       // ← Barrera de cristal (Nivel 9)
-        this.processLevelLogic(world, dt);
+        yield* this.resolveBarriersWork(world);       // ← Barrera de cristal (Nivel 9)
+        yield* this.processLevelLogicWork(world, dt);
     }
 
     static processLevelLogic(world, dt) {
+        for (const _ of this.processLevelLogicWork(world, dt)) { /* synchronous live path */ }
+    }
+
+    static *processLevelLogicWork(world, dt) {
+        let work = 0;
 
         // Mover nodos móviles (Level 5 Orbital)
         for (let n of world.nodes) {
@@ -108,8 +134,8 @@ export class PhysicsManager {
                 let oldX = n.x;
                 let oldY = n.y;
                 
-                n.x = (n.orbitAnchorX + Math.cos(n.orbitAngle) * n.orbitRadiusX) * world.game.width;
-                n.y = (n.orbitAnchorY + Math.sin(n.orbitAngle) * n.orbitRadiusY) * world.game.height;
+                const orbital = orbitalPosition(n, world.game);
+                n.x = orbital.x; n.y = orbital.y;
                 
                 n.vx = (n.x - oldX) / dt;
                 n.vy = (n.y - oldY) / dt;
@@ -139,6 +165,7 @@ export class PhysicsManager {
                 const hR = hz.radius * world.game.width; // Assume radius is % of width for circular logic
                 
                 for (let u of world.allUnits) {
+                if (++work % 16 === 0) yield 'physics64';
                     if (u.pendingRemoval) continue;
                     
                     // Inmunidad universal: Si están en la base (idle), el nodo / superficie de tierra las protege
@@ -216,6 +243,12 @@ export class PhysicsManager {
                     anyUnitsInHazard = true;
 
                     if (killedThisFrame < killsPending) {
+                        // Resistant cuticle consumes alternate hazard ticks, deterministically.
+                        if (world.campaignModifiers?.[u.faction]?.acid) {
+                            hz._acidCounters ??= {};
+                            const ticks = hz._acidCounters[u.faction] = (hz._acidCounters[u.faction] || 0) + 1;
+                            if (ticks % 2 === 1) { killedThisFrame++; continue; }
+                        }
                         // Deterministic damage: mark for exact removal
                         u.pendingRemoval = true;
                         killedThisFrame++;
@@ -241,6 +274,7 @@ export class PhysicsManager {
         // Apply Zone Multipliers
         if (world.zones && world.zones.length > 0) {
             for (let u of world.allUnits) {
+                if (++work % 16 === 0) yield 'physics64';
                 if (u.pendingRemoval) continue;
                 u.currentZoneMult = 1.0; // Reset every frame
                 
@@ -251,12 +285,14 @@ export class PhysicsManager {
                     if (uxPercent >= z.x && uxPercent <= z.x + z.width &&
                         uyPercent >= z.y && uyPercent <= z.y + z.height) {
                         u.currentZoneMult = z.speedMult;
+                        if (z.speedMult < 1 && world.campaignModifiers?.[u.faction]?.marsh) u.currentZoneMult = 1 - (1 - z.speedMult) / 2;
                         break; // Top-most zone takes precedence (if they overlap)
                     }
                 }
             }
         } else {
             for (let u of world.allUnits) {
+                if (++work % 16 === 0) yield 'physics64';
                 if (!u.pendingRemoval) u.currentZoneMult = 1.0;
             }
         }
@@ -303,6 +339,11 @@ export class PhysicsManager {
     //     Las unidades quedan "apiladas" en el borde intentando pasar.
     // ─────────────────────────────────────────────────────────────────
     static resolveBarriers(world) {
+        for (const _ of this.resolveBarriersWork(world)) { /* synchronous live path */ }
+    }
+
+    static *resolveBarriersWork(world) {
+        let work = 0;
         let activeBarriers = [];
         if (world.barriers) activeBarriers.push(...world.barriers);
         
@@ -319,6 +360,7 @@ export class PhysicsManager {
         const gh = world.game.height;
 
         for (let u of world.allUnits) {
+            if (++work % 16 === 0) yield 'physics64';
             if (u.pendingRemoval) continue;
             // Inmunidad: idle dentro de un nodo móvil (el ferry)
             if (u.state === 'idle' && u.targetNode && u.targetNode.isMobile) continue;
@@ -354,7 +396,8 @@ export class PhysicsManager {
         const time = performance.now();
         for (let n of world.nodes) {
             if (n.tunnelTo && n.tunnelTo.owner === n.owner && n.type !== 'tunel') {
-                const c = Node.COLORS[n.owner] || Node.COLORS.neutral;
+                const colors = n.constructor.COLORS;
+                const c = colors[n.owner] || colors.neutral;
                 const x1 = n.x, y1 = n.y;
                 const x2 = n.tunnelTo.x, y2 = n.tunnelTo.y;
 

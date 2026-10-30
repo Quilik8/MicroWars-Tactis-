@@ -1,0 +1,228 @@
+{
+  "method": "One real module worker; main-thread scheduling measured separately from worker CPU. Stress uses six factions and 42 nests. Main-thread fallback is evaluated by rts-ai-evaluate.mjs.",
+  "stress": [
+    {
+      "units": 1000,
+      "mainThreadMs": {
+        "p50": 0.1410000000000764,
+        "p95": 2.546600000000012,
+        "p99": 7.336999999999534,
+        "max": 35.32949999999994
+      },
+      "worker": {
+        "enabled": true,
+        "completed": 0,
+        "cpuMs": 1176.5034000000005,
+        "pending": 6,
+        "error": null
+      },
+      "visits": [
+        219,
+        219,
+        218,
+        218,
+        219,
+        218
+      ]
+    },
+    {
+      "units": 5000,
+      "mainThreadMs": {
+        "p50": 0.18370000000140863,
+        "p95": 2.07300000000032,
+        "p99": 9.386499999999614,
+        "max": 46.69909999999982
+      },
+      "worker": {
+        "enabled": true,
+        "completed": 0,
+        "cpuMs": 1256.7738999999783,
+        "pending": 6,
+        "error": null
+      },
+      "visits": [
+        207,
+        207,
+        208,
+        205,
+        207,
+        207
+      ]
+    },
+    {
+      "units": 10000,
+      "mainThreadMs": {
+        "p50": 0.18579999999928987,
+        "p95": 2.3246999999973923,
+        "p99": 6.894099999999526,
+        "max": 46.01710000000094
+      },
+      "worker": {
+        "enabled": true,
+        "completed": 0,
+        "cpuMs": 1226.0371000000305,
+        "pending": 6,
+        "error": null
+      },
+      "visits": [
+        212,
+        211,
+        211,
+        211,
+        212,
+        211
+      ]
+    }
+  ],
+  "playableCycle": {
+    "owners": [
+      "enemy",
+      "enemy"
+    ],
+    "diagnostics": {
+      "metrics": {
+        "frames": 650,
+        "forecasts": 3,
+        "orders": 2,
+        "vetoes": 0,
+        "stale": 1,
+        "overruns": 5,
+        "snapshots": 4,
+        "reactions": 1,
+        "jobsCompleted": 4,
+        "forecastSteps": 437,
+        "cacheHits": 0
+      },
+      "timings": {
+        "observation": 0.001299999999901047,
+        "planning": 0.01059999999779393,
+        "execution": 0.006099999998696148,
+        "preparation": 0.35930000000007567
+      },
+      "workCosts": {
+        "waiting_worker": {
+          "count": 433,
+          "total": 22.011000000013155,
+          "max": 12.05489999999918
+        },
+        "transition": {
+          "count": 4,
+          "total": 1.505299999997078,
+          "max": 1.2835999999988417
+        }
+      },
+      "worker": {
+        "enabled": true,
+        "completed": 3,
+        "cpuMs": 1026.4017999999742,
+        "pending": 0,
+        "error": null
+      },
+      "milliseconds": {
+        "p50": 0.09820000000036089,
+        "p95": 0.5733999999974912,
+        "p99": 3.66019999999844,
+        "max": 12.217500000002474
+      },
+      "factions": [
+        {
+          "faction": "enemy",
+          "visits": 437,
+          "decisions": 3,
+          "reactions": 1,
+          "operation": "completed",
+          "history": [
+            {
+              "id": 4,
+              "kind": "investment",
+              "target": 1,
+              "state": "completed",
+              "reason": "",
+              "actualArrivals": 0,
+              "actualSurvivors": 0,
+              "transitLosses": 0
+            },
+            {
+              "id": 3,
+              "kind": "expansion",
+              "target": 1,
+              "state": "cancelled",
+              "reason": "force_destroyed",
+              "predictedArrivals": 12,
+              "actualArrivals": 8,
+              "actualSurvivors": 0,
+              "transitLosses": 4
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "mainThreadBudgetPassed": false,
+  "playableCyclePassed": true,
+  "reactiveCycle": {
+    "method": "60 Hz paced live managers, real worker, player attacks at seconds 5 and 10; no future script passed to AI",
+    "owners": [
+      "enemy",
+      "neutral",
+      "player"
+    ],
+    "diagnostics": {
+      "metrics": {
+        "frames": 900,
+        "forecasts": 8,
+        "orders": 1,
+        "vetoes": 0,
+        "stale": 2,
+        "overruns": 1,
+        "snapshots": 5,
+        "reactions": 1,
+        "jobsCompleted": 3,
+        "forecastSteps": 874,
+        "cacheHits": 0
+      },
+      "timings": {
+        "observation": 0.0008999999990919605,
+        "planning": 0.029199999997217674,
+        "execution": 0.003299999996670522,
+        "preparation": 0.059000000001105946
+      },
+      "workCosts": {
+        "waiting_worker": {
+          "count": 871,
+          "total": 24.54029999994964,
+          "max": 4.617099999999482
+        },
+        "transition": {
+          "count": 3,
+          "total": 1.612299999993411,
+          "max": 0.7137999999977183
+        }
+      },
+      "worker": {
+        "enabled": true,
+        "completed": 6,
+        "cpuMs": 3755.0679999996282,
+        "pending": 1,
+        "error": null
+      },
+      "milliseconds": {
+        "p50": 0.1047000000035041,
+        "p95": 0.8470000000015716,
+        "p99": 2.1379999999990105,
+        "max": 3.7171000000016647
+      },
+      "factions": [
+        {
+          "faction": "enemy",
+          "visits": 874,
+          "decisions": 1,
+          "reactions": 1,
+          "operation": "dispute",
+          "history": []
+        }
+      ]
+    }
+  },
+  "reactiveCyclePassed": true
+}

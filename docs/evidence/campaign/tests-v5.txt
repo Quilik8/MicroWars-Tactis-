@@ -1,0 +1,48 @@
+✔ v5 initial world: six asymmetric profiles and all five special identities (24.5775ms)
+✔ atlas 50/300/400/500: real reciprocal dry borders and five independent approaches for full atlases (10981.55ms)
+✔ starting possessions are connected to their own capital; neutral land and Picnic retained (15.515ms)
+✔ training and real victories are distinct; preparation applies only once (13.3546ms)
+✔ name banks exceed 1000 nonredundant combinations for every principal (7.004ms)
+✔ identity, renaming and generated suggestions survive serialisation (28.1282ms)
+✔ new names never reuse the fallen army pool (15.1494ms)
+✔ empty occupation consumes exactly one action and grants no experience (18.2009ms)
+✔ recruit waits a turn and occupied capital blocks recruitment (17.549ms)
+✔ capture cannot farm points by repeated recapture (14.2416ms)
+✔ automatic resolution includes capitals without manual unlock or extra skipped turn (30.172ms)
+✔ same encounter gives same deterministic multiband result; pure preview does not mutate (18.6487ms)
+✔ damage is simultaneous and never exceeds 24 steps; draw preserves ownership (17.958ms)
+✔ save during a third-party encounter resumes to exactly the same consequences (73.2497ms)
+✔ a controlled victory awards at most one experience despite two defeated opponents (17.3167ms)
+✔ retreat preserves commander and mutations with penalty; invalid retreat destroys (30.5625ms)
+✔ resting a complete turn recovers preparation; moving does not (13.9422ms)
+✔ a principal captures a capital: transfer, dissolution and reward once (14.4337ms)
+✔ a threat wins a capital: neutral territories, ruined capital, no treasury or new colony (17.4844ms)
+✔ zero surviving principal colonies ends without a victor (15.3738ms)
+✔ finite enclave budgets and destruction cancel dependent expeditions (18.8013ms)
+✔ large threats retain wounds and recover only after a round without fighting (15.857ms)
+✔ large threat reward is unique and mutation options persist (38.0004ms)
+✔ intervention consumes its action and persists without reroll (27.3067ms)
+✔ aerial range is separate; termite tunnels use shared dry physical borders (15.2627ms)
+✔ weather warns, blocks temporarily and expires; geography remains valid (386.2304ms)
+✔ wasp waves appear only on schedule and never exceed the expedition cap (14.4964ms)
+✔ round queue includes factions, threats, events and roundEnd; save resumes exactly (114.3723ms)
+✔ Picnic counts after all threats/events, and losing occupation resets it (16.5064ms)
+✔ controlled complete Picnic campaign uses real automatic encounters and no RTS (25.3839ms)
+✔ domination can complete without visiting every territory (13.6979ms)
+✔ military information is stale outside vision; prediction never includes hidden intruders (14.8541ms)
+✔ v4 saves are backed up; v5 and mid-resolution state round-trip exactly (402.4758ms)
+✔ storage failure blocks cleanly without silently discarding state (22.8905ms)
+✔ friendly empty capital is movement; hostile Picnic always requires an encounter (13.7624ms)
+✔ Bala initial instruction is not a free global training upgrade (12.8389ms)
+✔ a strong intruder wins and a weak intruder is defeated under the real resolver (28.7634ms)
+✔ observed threat intents point to a legal next territory, not the current position (13.3924ms)
+✔ invalid retreat policy cannot mutate an army (13.4883ms)
+✔ duplicate participant results are rejected before applying any consequences (44.9035ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14837.2642

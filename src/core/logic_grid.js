@@ -73,6 +73,11 @@ export class SpatialHashGrid {
     }
 
     setSurfaceStore(surfaceStore) {
+        // Navigation is rebound every simulation frame; retain the query buffer
+        // until the baked store or its surface count actually changes.
+        const count=surfaceStore?.surfaceCount||0;
+        if(this.surfaceStore===(surfaceStore||null)&&
+            (count>0?this.surfaceVisited?.length===count:this.surfaceVisited===null))return;
         this.surfaceStore = surfaceStore || null;
         if (surfaceStore && surfaceStore.surfaceCount > 0) {
             this.surfaceVisited = new Uint32Array(surfaceStore.surfaceCount);

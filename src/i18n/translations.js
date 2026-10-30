@@ -15,6 +15,8 @@ export const LANGUAGE_NAMES = {
 };
 
 const STORAGE_KEY = 'microwars_language';
+const PREFERENCE_VERSION_KEY = 'microwars_language_preference_version';
+const PREFERENCE_VERSION = '1';
 const DEFAULT_LANGUAGE = 'es';
 
 const TRANSLATIONS = {
@@ -30,7 +32,7 @@ const TRANSLATIONS = {
         'menu.downloadReady': 'Disponible en itch.io',
         'language.label': 'Idioma',
         'credits.title': 'Créditos',
-        'credits.greeting': 'Hola, jugador. Gracias por jugar MicroWars: Swarm Tactics.',
+        'credits.greeting': 'Hola, jugador. Gracias por jugar MicroWars: Tácticas de Enjambre.',
         'credits.creator': 'Creado por Quilik.',
         'credits.contactLabel': 'Contacto',
         'credits.close': 'Cerrar',
@@ -48,10 +50,10 @@ const TRANSLATIONS = {
         'difficulty.hard': 'DIFÍCIL',
         'difficulty.easyTitle': 'La IA comete errores, ataca lento y rara vez coordina.',
         'difficulty.normalTitle': 'Comportamiento equilibrado. La IA expande, evoluciona y ataca con ritmo normal.',
-        'difficulty.hardTitle': 'La IA actúa rápido, coordina flancos y hace rush temprano.',
-        'difficulty.easyDesc': 'Conciencia estratégica: planifica rutas, refuerza momentum y evita sobreextensión.',
-        'difficulty.normalDesc': 'Inteligencia enjambre: coordinación de pinzas, ataques precisos y sniping oportunista.',
-        'difficulty.hardDesc': 'Dominio absoluto: back-capping, flanqueos letales, conciencia de peligros del mapa.',
+        'difficulty.hardTitle': 'La IA actúa rápido, coordina flancos y ataca desde el principio.',
+        'difficulty.easyDesc': 'Conciencia estratégica: planifica rutas, consolida su avance y evita expandirse demasiado.',
+        'difficulty.normalDesc': 'Inteligencia de enjambre: ataques en pinza, ofensivas precisas y captura de objetivos vulnerables.',
+        'difficulty.hardDesc': 'Dominio absoluto: capturas en retaguardia, flanqueos letales y atención a los peligros del mapa.',
         'intro.defaultTitle': 'SECTOR {sector} - NIVEL {level}',
         'intro.defaultDesc': 'Acaba con el nido enemigo.',
         'intro.continue': '(Haz clic en cualquier lado para continuar)',
@@ -60,8 +62,8 @@ const TRANSLATIONS = {
         'gameover.title': 'LA COLONIA HA CAÍDO',
         'gameover.subtitle': 'Nuestros números no fueron suficientes',
         'hud.send': 'Enviar',
-        'hud.zoomOut': '- Zoom',
-        'hud.zoomIn': '+ Zoom',
+        'hud.zoomOut': '− Alejar',
+        'hud.zoomIn': '+ Acercar',
         'hud.restart': '🔄 Reiniciar',
         'hud.surrender': 'RETIRADA AL SECTOR',
         'pause.pause': '⏸ PAUSA',
@@ -74,7 +76,7 @@ const TRANSLATIONS = {
         'evolution.artillery': 'Artillería (40)',
         'evolution.tank': 'Tanques (50)',
         'evolution.cancel': 'Cancelar',
-        'alert.premiumFaction': '¡Esta facción es exclusiva de la versión Premium!',
+        'alert.premiumFaction': '¡Esta facción es exclusiva de la versión completa!',
         'alert.gameBeaten': '¡FELICIDADES COMANDANTE!\n\nHas conquistado todos los sectores, doblegado a las especies rivales y asegurado la supervivencia absoluta de tu colonia.\n\nEl enjambre perdurará gracias a tus increíbles tácticas.\n\n¡Gracias por jugar MicroWars Tactics!'
     },
     en: {
@@ -119,8 +121,8 @@ const TRANSLATIONS = {
         'gameover.title': 'THE COLONY HAS FALLEN',
         'gameover.subtitle': 'Our numbers were not enough',
         'hud.send': 'Send',
-        'hud.zoomOut': '- Zoom',
-        'hud.zoomIn': '+ Zoom',
+        'hud.zoomOut': '− Alejar',
+        'hud.zoomIn': '+ Acercar',
         'hud.restart': '🔄 Restart',
         'hud.surrender': 'RETREAT TO SECTOR',
         'pause.pause': '⏸ PAUSE',
@@ -178,8 +180,8 @@ const TRANSLATIONS = {
         'gameover.title': 'A COLÔNIA CAIU',
         'gameover.subtitle': 'Nossos números não foram suficientes',
         'hud.send': 'Enviar',
-        'hud.zoomOut': '- Zoom',
-        'hud.zoomIn': '+ Zoom',
+        'hud.zoomOut': '− Alejar',
+        'hud.zoomIn': '+ Acercar',
         'hud.restart': '🔄 Reiniciar',
         'hud.surrender': 'RETIRADA PARA O SETOR',
         'pause.pause': '⏸ PAUSA',
@@ -264,6 +266,13 @@ function normalizeLanguage(language) {
 
 export function loadLanguage() {
     try {
+        // Legacy preferences did not distinguish an explicit choice from old defaults.
+        // Restore the Spanish baseline once; subsequent choices remain persistent.
+        if (localStorage.getItem(PREFERENCE_VERSION_KEY) !== PREFERENCE_VERSION) {
+            localStorage.setItem(STORAGE_KEY, DEFAULT_LANGUAGE);
+            localStorage.setItem(PREFERENCE_VERSION_KEY, PREFERENCE_VERSION);
+            return DEFAULT_LANGUAGE;
+        }
         return normalizeLanguage(localStorage.getItem(STORAGE_KEY));
     } catch (e) {
         return DEFAULT_LANGUAGE;
@@ -278,6 +287,7 @@ export function setLanguage(language) {
     currentLanguage = normalizeLanguage(language);
     try {
         localStorage.setItem(STORAGE_KEY, currentLanguage);
+        localStorage.setItem(PREFERENCE_VERSION_KEY, PREFERENCE_VERSION);
     } catch (e) {}
     return currentLanguage;
 }

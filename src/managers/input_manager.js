@@ -1,3 +1,4 @@
+import { setLogisticsLink, activatePortal } from '../simulation/rts_transport.js';
 
 /**
  * InputManager — MicroWars v2
@@ -42,7 +43,6 @@ import { InputDrawHelper } from './input_draw.js';
 const DRAG_THRESHOLD = 8;    // px mínimos para distinguir click de drag
 const LONG_PRESS_MS = 480;  // ms para activar modo túnel en mobile
 const DBL_CLICK_MS = 300;  // ventana de doble clic/tap
-const TUNNEL_COST = 15;   // tropas que cuesta crear una línea de suministro
 
 export class InputManager {
     constructor(game, world, ui, sfx, campaign = null) {
@@ -218,7 +218,7 @@ export class InputManager {
     _deselect() {
         if (this.selectedNode) {
             this.selectedNode.isSelected = false;
-            this.selectedNode.redraw();
+            if (this.selectedNode.gfx && !this.selectedNode.gfx.destroyed) this.selectedNode.redraw();
             this.selectedNode = null;
         }
         this.tunnelSourceNode = null;
@@ -250,11 +250,7 @@ export class InputManager {
             return false;
         }
 
-        if (this.world.popAt(src, 'player') < TUNNEL_COST) return false;
-
-        CombatManager.killNPower(this.world, src, 'player', TUNNEL_COST);
-        src.tunnelTo = dst;
-        src.redraw();
+        if (!setLogisticsLink(this.world, src, dst, 'player')) return false;
         if (this.sfx) this.sfx.evolve();
         return true;
     }
@@ -263,6 +259,7 @@ export class InputManager {
     // POINTER DOWN
     // ═══════════════════════════════════════════════════════════════
     onPointerDown(e) {
+        if (this.ui.gameState === 'CAMPAIGN') return;
         const isTouch = e.pointerType === 'touch';
 
         // ── Pinch zoom (mobile, segundo dedo) ──────────────────────
@@ -370,6 +367,7 @@ export class InputManager {
     // POINTER MOVE
     // ═══════════════════════════════════════════════════════════════
     onPointerMove(e) {
+        if (this.ui.gameState === 'CAMPAIGN') return;
         // Pinch zoom (mobile)
         if (e.pointerType === 'touch' && this._activeTouches[e.pointerId]) {
             this._activeTouches[e.pointerId] = { x: e.clientX, y: e.clientY };
@@ -426,6 +424,7 @@ export class InputManager {
     // POINTER UP
     // ═══════════════════════════════════════════════════════════════
     onPointerUp(e) {
+        if (this.ui.gameState === 'CAMPAIGN') return;
         // Limpiar tracking de touch
         if (e.pointerType === 'touch') {
             delete this._activeTouches[e.pointerId];
@@ -512,20 +511,7 @@ export class InputManager {
             }
             // Doble clic en nodo túnel propio: teletransportar tropas
             if (clicked.type === 'tunel' && clicked.owner === 'player' && clicked.tunnelTo) {
-                const dest = clicked.tunnelTo;
-                for (let u of this.world.allUnits) {
-                    if (u.faction === 'player' && u.targetNode === clicked && u.state === 'idle') {
-                        if (this.world.positionUnitInNode) {
-                            this.world.positionUnitInNode(u, dest, 0.5, ((u.deterministicSeed != null ? u.deterministicSeed : 1) ^ (dest.radius | 0)) >>> 0);
-                        } else {
-                            u.x = dest.x;
-                            u.y = dest.y;
-                        }
-                        u.targetNode = dest;
-                        u.homeNode = dest;
-                        u.state = 'idle';
-                    }
-                }
+                activatePortal(this.world, clicked, 'player');
                 return;
             }
         }
@@ -624,6 +610,7 @@ export class InputManager {
     // TECLADO
     // ═══════════════════════════════════════════════════════════════
     _onKeyDown(e) {
+        if (this.ui.gameState !== 'PLAYING' || e.target.closest('button,input,dialog')) return;
         if (e.code === 'Escape') {
             this._deselect();
             if (this.evoMenu) this.evoMenu.classList.add('hidden');
@@ -681,7 +668,7 @@ export class InputManager {
         const cancelBtn = buttons.find(b => b.dataset.evo === 'cancel');
 
         evoButtons.forEach(btn => {
-            const cost = Node.EVOLUTION_COSTS[btn.dataset.evo];
+            const cost = Math.ceil(Node.EVOLUTION_COSTS[btn.dataset.evo] * (this.world.campaignModifiers?.player?.evolutionDiscount || 1));
             btn.disabled = currentTroops < cost;
         });
 
@@ -734,7 +721,7 @@ export class InputManager {
             this._deselect();
             return;
         }
-        const cost = Node.EVOLUTION_COSTS[type];
+        const cost = Math.ceil(Node.EVOLUTION_COSTS[type] * (this.world.campaignModifiers?.player?.evolutionDiscount || 1));
         if (this.world.popAt(this.selectedNode, 'player') >= cost) {
             if (this.selectedNode.startEvolution(type)) {
                 CombatManager.killNPower(this.world, this.selectedNode, 'player', cost);

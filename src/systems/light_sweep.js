@@ -16,6 +16,8 @@
  *   alerting → 3.5 s de alerta (nodos parpadean)
  *   sweeping → orbs cruzan el mapa a 420 px/s (uno por rail)
  */
+import { fractionFromSeed, mixSeeds } from '../simulation/deterministic_layout.js';
+
 export class LightSweep {
     constructor(config) {
         this.speed         = config.speed        || 420;   // px/s
@@ -30,6 +32,8 @@ export class LightSweep {
 
         // Orbes activos
         this.orbs = [];  // { worldX, worldY }
+        this.seed = config.seed ?? 0x51a7;
+        this.cycleIndex = 0;
 
         const rawColor = config.color || 0xff8c00;
         this.color     = rawColor;
@@ -79,15 +83,17 @@ export class LightSweep {
                     let startX = -(this.orbRadius * 3);
 
                     // Pequeño stagger aleatorio (desfase en X) opcional
-                    for (let relativeY of this.rails) {
+                    for (let railIndex = 0; railIndex < this.rails.length; railIndex++) {
+                        const relativeY = this.rails[railIndex];
                         // Coordenada Y en mundo usando estrictamente game.height (consistente con cy en LevelManager)
                         const worldY = relativeY * game.height;
 
                         this.orbs.push({
-                            worldX: startX - Math.random() * 40, // stagger de hasta 40px
+                            worldX: startX - this.getOrbOffset(this.cycleIndex, railIndex),
                             worldY: worldY
                         });
                     }
+                    this.cycleIndex++;
 
                     this.state = 'sweeping';
                 }
@@ -142,6 +148,41 @@ export class LightSweep {
                 break;
             }
         }
+    }
+
+    getOrbOffset(cycle, rail) {
+        return fractionFromSeed(mixSeeds(this.seed, (cycle * 65537 + rail) >>> 0)) * 40;
+    }
+
+    predictNodeNeutralization(node, game, now = 0, horizon = 90) {
+        if (!node.isMarkedForSweep) return Infinity;
+        const radius = this.orbRadius + node.radius;
+        let earliest = Infinity;
+        const check = (x, y, start) => {
+            const dy = node.y - y;
+            if (Math.abs(dy) > radius) return;
+            const dx = Math.sqrt(radius * radius - dy * dy);
+            const enter = start + Math.max(0, (node.x - dx - x) / this.speed);
+            if (x <= node.x + dx && enter <= horizon) earliest = Math.min(earliest, now + enter);
+        };
+        if (this.state === 'sweeping' && !this._resetThisCycle.has(node)) {
+            for (const orb of this.orbs) check(orb.worldX, orb.worldY, 0);
+        }
+        let spawn = this.state === 'waiting' ? this.timer + this.alertDuration
+            : this.state === 'alerting' ? this.timer
+            : Math.max(0, ...this.orbs.map(o => (game.width + this.orbRadius * 3 - o.worldX) / this.speed)) + this.cooldown + this.alertDuration;
+        let cycle = this.cycleIndex;
+        while (spawn <= horizon) {
+            let duration = 0;
+            for (let i = 0; i < this.rails.length; i++) {
+                const x = -this.orbRadius * 3 - this.getOrbOffset(cycle, i);
+                check(x, this.rails[i] * game.height, spawn);
+                duration = Math.max(duration, (game.width + this.orbRadius * 3 - x) / this.speed);
+            }
+            spawn += duration + this.cooldown + this.alertDuration;
+            cycle++;
+        }
+        return earliest;
     }
 
     _drawOrbs() {

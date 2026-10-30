@@ -1,13 +1,20 @@
 {
   "name": "microwars-prototype",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "powershell -ExecutionPolicy Bypass -File tools/prepare-dist.ps1",
-    "tauri": "tauri"
+    "promo:capture": "node tools/capture-promo.cjs",
+    "promo:gifs": "powershell -ExecutionPolicy Bypass -File tools/create-promo-gifs.ps1",
+    "tauri": "tauri",
+    "test:campaign": "node --test tests/campaign.test.js",
+    "test:rts-ai": "node --test tests/rts-ai.test.js tests/rts-tactical.test.js tests/rts-consolidation.test.js tests/rts-investment.test.js tests/rts-transport.test.js tests/rts-thorns.test.js",
+    "evaluate:rts-ai": "node tools/rts-tactical-audit.mjs",
+    "evaluate:rts-transport": "node tools/rts-transport-evaluate.mjs"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.0.0"
+    "@tauri-apps/cli": "^2.0.0",
+    "playwright-core": "^1.60.0"
   }
 }

@@ -60,6 +60,10 @@ export class Unit {
      * @param {object|null} localAvoidanceSolver
      */
     updateForces(dt, targetX, targetY, nodeRadius, neighborIds, unitsList, grid = null, localAvoidanceSolver = null) {
+        for (const _ of this.updateForcesWork(dt, targetX, targetY, nodeRadius, neighborIds, unitsList, grid, localAvoidanceSolver)) {}
+    }
+
+    *updateForcesWork(dt, targetX, targetY, nodeRadius, neighborIds, unitsList, grid = null, localAvoidanceSolver = null) {
         // Detectar cambio de nodo y reasignar posicion personal de forma determinista.
         if (this.targetNode !== this._lastTargetNode) {
             let seedX = this.targetNode ? this.targetNode.x : targetX;
@@ -122,6 +126,7 @@ export class Unit {
         let sepVy = 0;
         if (distToCenter <= APPROACH_ZONE) {
             for (let i = 0; i < neighborIds.length; i++) {
+                if (i % 32 === 31) yield 'separation';
                 let other = unitsList[neighborIds[i]];
                 if (!other || other === this || other.pendingRemoval) continue;
                 let ox = this.x - other.x;

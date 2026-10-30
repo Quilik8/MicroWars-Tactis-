@@ -13,7 +13,7 @@ export const CAPTURE_HIGH_THRESHOLD = 250;
 export const UNIT_POWER_LIGHT = 1;
 export const UNIT_POWER_HEAVY = 3;
 
-export const ESPINOSO_KILL_INTERVAL = 0.15;
+export const ESPINOSO_KILL_INTERVAL = 0.25;
 export const ARTILLERY_SPLASH_POWER_BUDGET = 5;
 export const ARTILLERY_BASE_INTERVAL = 1.8;
 export const ARTILLERY_FIRE_INTERVAL = 1.0;

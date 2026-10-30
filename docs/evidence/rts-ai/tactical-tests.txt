@@ -1,0 +1,35 @@
+✔ easy: accessible neutral produces an order without a worker (49.3157ms)
+✔ easy: event-to-order latency measured from an external change (13.2562ms)
+✔ normal: accessible neutral produces an order without a worker (7.3758ms)
+✔ normal: event-to-order latency measured from an external change (9.9227ms)
+✔ hard: accessible neutral produces an order without a worker (3.9408ms)
+✔ hard: event-to-order latency measured from an external change (8.1916ms)
+✔ an unfinished strategic forecast cannot lock an independent tactical order (5.2047ms)
+✔ a closed gate reserves a cohort, not the whole faction (8.8031ms)
+✔ departure uses planning time even when the opportunity was observed earlier (2.6827ms)
+✔ military evacuation retains forces from an untenable nest (4.9589ms)
+✔ defense preempts unissued reservations and leaves traveling destinations intact (10.0267ms)
+✔ difficulty coordination limits are actually used on the same defended objective (23.3796ms)
+✔ already committed conquest does not attract duplicate reinforcement waves (5.4183ms)
+✔ permanent walls never become imaginary routes (2.6995ms)
+✔ a thin poison strip is detected and losses use the shared kill budget (3.3123ms)
+✔ flood islands, elliptical contours and ring holes retain their real meanings (1.1455ms)
+✔ slow surfaces change arrival windows without changing the legal destination (3.8986ms)
+✔ water, light and tunnel uncertainty are explicit, never invented as safe arrival (2.9551ms)
+✔ three factions remain distinct in the tactical projection (5.586ms)
+✔ difficulty change releases unsent reservations and does not modify sent units (4.2954ms)
+✔ all three modes can defend in time instead of waiting for strategic cadence (18.4513ms)
+✔ a late insufficient wave is rejected instead of feeding a lost defense (4.5149ms)
+✔ offensive front limits differ while every mode retains a useful action (17.5369ms)
+✔ forecast validation accepts ordinary production and ignores unrelated evolution (6.5386ms)
+✔ nested scenario overrides preserve faction difficulty instead of overwriting it (1.4393ms)
+✔ fast conquest verdict agrees with the physical reference on twenty controlled openings (2653.6687ms)
+✔ new hostile arrivals invalidate only the affected physical forecast (4.6233ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3497.9986

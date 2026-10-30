@@ -13,7 +13,7 @@ export const FACTIONS = [
         name: 'Hormigas Negras',
         color: 0x566573,
         trait: 'Caminos Eficientes',
-        icon: '🔥',
+        difficulty: 'Fácil',
         description: 'Reducen un 20% la inversión de tropas para establecer Caminos Logísticos.',
         isPremium: false
     },

@@ -1,0 +1,5569 @@
+{
+  "generated": "2026-10-29T22:16:43.821Z",
+  "environment": {
+    "node": "v24.14.0",
+    "cpu": "AMD A8-6410 APU with AMD Radeon R5 Graphics    ",
+    "platform": "win32"
+  },
+  "scope": "Fixed opening decision calls and scripted events only. Catalogue uses default budgets and Node main-thread forecast fallback (no browser Worker). Stress isolates tactics. No browser, renderer, autonomous matches or playable-difficulty claims.",
+  "catalogue": {
+    "sectors": 6,
+    "levels": 31,
+    "inactive": [
+      "sector7.js is not imported by the active catalogue"
+    ]
+  },
+  "milliseconds": {
+    "samples": 1860,
+    "p50": 0.8065000000001419,
+    "p95": 3.8824999999999363,
+    "p99": 9.521400000000085,
+    "max": 39.14960000000019
+  },
+  "warmMilliseconds": {
+    "samples": 1488,
+    "p50": 0.7786999999998443,
+    "p95": 2.9108000000001084,
+    "p99": 8.905999999999949,
+    "max": 27.72440000000006
+  },
+  "memory": {
+    "rss": 104222720,
+    "heapTotal": 54603776,
+    "heapUsed": 27270200,
+    "external": 2230636,
+    "arrayBuffers": 340847
+  },
+  "gcPauseMs": {
+    "samples": 51,
+    "p50": 2.1279000006616116,
+    "p95": 7.823399998247623,
+    "p99": 13.244800001382828,
+    "max": 13.244800001382828
+  },
+  "illegal": [],
+  "events": {
+    "easy": {
+      "failures": 0,
+      "latencyMs": {
+        "samples": 20,
+        "p50": 50,
+        "p95": 50,
+        "p99": 50,
+        "max": 50
+      }
+    },
+    "normal": {
+      "failures": 0,
+      "latencyMs": {
+        "samples": 20,
+        "p50": 50,
+        "p95": 50,
+        "p99": 50,
+        "max": 50
+      }
+    },
+    "hard": {
+      "failures": 0,
+      "latencyMs": {
+        "samples": 20,
+        "p50": 50,
+        "p95": 50,
+        "p99": 50,
+        "max": 50
+      }
+    }
+  },
+  "rows": [
+    {
+      "sector": "sector-1",
+      "level": 1,
+      "name": "Nivel 1: Aprende a Conquistar",
+      "difficulty": "easy",
+      "mechanics": [],
+      "nodes": 3,
+      "units": 145,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "forces_committed",
+          "since": 0.30000000000000004,
+          "emitted": 1
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.18410000000000082,
+        "p95": 18.187000000000012,
+        "p99": 18.187000000000012,
+        "max": 18.187000000000012
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.09929999999997108,
+        "p95": 18.187000000000012,
+        "p99": 18.187000000000012,
+        "max": 18.187000000000012
+      },
+      "heapDelta": -10392,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-1",
+      "level": 1,
+      "name": "Nivel 1: Aprende a Conquistar",
+      "difficulty": "normal",
+      "mechanics": [],
+      "nodes": 3,
+      "units": 145,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.30000000000000004,
+          "target": 2,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.1297999999999888,
+        "p95": 5.09050000000002,
+        "p99": 5.09050000000002,
+        "max": 5.09050000000002
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.1297999999999888,
+        "p95": 2.7894000000000005,
+        "p99": 2.7894000000000005,
+        "max": 2.7894000000000005
+      },
+      "heapDelta": 107624,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-1",
+      "level": 1,
+      "name": "Nivel 1: Aprende a Conquistar",
+      "difficulty": "hard",
+      "mechanics": [],
+      "nodes": 3,
+      "units": 145,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.42500000000000004,
+          "target": 2,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.3715000000000828,
+        "p95": 4.438499999999976,
+        "p99": 4.438499999999976,
+        "max": 4.438499999999976
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.4862000000000535,
+        "p95": 3.204900000000066,
+        "p99": 3.204900000000066,
+        "max": 3.204900000000066
+      },
+      "heapDelta": 78768,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-1",
+      "level": 2,
+      "name": "Nivel 2: Disputa por los Recursos",
+      "difficulty": "easy",
+      "mechanics": [],
+      "nodes": 4,
+      "units": 340,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.4,
+          "target": 3,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.04189999999994143,
+        "p95": 3.495700000000056,
+        "p99": 3.495700000000056,
+        "max": 3.495700000000056
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.024200000000064392,
+        "p95": 2.4750999999999976,
+        "p99": 2.4750999999999976,
+        "max": 2.4750999999999976
+      },
+      "heapDelta": 778736,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-1",
+      "level": 2,
+      "name": "Nivel 2: Disputa por los Recursos",
+      "difficulty": "normal",
+      "mechanics": [],
+      "nodes": 4,
+      "units": 340,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.125,
+          "target": 3,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.12139999999999418,
+        "p95": 4.194600000000037,
+        "p99": 4.194600000000037,
+        "max": 4.194600000000037
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.1312000000000353,
+        "p95": 1.3286000000000513,
+        "p99": 1.3286000000000513,
+        "max": 1.3286000000000513
+      },
+      "heapDelta": 743960,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-1",
+      "level": 2,
+      "name": "Nivel 2: Disputa por los Recursos",
+      "difficulty": "hard",
+      "mechanics": [],
+      "nodes": 4,
+      "units": 340,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.15000000000000002,
+          "target": 3,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.04149999999992815,
+        "p95": 5.877700000000004,
+        "p99": 5.877700000000004,
+        "max": 5.877700000000004
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.0471999999999753,
+        "p95": 3.366700000000037,
+        "p99": 3.366700000000037,
+        "max": 3.366700000000037
+      },
+      "heapDelta": 2353832,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-1",
+      "level": 3,
+      "name": "Nivel 3: El Foso Central",
+      "difficulty": "easy",
+      "mechanics": [],
+      "nodes": 5,
+      "units": 460,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.30000000000000004,
+          "target": 3,
+          "requiredPower": 30
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.02179999999998472,
+        "p95": 2.265899999999988,
+        "p99": 2.265899999999988,
+        "max": 2.265899999999988
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.019800000000032014,
+        "p95": 1.4447999999999865,
+        "p99": 1.4447999999999865,
+        "max": 1.4447999999999865
+      },
+      "heapDelta": 1325656,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-1",
+      "level": 3,
+      "name": "Nivel 3: El Foso Central",
+      "difficulty": "normal",
+      "mechanics": [],
+      "nodes": 5,
+      "units": 460,
+      "factions": 1,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.375,
+          "target": 3,
+          "requiredPower": 30
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.11260000000004311,
+        "p95": 3.940900000000056,
+        "p99": 3.940900000000056,
+        "max": 3.940900000000056
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.14659999999992124,
+        "p95": 3.940900000000056,
+        "p99": 3.940900000000056,
+        "max": 3.940900000000056
+      },
+      "heapDelta": 1960488,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-1",
+      "level": 3,
+      "name": "Nivel 3: El Foso Central",
+      "difficulty": "hard",
+      "mechanics": [],
+      "nodes": 5,
+      "units": 460,
+      "factions": 1,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.45,
+          "target": 0,
+          "requiredPower": 200
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.023500000000012733,
+        "p95": 5.756599999999935,
+        "p99": 5.756599999999935,
+        "max": 5.756599999999935
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.022600000000011278,
+        "p95": 5.756599999999935,
+        "p99": 5.756599999999935,
+        "max": 5.756599999999935
+      },
+      "heapDelta": 2707352,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-1",
+      "level": 4,
+      "name": "Nivel 4: La Fortaleza de Cristal",
+      "difficulty": "easy",
+      "mechanics": [
+        "paredes",
+        "moviles"
+      ],
+      "nodes": 9,
+      "units": 620,
+      "factions": 2,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.07500000000000001,
+          "target": 8,
+          "requiredPower": 203
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.30000000000000004,
+          "target": 8,
+          "requiredPower": 74
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.5416000000000167,
+        "p95": 4.419899999999984,
+        "p99": 4.419899999999984,
+        "max": 4.419899999999984
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.2328999999999724,
+        "p95": 4.0219999999999345,
+        "p99": 4.0219999999999345,
+        "max": 4.0219999999999345
+      },
+      "heapDelta": -177584,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-1",
+      "level": 4,
+      "name": "Nivel 4: La Fortaleza de Cristal",
+      "difficulty": "normal",
+      "mechanics": [
+        "paredes",
+        "moviles"
+      ],
+      "nodes": 9,
+      "units": 620,
+      "factions": 2,
+      "orders": 4,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.275,
+          "target": 8,
+          "requiredPower": 203
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.275,
+          "target": 8,
+          "requiredPower": 203
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.9305000000000518,
+        "p95": 7.86889999999994,
+        "p99": 7.86889999999994,
+        "max": 7.86889999999994
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.9305000000000518,
+        "p95": 7.86889999999994,
+        "p99": 7.86889999999994,
+        "max": 7.86889999999994
+      },
+      "heapDelta": -2350128,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-1",
+      "level": 4,
+      "name": "Nivel 4: La Fortaleza de Cristal",
+      "difficulty": "hard",
+      "mechanics": [
+        "paredes",
+        "moviles"
+      ],
+      "nodes": 9,
+      "units": 620,
+      "factions": 2,
+      "orders": 4,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.225,
+          "target": 8,
+          "requiredPower": 203
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.15000000000000002,
+          "target": 8,
+          "requiredPower": 203
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.4723000000000184,
+        "p95": 2.7989000000000033,
+        "p99": 2.7989000000000033,
+        "max": 2.7989000000000033
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.418800000000033,
+        "p95": 2.7989000000000033,
+        "p99": 2.7989000000000033,
+        "max": 2.7989000000000033
+      },
+      "heapDelta": 1634968,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-1",
+      "level": 5,
+      "name": "Nivel 5: El Muro Infranqueable",
+      "difficulty": "easy",
+      "mechanics": [
+        "paredes"
+      ],
+      "nodes": 5,
+      "units": 370,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.2,
+          "target": 4,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.021999999999934516,
+        "p95": 2.008000000000038,
+        "p99": 2.008000000000038,
+        "max": 2.008000000000038
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.021100000000046748,
+        "p95": 0.9909999999999854,
+        "p99": 0.9909999999999854,
+        "max": 0.9909999999999854
+      },
+      "heapDelta": 1173664,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-1",
+      "level": 5,
+      "name": "Nivel 5: El Muro Infranqueable",
+      "difficulty": "normal",
+      "mechanics": [
+        "paredes"
+      ],
+      "nodes": 5,
+      "units": 370,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.35000000000000003,
+          "target": 4,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.13040000000000873,
+        "p95": 3.3933999999999287,
+        "p99": 3.3933999999999287,
+        "max": 3.3933999999999287
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.13040000000000873,
+        "p95": 1.2846000000000686,
+        "p99": 1.2846000000000686,
+        "max": 1.2846000000000686
+      },
+      "heapDelta": -2193288,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-1",
+      "level": 5,
+      "name": "Nivel 5: El Muro Infranqueable",
+      "difficulty": "hard",
+      "mechanics": [
+        "paredes"
+      ],
+      "nodes": 5,
+      "units": 370,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.45
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.106899999999996,
+        "p95": 8.255400000000009,
+        "p99": 8.255400000000009,
+        "max": 8.255400000000009
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.106899999999996,
+        "p95": 2.5389999999999873,
+        "p99": 2.5389999999999873,
+        "max": 2.5389999999999873
+      },
+      "heapDelta": 1516904,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-2",
+      "level": 1,
+      "name": "Nivel 6: Conexiones Subterraneas",
+      "difficulty": "easy",
+      "mechanics": [
+        "paredes",
+        "tuneles"
+      ],
+      "nodes": 10,
+      "units": 670,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.47500000000000003
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.47500000000000003,
+          "target": 4,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.7343999999999369,
+        "p95": 19.125699999999938,
+        "p99": 19.125699999999938,
+        "max": 19.125699999999938
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.5991999999999962,
+        "p95": 6.930500000000052,
+        "p99": 6.930500000000052,
+        "max": 6.930500000000052
+      },
+      "heapDelta": 382776,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-2",
+      "level": 1,
+      "name": "Nivel 6: Conexiones Subterraneas",
+      "difficulty": "normal",
+      "mechanics": [
+        "paredes",
+        "tuneles"
+      ],
+      "nodes": 10,
+      "units": 670,
+      "factions": 2,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.47500000000000003
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.4,
+          "target": 4,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.5919000000000096,
+        "p95": 7.856800000000021,
+        "p99": 7.856800000000021,
+        "max": 7.856800000000021
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.4954999999999927,
+        "p95": 6.042699999999968,
+        "p99": 6.042699999999968,
+        "max": 6.042699999999968
+      },
+      "heapDelta": -2797056,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-2",
+      "level": 1,
+      "name": "Nivel 6: Conexiones Subterraneas",
+      "difficulty": "hard",
+      "mechanics": [
+        "paredes",
+        "tuneles"
+      ],
+      "nodes": 10,
+      "units": 670,
+      "factions": 2,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.47500000000000003
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.47500000000000003,
+          "target": 9,
+          "requiredPower": 149
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.4237999999999147,
+        "p95": 4.015600000000063,
+        "p99": 4.015600000000063,
+        "max": 4.015600000000063
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.3565000000000964,
+        "p95": 4.015600000000063,
+        "p99": 4.015600000000063,
+        "max": 4.015600000000063
+      },
+      "heapDelta": 685592,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-2",
+      "level": 2,
+      "name": "Nivel 7: El Baluarte del Artillero",
+      "difficulty": "easy",
+      "mechanics": [
+        "paredes"
+      ],
+      "nodes": 9,
+      "units": 665,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.4,
+          "target": 7,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.12419999999997344,
+        "p95": 2.704200000000128,
+        "p99": 2.704200000000128,
+        "max": 2.704200000000128
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.023899999999912325,
+        "p95": 1.5220999999999094,
+        "p99": 1.5220999999999094,
+        "max": 1.5220999999999094
+      },
+      "heapDelta": 1543912,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-2",
+      "level": 2,
+      "name": "Nivel 7: El Baluarte del Artillero",
+      "difficulty": "normal",
+      "mechanics": [
+        "paredes"
+      ],
+      "nodes": 9,
+      "units": 665,
+      "factions": 1,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.30000000000000004,
+          "target": 7,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.03139999999984866,
+        "p95": 5.981099999999969,
+        "p99": 5.981099999999969,
+        "max": 5.981099999999969
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.03139999999984866,
+        "p95": 5.981099999999969,
+        "p99": 5.981099999999969,
+        "max": 5.981099999999969
+      },
+      "heapDelta": 1657944,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-2",
+      "level": 2,
+      "name": "Nivel 7: El Baluarte del Artillero",
+      "difficulty": "hard",
+      "mechanics": [
+        "paredes"
+      ],
+      "nodes": 9,
+      "units": 665,
+      "factions": 1,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "analysis_pending",
+          "since": 0.45,
+          "target": 7,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.19239999999990687,
+        "p95": 27.72440000000006,
+        "p99": 27.72440000000006,
+        "max": 27.72440000000006
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.19239999999990687,
+        "p95": 27.72440000000006,
+        "p99": 27.72440000000006,
+        "max": 27.72440000000006
+      },
+      "heapDelta": -5408728,
+      "vetoes": 0,
+      "snapshots": 1
+    },
+    {
+      "sector": "sector-2",
+      "level": 3,
+      "name": "Nivel 8: Chokepoint Espinoso",
+      "difficulty": "easy",
+      "mechanics": [
+        "paredes"
+      ],
+      "nodes": 7,
+      "units": 540,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.225,
+          "target": 3,
+          "requiredPower": 71
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.47500000000000003,
+          "target": 3,
+          "requiredPower": 84
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.5355999999999312,
+        "p95": 2.877999999999929,
+        "p99": 2.877999999999929,
+        "max": 2.877999999999929
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.3541000000000167,
+        "p95": 2.877999999999929,
+        "p99": 2.877999999999929,
+        "max": 2.877999999999929
+      },
+      "heapDelta": 3300248,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-2",
+      "level": 3,
+      "name": "Nivel 8: Chokepoint Espinoso",
+      "difficulty": "normal",
+      "mechanics": [
+        "paredes"
+      ],
+      "nodes": 7,
+      "units": 540,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "analysis_pending",
+          "since": 0.45,
+          "target": 2,
+          "requiredPower": 15
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.47500000000000003,
+          "target": 3,
+          "requiredPower": 84
+        }
+      ],
+      "milliseconds": {
+        "p50": 2.2572000000000116,
+        "p95": 14.793600000000197,
+        "p99": 14.793600000000197,
+        "max": 14.793600000000197
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 2.2572000000000116,
+        "p95": 14.793600000000197,
+        "p99": 14.793600000000197,
+        "max": 14.793600000000197
+      },
+      "heapDelta": -3074296,
+      "vetoes": 0,
+      "snapshots": 1
+    },
+    {
+      "sector": "sector-2",
+      "level": 3,
+      "name": "Nivel 8: Chokepoint Espinoso",
+      "difficulty": "hard",
+      "mechanics": [
+        "paredes"
+      ],
+      "nodes": 7,
+      "units": 540,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.45,
+          "target": 3,
+          "requiredPower": 67
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.47500000000000003,
+          "target": 3,
+          "requiredPower": 84
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.5271999999999935,
+        "p95": 21.948300000000017,
+        "p99": 21.948300000000017,
+        "max": 21.948300000000017
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.505100000000084,
+        "p95": 21.948300000000017,
+        "p99": 21.948300000000017,
+        "max": 21.948300000000017
+      },
+      "heapDelta": 4841752,
+      "vetoes": 0,
+      "snapshots": 1
+    },
+    {
+      "sector": "sector-2",
+      "level": 4,
+      "name": "Nivel 9: Duelo de Titanes",
+      "difficulty": "easy",
+      "mechanics": [],
+      "nodes": 7,
+      "units": 620,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.47500000000000003,
+          "target": 4,
+          "requiredPower": 196
+        },
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.45,
+          "target": 4,
+          "requiredPower": 166
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.0372999999999593,
+        "p95": 4.442600000000084,
+        "p99": 4.442600000000084,
+        "max": 4.442600000000084
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.9828999999999724,
+        "p95": 1.9542999999998756,
+        "p99": 1.9542999999998756,
+        "max": 1.9542999999998756
+      },
+      "heapDelta": -4294536,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-2",
+      "level": 4,
+      "name": "Nivel 9: Duelo de Titanes",
+      "difficulty": "normal",
+      "mechanics": [],
+      "nodes": 7,
+      "units": 620,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.42500000000000004,
+          "target": 4,
+          "requiredPower": 196
+        },
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.4,
+          "target": 4,
+          "requiredPower": 166
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.3005000000000564,
+        "p95": 39.14960000000019,
+        "p99": 39.14960000000019,
+        "max": 39.14960000000019
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.1206999999999425,
+        "p95": 1.6772000000000844,
+        "p99": 1.6772000000000844,
+        "max": 1.6772000000000844
+      },
+      "heapDelta": 3956632,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-2",
+      "level": 4,
+      "name": "Nivel 9: Duelo de Titanes",
+      "difficulty": "hard",
+      "mechanics": [],
+      "nodes": 7,
+      "units": 620,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.47500000000000003,
+          "target": 4,
+          "requiredPower": 192
+        },
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.47500000000000003
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.134800000000041,
+        "p95": 22.129199999999855,
+        "p99": 22.129199999999855,
+        "max": 22.129199999999855
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.134800000000041,
+        "p95": 22.129199999999855,
+        "p99": 22.129199999999855,
+        "max": 22.129199999999855
+      },
+      "heapDelta": 4708488,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 1,
+      "name": "Nivel 10: La Hoja Flotante",
+      "difficulty": "easy",
+      "mechanics": [
+        "veneno",
+        "moviles"
+      ],
+      "nodes": 11,
+      "units": 580,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.45,
+          "target": 8,
+          "requiredPower": 20
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.325,
+          "target": 9,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.8541000000000167,
+        "p95": 2.3114000000000487,
+        "p99": 2.3114000000000487,
+        "max": 2.3114000000000487
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.7143000000000939,
+        "p95": 1.8729000000000724,
+        "p99": 1.8729000000000724,
+        "max": 1.8729000000000724
+      },
+      "heapDelta": 2280696,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 1,
+      "name": "Nivel 10: La Hoja Flotante",
+      "difficulty": "normal",
+      "mechanics": [
+        "veneno",
+        "moviles"
+      ],
+      "nodes": 11,
+      "units": 580,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.47500000000000003
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.47500000000000003
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.0104000000001179,
+        "p95": 3.1981000000000677,
+        "p99": 3.1981000000000677,
+        "max": 3.1981000000000677
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.0104000000001179,
+        "p95": 3.1981000000000677,
+        "p99": 3.1981000000000677,
+        "max": 3.1981000000000677
+      },
+      "heapDelta": 3963192,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 1,
+      "name": "Nivel 10: La Hoja Flotante",
+      "difficulty": "hard",
+      "mechanics": [
+        "veneno",
+        "moviles"
+      ],
+      "nodes": 11,
+      "units": 580,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.47500000000000003
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.47500000000000003,
+          "target": 8,
+          "requiredPower": 142
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.6158000000000357,
+        "p95": 7.41359999999986,
+        "p99": 7.41359999999986,
+        "max": 7.41359999999986
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.3868999999999687,
+        "p95": 2.940800000000081,
+        "p99": 2.940800000000081,
+        "max": 2.940800000000081
+      },
+      "heapDelta": -4239904,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 2,
+      "name": "Nivel 11: El Ojo de la Tormenta",
+      "difficulty": "easy",
+      "mechanics": [
+        "veneno",
+        "moviles"
+      ],
+      "nodes": 9,
+      "units": 425,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.2,
+          "target": 3,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.02740000000017062,
+        "p95": 2.665599999999813,
+        "p99": 2.665599999999813,
+        "max": 2.665599999999813
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.10560000000009495,
+        "p95": 1.2506000000000768,
+        "p99": 1.2506000000000768,
+        "max": 1.2506000000000768
+      },
+      "heapDelta": 1302000,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 2,
+      "name": "Nivel 11: El Ojo de la Tormenta",
+      "difficulty": "normal",
+      "mechanics": [
+        "veneno",
+        "moviles"
+      ],
+      "nodes": 9,
+      "units": 425,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.35000000000000003,
+          "target": 3,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.08570000000008804,
+        "p95": 2.72219999999993,
+        "p99": 2.72219999999993,
+        "max": 2.72219999999993
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.21100000000001273,
+        "p95": 2.72219999999993,
+        "p99": 2.72219999999993,
+        "max": 2.72219999999993
+      },
+      "heapDelta": 1693824,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 2,
+      "name": "Nivel 11: El Ojo de la Tormenta",
+      "difficulty": "hard",
+      "mechanics": [
+        "veneno",
+        "moviles"
+      ],
+      "nodes": 9,
+      "units": 425,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.15000000000000002,
+          "target": 3,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.11040000000002692,
+        "p95": 2.709100000000035,
+        "p99": 2.709100000000035,
+        "max": 2.709100000000035
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.11040000000002692,
+        "p95": 1.4072000000001026,
+        "p99": 1.4072000000001026,
+        "max": 1.4072000000001026
+      },
+      "heapDelta": 1935120,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 3,
+      "name": "Nivel 12: Islas de Seguridad",
+      "difficulty": "easy",
+      "mechanics": [
+        "veneno"
+      ],
+      "nodes": 9,
+      "units": 540,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.2,
+          "target": 5,
+          "requiredPower": 15
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.325,
+          "target": 6,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.652599999999893,
+        "p95": 2.97180000000003,
+        "p99": 2.97180000000003,
+        "max": 2.97180000000003
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.652599999999893,
+        "p95": 2.85349999999994,
+        "p99": 2.85349999999994,
+        "max": 2.85349999999994
+      },
+      "heapDelta": -5628992,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 3,
+      "name": "Nivel 12: Islas de Seguridad",
+      "difficulty": "normal",
+      "mechanics": [
+        "veneno"
+      ],
+      "nodes": 9,
+      "units": 540,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.47500000000000003
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.42500000000000004,
+          "target": 5,
+          "requiredPower": 138
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.026299999999992,
+        "p95": 11.110699999999952,
+        "p99": 11.110699999999952,
+        "max": 11.110699999999952
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.026299999999992,
+        "p95": 11.110699999999952,
+        "p99": 11.110699999999952,
+        "max": 11.110699999999952
+      },
+      "heapDelta": 3630264,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 3,
+      "name": "Nivel 12: Islas de Seguridad",
+      "difficulty": "hard",
+      "mechanics": [
+        "veneno"
+      ],
+      "nodes": 9,
+      "units": 540,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.45,
+          "target": 6,
+          "requiredPower": 132
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.47500000000000003,
+          "target": 5,
+          "requiredPower": 132
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.9890000000000327,
+        "p95": 4.376800000000003,
+        "p99": 4.376800000000003,
+        "max": 4.376800000000003
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.9890000000000327,
+        "p95": 4.376800000000003,
+        "p99": 4.376800000000003,
+        "max": 4.376800000000003
+      },
+      "heapDelta": -4460032,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 4,
+      "name": "Nivel 13: Rios Venenosos",
+      "difficulty": "easy",
+      "mechanics": [
+        "veneno"
+      ],
+      "nodes": 15,
+      "units": 840,
+      "factions": 3,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "mutantes",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.47500000000000003,
+          "target": 3,
+          "requiredPower": 30
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.45,
+          "target": 11,
+          "requiredPower": 30
+        },
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.45,
+          "target": 12,
+          "requiredPower": 30
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.3204000000000633,
+        "p95": 10.037400000000162,
+        "p99": 10.037400000000162,
+        "max": 10.037400000000162
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.2872999999999593,
+        "p95": 10.037400000000162,
+        "p99": 10.037400000000162,
+        "max": 10.037400000000162
+      },
+      "heapDelta": 4381440,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 4,
+      "name": "Nivel 13: Rios Venenosos",
+      "difficulty": "normal",
+      "mechanics": [
+        "veneno"
+      ],
+      "nodes": 15,
+      "units": 840,
+      "factions": 3,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "mutantes",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.42500000000000004,
+          "target": 12,
+          "requiredPower": 158
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.45,
+          "target": 8,
+          "requiredPower": 15
+        },
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.42500000000000004,
+          "target": 3,
+          "requiredPower": 158
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.306400000000167,
+        "p95": 3.934500000000071,
+        "p99": 3.934500000000071,
+        "max": 3.934500000000071
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.248199999999997,
+        "p95": 1.4563000000000557,
+        "p99": 1.4563000000000557,
+        "max": 1.4563000000000557
+      },
+      "heapDelta": -3092464,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 4,
+      "name": "Nivel 13: Rios Venenosos",
+      "difficulty": "hard",
+      "mechanics": [
+        "veneno"
+      ],
+      "nodes": 15,
+      "units": 840,
+      "factions": 3,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "mutantes",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.47500000000000003,
+          "target": 12,
+          "requiredPower": 152
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.35000000000000003,
+          "target": 0,
+          "requiredPower": 150
+        },
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.47500000000000003
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.3003999999998541,
+        "p95": 2.848199999999906,
+        "p99": 2.848199999999906,
+        "max": 2.848199999999906
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.2607000000000426,
+        "p95": 2.848199999999906,
+        "p99": 2.848199999999906,
+        "max": 2.848199999999906
+      },
+      "heapDelta": -3103728,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 5,
+      "name": "Nivel 14: Oceano de Insecticida",
+      "difficulty": "easy",
+      "mechanics": [
+        "veneno",
+        "moviles"
+      ],
+      "nodes": 22,
+      "units": 450,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": {
+            "target": 18,
+            "started": 0.05,
+            "deadline": 13.983968515384827,
+            "visits": 125
+          },
+          "code": "budget_exhausted",
+          "since": 0.45
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.4726000000000568,
+        "p95": 12.368799999999965,
+        "p99": 12.368799999999965,
+        "max": 12.368799999999965
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.4726000000000568,
+        "p95": 3.8824999999999363,
+        "p99": 3.8824999999999363,
+        "max": 3.8824999999999363
+      },
+      "heapDelta": 4812632,
+      "vetoes": 0,
+      "snapshots": 1
+    },
+    {
+      "sector": "sector-3",
+      "level": 5,
+      "name": "Nivel 14: Oceano de Insecticida",
+      "difficulty": "normal",
+      "mechanics": [
+        "veneno",
+        "moviles"
+      ],
+      "nodes": 22,
+      "units": 450,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": {
+            "target": 18,
+            "started": 0.05,
+            "deadline": 13.983968515384827,
+            "visits": 123
+          },
+          "code": "maintaining_control",
+          "since": 0.47500000000000003,
+          "target": 18,
+          "requiredPower": 0
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.3403000000000702,
+        "p95": 6.047700000000077,
+        "p99": 6.047700000000077,
+        "max": 6.047700000000077
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.3403000000000702,
+        "p95": 6.047700000000077,
+        "p99": 6.047700000000077,
+        "max": 6.047700000000077
+      },
+      "heapDelta": 5837104,
+      "vetoes": 0,
+      "snapshots": 1
+    },
+    {
+      "sector": "sector-3",
+      "level": 5,
+      "name": "Nivel 14: Oceano de Insecticida",
+      "difficulty": "hard",
+      "mechanics": [
+        "veneno",
+        "moviles"
+      ],
+      "nodes": 22,
+      "units": 450,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": {
+            "target": 18,
+            "started": 0.05,
+            "deadline": 13.983968515384827,
+            "visits": 130
+          },
+          "code": "budget_exhausted",
+          "since": 0.25,
+          "target": 18,
+          "requiredPower": 0
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.5751999999999953,
+        "p95": 8.46510000000012,
+        "p99": 8.46510000000012,
+        "max": 8.46510000000012
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.9575999999999567,
+        "p95": 8.46510000000012,
+        "p99": 8.46510000000012,
+        "max": 8.46510000000012
+      },
+      "heapDelta": -2750496,
+      "vetoes": 0,
+      "snapshots": 1
+    },
+    {
+      "sector": "sector-3",
+      "level": 6,
+      "name": "Nivel 15: Fortalezas de Artilleria",
+      "difficulty": "easy",
+      "mechanics": [
+        "veneno",
+        "defensas"
+      ],
+      "nodes": 9,
+      "units": 450,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.2,
+          "target": 7,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.02179999999998472,
+        "p95": 2.297599999999875,
+        "p99": 2.297599999999875,
+        "max": 2.297599999999875
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.02250000000003638,
+        "p95": 1.3947000000000571,
+        "p99": 1.3947000000000571,
+        "max": 1.3947000000000571
+      },
+      "heapDelta": 1213680,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 6,
+      "name": "Nivel 15: Fortalezas de Artilleria",
+      "difficulty": "normal",
+      "mechanics": [
+        "veneno",
+        "defensas"
+      ],
+      "nodes": 9,
+      "units": 450,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.4,
+          "target": 8,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.13370000000008986,
+        "p95": 5.294399999999996,
+        "p99": 5.294399999999996,
+        "max": 5.294399999999996
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.13370000000008986,
+        "p95": 2.506399999999985,
+        "p99": 2.506399999999985,
+        "max": 2.506399999999985
+      },
+      "heapDelta": -6381864,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-3",
+      "level": 6,
+      "name": "Nivel 15: Fortalezas de Artilleria",
+      "difficulty": "hard",
+      "mechanics": [
+        "veneno",
+        "defensas"
+      ],
+      "nodes": 9,
+      "units": 450,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.1,
+          "target": 8,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.025300000000015643,
+        "p95": 2.5516000000000076,
+        "p99": 2.5516000000000076,
+        "max": 2.5516000000000076
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.5759000000000469,
+        "p95": 1.314300000000003,
+        "p99": 1.314300000000003,
+        "max": 1.314300000000003
+      },
+      "heapDelta": 1772848,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 1,
+      "name": "Nivel 16: Carreteras y Pantanos",
+      "difficulty": "easy",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 11,
+      "units": 440,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.2,
+          "target": 4,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.020500000000083674,
+        "p95": 3.873100000000022,
+        "p99": 3.873100000000022,
+        "max": 3.873100000000022
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.020500000000083674,
+        "p95": 2.1803999999999633,
+        "p99": 2.1803999999999633,
+        "max": 2.1803999999999633
+      },
+      "heapDelta": 1157768,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 1,
+      "name": "Nivel 16: Carreteras y Pantanos",
+      "difficulty": "normal",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 11,
+      "units": 440,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.125,
+          "target": 5,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.12049999999999272,
+        "p95": 2.6252999999999247,
+        "p99": 2.6252999999999247,
+        "max": 2.6252999999999247
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.14010000000007494,
+        "p95": 1.0915999999999713,
+        "p99": 1.0915999999999713,
+        "max": 1.0915999999999713
+      },
+      "heapDelta": 1440352,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 1,
+      "name": "Nivel 16: Carreteras y Pantanos",
+      "difficulty": "hard",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 11,
+      "units": 440,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.2,
+          "target": 5,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.020299999999906504,
+        "p95": 2.567700000000059,
+        "p99": 2.567700000000059,
+        "max": 2.567700000000059
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.5251999999998134,
+        "p95": 2.0690000000001874,
+        "p99": 2.0690000000001874,
+        "max": 2.0690000000001874
+      },
+      "heapDelta": -6336784,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 2,
+      "name": "Nivel 17: El Oasis en el Desierto Pegajoso",
+      "difficulty": "easy",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 8,
+      "units": 445,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.2,
+          "target": 5,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.019800000000032014,
+        "p95": 2.0437999999999192,
+        "p99": 2.0437999999999192,
+        "max": 2.0437999999999192
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.024200000000064392,
+        "p95": 1.2662000000000262,
+        "p99": 1.2662000000000262,
+        "max": 1.2662000000000262
+      },
+      "heapDelta": 1244496,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 2,
+      "name": "Nivel 17: El Oasis en el Desierto Pegajoso",
+      "difficulty": "normal",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 8,
+      "units": 445,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.17500000000000002,
+          "target": 5,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.07399999999984175,
+        "p95": 2.4915000000000873,
+        "p99": 2.4915000000000873,
+        "max": 2.4915000000000873
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.07399999999984175,
+        "p95": 0.9679000000000997,
+        "p99": 0.9679000000000997,
+        "max": 0.9679000000000997
+      },
+      "heapDelta": 1654080,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 2,
+      "name": "Nivel 17: El Oasis en el Desierto Pegajoso",
+      "difficulty": "hard",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 8,
+      "units": 445,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.35000000000000003,
+          "target": 5,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.08300000000008367,
+        "p95": 3.6459000000002106,
+        "p99": 3.6459000000002106,
+        "max": 3.6459000000002106
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.08300000000008367,
+        "p95": 3.6459000000002106,
+        "p99": 3.6459000000002106,
+        "max": 3.6459000000002106
+      },
+      "heapDelta": 1832776,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 3,
+      "name": "Nivel 18: Franjas de Interferencia",
+      "difficulty": "easy",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 7,
+      "units": 405,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.325,
+          "target": 3,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.06880000000001019,
+        "p95": 1.8085000000000946,
+        "p99": 1.8085000000000946,
+        "max": 1.8085000000000946
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.0784000000001015,
+        "p95": 1.8085000000000946,
+        "p99": 1.8085000000000946,
+        "max": 1.8085000000000946
+      },
+      "heapDelta": -6816448,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 3,
+      "name": "Nivel 18: Franjas de Interferencia",
+      "difficulty": "normal",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 7,
+      "units": 405,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.125,
+          "target": 5,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.0751999999997679,
+        "p95": 2.238900000000285,
+        "p99": 2.238900000000285,
+        "max": 2.238900000000285
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.07889999999997599,
+        "p95": 0.9437000000002627,
+        "p99": 0.9437000000002627,
+        "max": 0.9437000000002627
+      },
+      "heapDelta": 1245496,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 3,
+      "name": "Nivel 18: Franjas de Interferencia",
+      "difficulty": "hard",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 7,
+      "units": 405,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.1,
+          "target": 5,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.01919999999972788,
+        "p95": 2.8179000000000087,
+        "p99": 2.8179000000000087,
+        "max": 2.8179000000000087
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.5880999999999403,
+        "p95": 1.188499999999749,
+        "p99": 1.188499999999749,
+        "max": 1.188499999999749
+      },
+      "heapDelta": 2082080,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 4,
+      "name": "Nivel 19: El Delta de la Melaza",
+      "difficulty": "easy",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 7,
+      "units": 410,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.2,
+          "target": 5,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.01960000000008222,
+        "p95": 1.7247000000002117,
+        "p99": 1.7247000000002117,
+        "max": 1.7247000000002117
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.022400000000288856,
+        "p95": 1.053899999999885,
+        "p99": 1.053899999999885,
+        "max": 1.053899999999885
+      },
+      "heapDelta": 1184240,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 4,
+      "name": "Nivel 19: El Delta de la Melaza",
+      "difficulty": "normal",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 7,
+      "units": 410,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.125,
+          "target": 3,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.12010000000009313,
+        "p95": 3.038100000000213,
+        "p99": 3.038100000000213,
+        "max": 3.038100000000213
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.12010000000009313,
+        "p95": 1.0246000000001914,
+        "p99": 1.0246000000001914,
+        "max": 1.0246000000001914
+      },
+      "heapDelta": -6661608,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 4,
+      "name": "Nivel 19: El Delta de la Melaza",
+      "difficulty": "hard",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 7,
+      "units": 410,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.1,
+          "target": 3,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.021199999999680585,
+        "p95": 2.6613000000002103,
+        "p99": 2.6613000000002103,
+        "max": 2.6613000000002103
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.4717000000000553,
+        "p95": 1.247899999999845,
+        "p99": 1.247899999999845,
+        "max": 1.247899999999845
+      },
+      "heapDelta": 1728432,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 5,
+      "name": "Nivel 20: Trampa de Succion",
+      "difficulty": "easy",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 8,
+      "units": 520,
+      "factions": 2,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.45,
+          "target": 4,
+          "requiredPower": 68
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.47500000000000003,
+          "target": 4,
+          "requiredPower": 236
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.7999999999997272,
+        "p95": 2.318499999999858,
+        "p99": 2.318499999999858,
+        "max": 2.318499999999858
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.7878000000000611,
+        "p95": 2.318499999999858,
+        "p99": 2.318499999999858,
+        "max": 2.318499999999858
+      },
+      "heapDelta": 2664440,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 5,
+      "name": "Nivel 20: Trampa de Succion",
+      "difficulty": "normal",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 8,
+      "units": 520,
+      "factions": 2,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.45,
+          "target": 4,
+          "requiredPower": 68
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.42500000000000004,
+          "target": 4,
+          "requiredPower": 236
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.9301000000000386,
+        "p95": 4.5940999999997985,
+        "p99": 4.5940999999997985,
+        "max": 4.5940999999997985
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.9301000000000386,
+        "p95": 4.5940999999997985,
+        "p99": 4.5940999999997985,
+        "max": 4.5940999999997985
+      },
+      "heapDelta": -4479168,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 5,
+      "name": "Nivel 20: Trampa de Succion",
+      "difficulty": "hard",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 8,
+      "units": 520,
+      "factions": 2,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.45,
+          "target": 4,
+          "requiredPower": 62
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.47500000000000003,
+          "target": 4,
+          "requiredPower": 224
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.9550999999996748,
+        "p95": 3.451000000000022,
+        "p99": 3.451000000000022,
+        "max": 3.451000000000022
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.9550999999996748,
+        "p95": 3.451000000000022,
+        "p99": 3.451000000000022,
+        "max": 3.451000000000022
+      },
+      "heapDelta": 4300856,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 6,
+      "name": "Nivel 21: Ajedrez de Friccion",
+      "difficulty": "easy",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 8,
+      "units": 423,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.2,
+          "target": 6,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.016900000000077853,
+        "p95": 1.934099999999944,
+        "p99": 1.934099999999944,
+        "max": 1.934099999999944
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.016900000000077853,
+        "p95": 0.946100000000115,
+        "p99": 0.946100000000115,
+        "max": 0.946100000000115
+      },
+      "heapDelta": 1214960,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 6,
+      "name": "Nivel 21: Ajedrez de Friccion",
+      "difficulty": "normal",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 8,
+      "units": 423,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.125,
+          "target": 6,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.07860000000027867,
+        "p95": 2.7450000000003456,
+        "p99": 2.7450000000003456,
+        "max": 2.7450000000003456
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.08670000000029177,
+        "p95": 1.0704000000000633,
+        "p99": 1.0704000000000633,
+        "max": 1.0704000000000633
+      },
+      "heapDelta": 1579248,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-4",
+      "level": 6,
+      "name": "Nivel 21: Ajedrez de Friccion",
+      "difficulty": "hard",
+      "mechanics": [
+        "velocidad"
+      ],
+      "nodes": 8,
+      "units": 423,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.45,
+          "target": 6,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.01790000000028158,
+        "p95": 4.754100000000108,
+        "p99": 4.754100000000108,
+        "max": 4.754100000000108
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.6829999999999927,
+        "p95": 4.754100000000108,
+        "p99": 4.754100000000108,
+        "max": 4.754100000000108
+      },
+      "heapDelta": -6167992,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 1,
+      "name": "Nivel 22: El Arroyuelo",
+      "difficulty": "easy",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 10,
+      "units": 590,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.07500000000000001,
+          "target": 3,
+          "requiredPower": 20
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.30000000000000004,
+          "target": 5,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.6289000000001579,
+        "p95": 14.189700000000357,
+        "p99": 14.189700000000357,
+        "max": 14.189700000000357
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.4718000000002576,
+        "p95": 14.189700000000357,
+        "p99": 14.189700000000357,
+        "max": 14.189700000000357
+      },
+      "heapDelta": 3742456,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 1,
+      "name": "Nivel 22: El Arroyuelo",
+      "difficulty": "normal",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 10,
+      "units": 590,
+      "factions": 2,
+      "orders": 4,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.47500000000000003
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.275,
+          "target": 5,
+          "requiredPower": 54
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.9140000000002146,
+        "p95": 9.521400000000085,
+        "p99": 9.521400000000085,
+        "max": 9.521400000000085
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.9140000000002146,
+        "p95": 9.521400000000085,
+        "p99": 9.521400000000085,
+        "max": 9.521400000000085
+      },
+      "heapDelta": 4228408,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 1,
+      "name": "Nivel 22: El Arroyuelo",
+      "difficulty": "hard",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 10,
+      "units": 590,
+      "factions": 2,
+      "orders": 4,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.17500000000000002,
+          "target": 3,
+          "requiredPower": 149
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.25,
+          "target": 5,
+          "requiredPower": 149
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.4140999999999622,
+        "p95": 16.36140000000023,
+        "p99": 16.36140000000023,
+        "max": 16.36140000000023
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.3868000000002212,
+        "p95": 16.36140000000023,
+        "p99": 16.36140000000023,
+        "max": 16.36140000000023
+      },
+      "heapDelta": 4383760,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 2,
+      "name": "Nivel 23: Bombardeo desde el Centro",
+      "difficulty": "easy",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 9,
+      "units": 415,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.25,
+          "target": 7,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.027999999999792635,
+        "p95": 2.739100000000235,
+        "p99": 2.739100000000235,
+        "max": 2.739100000000235
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.027999999999792635,
+        "p95": 1.4670000000000982,
+        "p99": 1.4670000000000982,
+        "max": 1.4670000000000982
+      },
+      "heapDelta": 1111288,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 2,
+      "name": "Nivel 23: Bombardeo desde el Centro",
+      "difficulty": "normal",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 9,
+      "units": 415,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.4,
+          "target": 7,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.1853000000000975,
+        "p95": 3.3122000000003027,
+        "p99": 3.3122000000003027,
+        "max": 3.3122000000003027
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.1853000000000975,
+        "p95": 1.5407000000000153,
+        "p99": 1.5407000000000153,
+        "max": 1.5407000000000153
+      },
+      "heapDelta": 1395480,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 2,
+      "name": "Nivel 23: Bombardeo desde el Centro",
+      "difficulty": "hard",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 9,
+      "units": 415,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.45,
+          "target": 7,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.02209999999968204,
+        "p95": 6.800900000000183,
+        "p99": 6.800900000000183,
+        "max": 6.800900000000183
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.02209999999968204,
+        "p95": 6.800900000000183,
+        "p99": 6.800900000000183,
+        "max": 6.800900000000183
+      },
+      "heapDelta": -14849336,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 3,
+      "name": "Nivel 24: Mareas Impredecibles",
+      "difficulty": "easy",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 8,
+      "units": 530,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.25,
+          "target": 4,
+          "requiredPower": 15
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.325,
+          "target": 3,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.8260999999997694,
+        "p95": 8.616999999999734,
+        "p99": 8.616999999999734,
+        "max": 8.616999999999734
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.8260999999997694,
+        "p95": 2.6608000000001084,
+        "p99": 2.6608000000001084,
+        "max": 2.6608000000001084
+      },
+      "heapDelta": 2589520,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 3,
+      "name": "Nivel 24: Mareas Impredecibles",
+      "difficulty": "normal",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 8,
+      "units": 530,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.125,
+          "target": 3,
+          "requiredPower": 154
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.275,
+          "target": 4,
+          "requiredPower": 149
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.9733000000001084,
+        "p95": 5.729699999999866,
+        "p99": 5.729699999999866,
+        "max": 5.729699999999866
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.9733000000001084,
+        "p95": 5.729699999999866,
+        "p99": 5.729699999999866,
+        "max": 5.729699999999866
+      },
+      "heapDelta": 3436192,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 3,
+      "name": "Nivel 24: Mareas Impredecibles",
+      "difficulty": "hard",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 8,
+      "units": 530,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.45,
+          "target": 3,
+          "requiredPower": 148
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.42500000000000004,
+          "target": 4,
+          "requiredPower": 143
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.265100000000075,
+        "p95": 4.8697000000001935,
+        "p99": 4.8697000000001935,
+        "max": 4.8697000000001935
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.265100000000075,
+        "p95": 4.8697000000001935,
+        "p99": 4.8697000000001935,
+        "max": 4.8697000000001935
+      },
+      "heapDelta": 3478544,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 4,
+      "name": "Nivel 25: Convergencia",
+      "difficulty": "easy",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 13,
+      "units": 770,
+      "factions": 3,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.35000000000000003,
+          "target": 4,
+          "requiredPower": 20
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.375,
+          "target": 6,
+          "requiredPower": 20
+        },
+        {
+          "faction": "tejedoras",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.45,
+          "target": 7,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.3463999999999032,
+        "p95": 3.5932000000002517,
+        "p99": 3.5932000000002517,
+        "max": 3.5932000000002517
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.154700000000048,
+        "p95": 2.3652000000001863,
+        "p99": 2.3652000000001863,
+        "max": 2.3652000000001863
+      },
+      "heapDelta": 3773840,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 4,
+      "name": "Nivel 25: Convergencia",
+      "difficulty": "normal",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 13,
+      "units": 770,
+      "factions": 3,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.42500000000000004,
+          "target": 6,
+          "requiredPower": 154
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.45,
+          "target": 4,
+          "requiredPower": 154
+        },
+        {
+          "faction": "tejedoras",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.4,
+          "target": 4,
+          "requiredPower": 154
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.349800000000414,
+        "p95": 5.227100000000064,
+        "p99": 5.227100000000064,
+        "max": 5.227100000000064
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.2818999999999505,
+        "p95": 5.227100000000064,
+        "p99": 5.227100000000064,
+        "max": 5.227100000000064
+      },
+      "heapDelta": -11904016,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 4,
+      "name": "Nivel 25: Convergencia",
+      "difficulty": "hard",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 13,
+      "units": 770,
+      "factions": 3,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.47500000000000003,
+          "target": 7,
+          "requiredPower": 148
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.45,
+          "target": 6,
+          "requiredPower": 148
+        },
+        {
+          "faction": "tejedoras",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.47500000000000003,
+          "target": 7,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.6419000000000779,
+        "p95": 7.740699999999833,
+        "p99": 7.740699999999833,
+        "max": 7.740699999999833
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.5927999999998974,
+        "p95": 4.962800000000243,
+        "p99": 4.962800000000243,
+        "max": 4.962800000000243
+      },
+      "heapDelta": 5531648,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 5,
+      "name": "Nivel 26: Ida y Vuelta",
+      "difficulty": "easy",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 13,
+      "units": 805,
+      "factions": 3,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.45,
+          "target": 3,
+          "requiredPower": 160
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.42500000000000004,
+          "target": 3,
+          "requiredPower": 160
+        },
+        {
+          "faction": "tejedoras",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.47500000000000003,
+          "target": 7,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.2827000000002045,
+        "p95": 2.722399999999652,
+        "p99": 2.722399999999652,
+        "max": 2.722399999999652
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.157100000000355,
+        "p95": 1.9728000000000065,
+        "p99": 1.9728000000000065,
+        "max": 1.9728000000000065
+      },
+      "heapDelta": 5270432,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 5,
+      "name": "Nivel 26: Ida y Vuelta",
+      "difficulty": "normal",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 13,
+      "units": 805,
+      "factions": 3,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.4,
+          "target": 3,
+          "requiredPower": 154
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.45,
+          "target": 7,
+          "requiredPower": 154
+        },
+        {
+          "faction": "tejedoras",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.47500000000000003,
+          "target": 3,
+          "requiredPower": 288
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.3614999999999782,
+        "p95": 6.7992999999996755,
+        "p99": 6.7992999999996755,
+        "max": 6.7992999999996755
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.356999999999971,
+        "p95": 2.845800000000054,
+        "p99": 2.845800000000054,
+        "max": 2.845800000000054
+      },
+      "heapDelta": -9854552,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-5",
+      "level": 5,
+      "name": "Nivel 26: Ida y Vuelta",
+      "difficulty": "hard",
+      "mechanics": [
+        "agua"
+      ],
+      "nodes": 13,
+      "units": 805,
+      "factions": 3,
+      "orders": 3,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.47500000000000003,
+          "target": 3,
+          "requiredPower": 148
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.45,
+          "target": 7,
+          "requiredPower": 148
+        },
+        {
+          "faction": "tejedoras",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.45
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.4122999999999593,
+        "p95": 3.329400000000078,
+        "p99": 3.329400000000078,
+        "max": 3.329400000000078
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.3355000000001382,
+        "p95": 2.9945000000002437,
+        "p99": 2.9945000000002437,
+        "max": 2.9945000000002437
+      },
+      "heapDelta": 6857808,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-6",
+      "level": 1,
+      "name": "Nivel 27: El Latido de la Espiral",
+      "difficulty": "easy",
+      "mechanics": [
+        "compuertas",
+        "luz"
+      ],
+      "nodes": 9,
+      "units": 460,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.25,
+          "target": 4,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.01470000000017535,
+        "p95": 4.112599999999929,
+        "p99": 4.112599999999929,
+        "max": 4.112599999999929
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.013699999999971624,
+        "p95": 1.3111000000003514,
+        "p99": 1.3111000000003514,
+        "max": 1.3111000000003514
+      },
+      "heapDelta": 1158736,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-6",
+      "level": 1,
+      "name": "Nivel 27: El Latido de la Espiral",
+      "difficulty": "normal",
+      "mechanics": [
+        "compuertas",
+        "luz"
+      ],
+      "nodes": 9,
+      "units": 460,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.45,
+          "target": 5,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.0886000000000422,
+        "p95": 2.936500000000251,
+        "p99": 2.936500000000251,
+        "max": 2.936500000000251
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.20669999999972788,
+        "p95": 2.374399999999696,
+        "p99": 2.374399999999696,
+        "max": 2.374399999999696
+      },
+      "heapDelta": -15022256,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-6",
+      "level": 1,
+      "name": "Nivel 27: El Latido de la Espiral",
+      "difficulty": "hard",
+      "mechanics": [
+        "compuertas",
+        "luz"
+      ],
+      "nodes": 9,
+      "units": 460,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.35000000000000003,
+          "target": 5,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.1147000000000844,
+        "p95": 3.4821999999999207,
+        "p99": 3.4821999999999207,
+        "max": 3.4821999999999207
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.697400000000016,
+        "p95": 1.7036000000002787,
+        "p99": 1.7036000000002787,
+        "max": 1.7036000000002787
+      },
+      "heapDelta": 1894936,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-6",
+      "level": 2,
+      "name": "Nivel 28: Las Tres Eclusas",
+      "difficulty": "easy",
+      "mechanics": [
+        "compuertas"
+      ],
+      "nodes": 8,
+      "units": 470,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.4,
+          "target": 5,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.020200000000386353,
+        "p95": 7.62079999999969,
+        "p99": 7.62079999999969,
+        "max": 7.62079999999969
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.03679999999985739,
+        "p95": 7.62079999999969,
+        "p99": 7.62079999999969,
+        "max": 7.62079999999969
+      },
+      "heapDelta": 1576584,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-6",
+      "level": 2,
+      "name": "Nivel 28: Las Tres Eclusas",
+      "difficulty": "normal",
+      "mechanics": [
+        "compuertas"
+      ],
+      "nodes": 8,
+      "units": 470,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "terrain_window",
+          "since": 0.25,
+          "until": 14.251
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.555199999999786,
+        "p95": 13.052499999999782,
+        "p99": 13.052499999999782,
+        "max": 13.052499999999782
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.555199999999786,
+        "p95": 8.905999999999949,
+        "p99": 8.905999999999949,
+        "max": 8.905999999999949
+      },
+      "heapDelta": -5327224,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-6",
+      "level": 2,
+      "name": "Nivel 28: Las Tres Eclusas",
+      "difficulty": "hard",
+      "mechanics": [
+        "compuertas"
+      ],
+      "nodes": 8,
+      "units": 470,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.45
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.3740999999999985,
+        "p95": 6.669400000000223,
+        "p99": 6.669400000000223,
+        "max": 6.669400000000223
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.3740999999999985,
+        "p95": 5.560099999999693,
+        "p99": 5.560099999999693,
+        "max": 5.560099999999693
+      },
+      "heapDelta": 2726208,
+      "vetoes": 0,
+      "snapshots": 1
+    },
+    {
+      "sector": "sector-6",
+      "level": 3,
+      "name": "Nivel 29: La Prision de Sombras",
+      "difficulty": "easy",
+      "mechanics": [
+        "compuertas",
+        "luz"
+      ],
+      "nodes": 6,
+      "units": 420,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.2,
+          "target": 2,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.02179999999998472,
+        "p95": 2.402099999999791,
+        "p99": 2.402099999999791,
+        "max": 2.402099999999791
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.04510000000027503,
+        "p95": 1.1610000000000582,
+        "p99": 1.1610000000000582,
+        "max": 1.1610000000000582
+      },
+      "heapDelta": 1123136,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-6",
+      "level": 3,
+      "name": "Nivel 29: La Prision de Sombras",
+      "difficulty": "normal",
+      "mechanics": [
+        "compuertas",
+        "luz"
+      ],
+      "nodes": 6,
+      "units": 420,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.125,
+          "target": 2,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.094300000000203,
+        "p95": 2.4191000000000713,
+        "p99": 2.4191000000000713,
+        "max": 2.4191000000000713
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.12820000000010623,
+        "p95": 1.1609000000003107,
+        "p99": 1.1609000000003107,
+        "max": 1.1609000000003107
+      },
+      "heapDelta": 1360824,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-6",
+      "level": 3,
+      "name": "Nivel 29: La Prision de Sombras",
+      "difficulty": "hard",
+      "mechanics": [
+        "compuertas",
+        "luz"
+      ],
+      "nodes": 6,
+      "units": 420,
+      "factions": 1,
+      "orders": 1,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.1,
+          "target": 2,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.06809999999995853,
+        "p95": 3.1660000000001673,
+        "p99": 3.1660000000001673,
+        "max": 3.1660000000001673
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.6613999999999578,
+        "p95": 1.2820000000001528,
+        "p99": 1.2820000000001528,
+        "max": 1.2820000000001528
+      },
+      "heapDelta": 1554024,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-6",
+      "level": 4,
+      "name": "Nivel 30: Laberinto de Espejos Desfasados",
+      "difficulty": "easy",
+      "mechanics": [
+        "compuertas",
+        "luz"
+      ],
+      "nodes": 11,
+      "units": 495,
+      "factions": 1,
+      "orders": 0,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "analysis_pending",
+          "since": 0,
+          "target": 3,
+          "requiredPower": 20
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.3858000000000175,
+        "p95": 3.6174000000000888,
+        "p99": 3.6174000000000888,
+        "max": 3.6174000000000888
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.3858000000000175,
+        "p95": 3.345800000000054,
+        "p99": 3.345800000000054,
+        "max": 3.345800000000054
+      },
+      "heapDelta": 3015168,
+      "vetoes": 0,
+      "snapshots": 1
+    },
+    {
+      "sector": "sector-6",
+      "level": 4,
+      "name": "Nivel 30: Laberinto de Espejos Desfasados",
+      "difficulty": "normal",
+      "mechanics": [
+        "compuertas",
+        "luz"
+      ],
+      "nodes": 11,
+      "units": 495,
+      "factions": 1,
+      "orders": 0,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "terrain_window",
+          "since": 0.05,
+          "until": 6.8511656916342645
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.8186000000000604,
+        "p95": 19.13229999999976,
+        "p99": 19.13229999999976,
+        "max": 19.13229999999976
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.7647999999999229,
+        "p95": 19.13229999999976,
+        "p99": 19.13229999999976,
+        "max": 19.13229999999976
+      },
+      "heapDelta": 2514368,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-6",
+      "level": 4,
+      "name": "Nivel 30: Laberinto de Espejos Desfasados",
+      "difficulty": "hard",
+      "mechanics": [
+        "compuertas",
+        "luz"
+      ],
+      "nodes": 11,
+      "units": 495,
+      "factions": 1,
+      "orders": 0,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "terrain_window",
+          "since": 0.05,
+          "until": 6.8511656916342645
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.7973000000001775,
+        "p95": 12.135000000000218,
+        "p99": 12.135000000000218,
+        "max": 12.135000000000218
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.7231999999999061,
+        "p95": 12.135000000000218,
+        "p99": 12.135000000000218,
+        "max": 12.135000000000218
+      },
+      "heapDelta": -13125360,
+      "vetoes": 0,
+      "snapshots": 1
+    },
+    {
+      "sector": "sector-6",
+      "level": 5,
+      "name": "Nivel 31: El Gran Engranaje",
+      "difficulty": "easy",
+      "mechanics": [
+        "compuertas",
+        "luz"
+      ],
+      "nodes": 9,
+      "units": 575,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.2,
+          "target": 5,
+          "requiredPower": 15
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "accumulating",
+          "since": 0.225,
+          "target": 6,
+          "requiredPower": 15
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.6583999999998014,
+        "p95": 2.361499999999978,
+        "p99": 2.361499999999978,
+        "max": 2.361499999999978
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.6583999999998014,
+        "p95": 1.224999999999909,
+        "p99": 1.224999999999909,
+        "max": 1.224999999999909
+      },
+      "heapDelta": 2381440,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-6",
+      "level": 5,
+      "name": "Nivel 31: El Gran Engranaje",
+      "difficulty": "normal",
+      "mechanics": [
+        "compuertas",
+        "luz"
+      ],
+      "nodes": 9,
+      "units": 575,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "budget_exhausted",
+          "since": 0.45
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.47500000000000003,
+          "target": 5,
+          "requiredPower": 151
+        }
+      ],
+      "milliseconds": {
+        "p50": 0.9534000000003289,
+        "p95": 5.3499000000001615,
+        "p99": 5.3499000000001615,
+        "max": 5.3499000000001615
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 0.9534000000003289,
+        "p95": 5.3499000000001615,
+        "p99": 5.3499000000001615,
+        "max": 5.3499000000001615
+      },
+      "heapDelta": 3001160,
+      "vetoes": 0,
+      "snapshots": 0
+    },
+    {
+      "sector": "sector-6",
+      "level": 5,
+      "name": "Nivel 31: El Gran Engranaje",
+      "difficulty": "hard",
+      "mechanics": [
+        "compuertas",
+        "luz"
+      ],
+      "nodes": 9,
+      "units": 575,
+      "factions": 2,
+      "orders": 2,
+      "idle": [
+        {
+          "faction": "enemy",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.45,
+          "target": 6,
+          "requiredPower": 151
+        },
+        {
+          "faction": "fuego",
+          "pendingForecast": null,
+          "code": "maintaining_control",
+          "since": 0.325,
+          "target": 5,
+          "requiredPower": 151
+        }
+      ],
+      "milliseconds": {
+        "p50": 1.169300000000021,
+        "p95": 4.826399999999921,
+        "p99": 4.826399999999921,
+        "max": 4.826399999999921
+      },
+      "warmMilliseconds": {
+        "samples": 16,
+        "p50": 1.1363000000001193,
+        "p95": 1.5264999999999418,
+        "p99": 1.5264999999999418,
+        "max": 1.5264999999999418
+      },
+      "heapDelta": 3180592,
+      "vetoes": 0,
+      "snapshots": 0
+    }
+  ],
+  "stress": [
+    {
+      "units": 984,
+      "nodes": 24,
+      "factions": [
+        {
+          "faction": "enemy",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 13,
+          "evaluation": {
+            "time": 1.85,
+            "alternatives": [
+              {
+                "source": 0,
+                "target": 6,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 0.9750000000000001,
+            "target": 1,
+            "requiredPower": 41
+          },
+          "route": [
+            1
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "fuego",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 13,
+          "evaluation": {
+            "time": 1.875,
+            "alternatives": [
+              {
+                "source": 1,
+                "target": 0,
+                "purpose": "conquest",
+                "reason": "insufficient_force"
+              },
+              {
+                "source": 1,
+                "target": 7,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 1.75,
+            "target": 0,
+            "requiredPower": 41
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "tejedoras",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 13,
+          "evaluation": {
+            "time": 1.925,
+            "alternatives": [
+              {
+                "source": 2,
+                "target": 0,
+                "purpose": "conquest",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 1.5,
+            "target": 8,
+            "requiredPower": 41
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "bala",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 14,
+          "evaluation": {
+            "time": 1.9500000000000002,
+            "alternatives": [
+              {
+                "source": 3,
+                "target": 22,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              },
+              {
+                "source": 3,
+                "target": 9,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 1.5250000000000001,
+            "target": 9,
+            "requiredPower": 41
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "negras",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 13,
+          "evaluation": {
+            "time": 1.9000000000000001,
+            "alternatives": [],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 1.625,
+            "target": 10,
+            "requiredPower": 41
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "cortadoras",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 14,
+          "evaluation": {
+            "time": 1.975,
+            "alternatives": [
+              {
+                "source": 5,
+                "target": 10,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              },
+              {
+                "source": 5,
+                "target": 20,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 1.7000000000000002,
+            "target": 11,
+            "requiredPower": 41
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        }
+      ],
+      "metrics": {
+        "frames": 80,
+        "forecasts": 0,
+        "orders": 0,
+        "vetoes": 0,
+        "stale": 0,
+        "overruns": 6,
+        "snapshots": 0,
+        "reactions": 0,
+        "jobsCompleted": 0,
+        "forecastSteps": 0,
+        "cacheHits": 0
+      },
+      "timings": {
+        "observation": 0.0009000000000014552,
+        "planning": 0.004200000000309956,
+        "execution": 0.0037000000002080924,
+        "tactical": 1.3083000000001448,
+        "preparation": 1.330500000000029
+      },
+      "workCosts": {},
+      "worker": {
+        "enabled": false,
+        "completed": 0,
+        "cpuMs": 0,
+        "pending": 0,
+        "error": null
+      },
+      "milliseconds": {
+        "p50": 1.5152000000002772,
+        "p95": 5.454899999999725,
+        "p99": 8.243399999999838,
+        "max": 8.243399999999838
+      },
+      "warmMilliseconds": {
+        "samples": 70,
+        "p50": 1.494499999999789,
+        "p95": 4.013899999999921,
+        "p99": 8.243399999999838,
+        "max": 8.243399999999838
+      },
+      "tacticalVisits": [
+        {
+          "faction": "enemy",
+          "visits": 13
+        },
+        {
+          "faction": "fuego",
+          "visits": 13
+        },
+        {
+          "faction": "tejedoras",
+          "visits": 13
+        },
+        {
+          "faction": "bala",
+          "visits": 14
+        },
+        {
+          "faction": "negras",
+          "visits": 13
+        },
+        {
+          "faction": "cortadoras",
+          "visits": 14
+        }
+      ]
+    },
+    {
+      "units": 4992,
+      "nodes": 24,
+      "factions": [
+        {
+          "faction": "enemy",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 13,
+          "evaluation": {
+            "time": 1.85,
+            "alternatives": [
+              {
+                "source": 0,
+                "target": 1,
+                "purpose": "conquest",
+                "reason": "insufficient_force"
+              },
+              {
+                "source": 0,
+                "target": 6,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 0,
+            "target": 1,
+            "requiredPower": 208
+          },
+          "route": [
+            1
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "fuego",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 13,
+          "evaluation": {
+            "time": 1.875,
+            "alternatives": [
+              {
+                "source": 1,
+                "target": 20,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              },
+              {
+                "source": 1,
+                "target": 0,
+                "purpose": "conquest",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 0,
+            "target": 0,
+            "requiredPower": 208
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "tejedoras",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 13,
+          "evaluation": {
+            "time": 1.925,
+            "alternatives": [
+              {
+                "source": 2,
+                "target": 8,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              },
+              {
+                "source": 2,
+                "target": 0,
+                "purpose": "conquest",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 0,
+            "target": 8,
+            "requiredPower": 208
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "bala",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 14,
+          "evaluation": {
+            "time": 1.9500000000000002,
+            "alternatives": [
+              {
+                "source": 3,
+                "target": 13,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 0,
+            "target": 9,
+            "requiredPower": 208
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "negras",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 13,
+          "evaluation": {
+            "time": 1.75,
+            "alternatives": [
+              {
+                "source": 4,
+                "target": 9,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              },
+              {
+                "source": 4,
+                "target": 0,
+                "purpose": "conquest",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 0
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "cortadoras",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 14,
+          "evaluation": {
+            "time": 1.975,
+            "alternatives": [
+              {
+                "source": 5,
+                "target": 10,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              },
+              {
+                "source": 5,
+                "target": 0,
+                "purpose": "conquest",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 0,
+            "target": 11,
+            "requiredPower": 208
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        }
+      ],
+      "metrics": {
+        "frames": 80,
+        "forecasts": 0,
+        "orders": 0,
+        "vetoes": 0,
+        "stale": 0,
+        "overruns": 7,
+        "snapshots": 0,
+        "reactions": 0,
+        "jobsCompleted": 0,
+        "forecastSteps": 0,
+        "cacheHits": 0
+      },
+      "timings": {
+        "observation": 0.0007999999997991836,
+        "planning": 0.0039000000001578883,
+        "execution": 0.0028999999999541615,
+        "tactical": 1.5832000000000335,
+        "preparation": 1.6014000000000124
+      },
+      "workCosts": {},
+      "worker": {
+        "enabled": false,
+        "completed": 0,
+        "cpuMs": 0,
+        "pending": 0,
+        "error": null
+      },
+      "milliseconds": {
+        "p50": 1.6941000000001623,
+        "p95": 5.739900000000034,
+        "p99": 8.425900000000183,
+        "max": 8.425900000000183
+      },
+      "warmMilliseconds": {
+        "samples": 70,
+        "p50": 1.6907999999998538,
+        "p95": 5.739900000000034,
+        "p99": 8.425900000000183,
+        "max": 8.425900000000183
+      },
+      "tacticalVisits": [
+        {
+          "faction": "enemy",
+          "visits": 13
+        },
+        {
+          "faction": "fuego",
+          "visits": 13
+        },
+        {
+          "faction": "tejedoras",
+          "visits": 13
+        },
+        {
+          "faction": "bala",
+          "visits": 14
+        },
+        {
+          "faction": "negras",
+          "visits": 13
+        },
+        {
+          "faction": "cortadoras",
+          "visits": 14
+        }
+      ]
+    },
+    {
+      "units": 9984,
+      "nodes": 24,
+      "factions": [
+        {
+          "faction": "enemy",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 13,
+          "evaluation": {
+            "time": 1.85,
+            "alternatives": [],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 0,
+            "target": 1,
+            "requiredPower": 416
+          },
+          "route": [
+            1
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "fuego",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 13,
+          "evaluation": {
+            "time": 1.875,
+            "alternatives": [],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 0,
+            "target": 0,
+            "requiredPower": 416
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "tejedoras",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 13,
+          "evaluation": {
+            "time": 1.925,
+            "alternatives": [
+              {
+                "source": 2,
+                "target": 0,
+                "purpose": "conquest",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 0,
+            "target": 8,
+            "requiredPower": 416
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "bala",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 14,
+          "evaluation": {
+            "time": 1.9500000000000002,
+            "alternatives": [
+              {
+                "source": 3,
+                "target": 8,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 0,
+            "target": 9,
+            "requiredPower": 416
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "negras",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 13,
+          "evaluation": {
+            "time": 1.75,
+            "alternatives": [
+              {
+                "source": 4,
+                "target": 9,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 0
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        },
+        {
+          "faction": "cortadoras",
+          "visits": 0,
+          "decisions": 0,
+          "activeProfile": {
+            "aggressionMult": 1,
+            "allowedTargets": [
+              "all"
+            ],
+            "diplomacy": null,
+            "preferredEvolution": null,
+            "minEvolutionGarrison": null,
+            "minPostCaptureGarrison": 10
+          },
+          "legacyOnlySettings": [
+            "focus",
+            "antiPendulum",
+            "hazardPolicy",
+            "hazards",
+            "maxRouteCasualtyRatio",
+            "hazardGarrisonBonus"
+          ],
+          "pendingForecast": null,
+          "reactions": 0,
+          "preparationLeadSeconds": 0,
+          "history": [],
+          "difficulty": "hard",
+          "limits": {
+            "strategy": 0.5,
+            "reaction": 0.08,
+            "sources": 3,
+            "responses": 3,
+            "fronts": 3,
+            "depth": 3,
+            "hypotheses": 2,
+            "urgentMs": 250,
+            "routineMs": 500
+          },
+          "tacticalVisits": 14,
+          "evaluation": {
+            "time": 1.975,
+            "alternatives": [
+              {
+                "source": 5,
+                "target": 11,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              },
+              {
+                "source": 5,
+                "target": 10,
+                "purpose": "expansion",
+                "reason": "insufficient_force"
+              }
+            ],
+            "selected": null
+          },
+          "tacticalHistory": [],
+          "idle": {
+            "code": "budget_exhausted",
+            "since": 0,
+            "target": 11,
+            "requiredPower": 416
+          },
+          "route": [
+            0
+          ],
+          "latencyViolations": 0,
+          "latencyMs": {
+            "samples": 0,
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          }
+        }
+      ],
+      "metrics": {
+        "frames": 80,
+        "forecasts": 0,
+        "orders": 0,
+        "vetoes": 0,
+        "stale": 0,
+        "overruns": 20,
+        "snapshots": 0,
+        "reactions": 0,
+        "jobsCompleted": 0,
+        "forecastSteps": 0,
+        "cacheHits": 0
+      },
+      "timings": {
+        "observation": 0.001099999999951251,
+        "planning": 0.004600000000209548,
+        "execution": 0.003200000000106229,
+        "tactical": 1.7701999999999316,
+        "preparation": 1.7901999999999134
+      },
+      "workCosts": {},
+      "worker": {
+        "enabled": false,
+        "completed": 0,
+        "cpuMs": 0,
+        "pending": 0,
+        "error": null
+      },
+      "milliseconds": {
+        "p50": 1.543500000000222,
+        "p95": 7.476200000000063,
+        "p99": 11.99369999999999,
+        "max": 11.99369999999999
+      },
+      "warmMilliseconds": {
+        "samples": 70,
+        "p50": 1.6224999999999454,
+        "p95": 6.918699999999717,
+        "p99": 8.37900000000036,
+        "max": 8.37900000000036
+      },
+      "tacticalVisits": [
+        {
+          "faction": "enemy",
+          "visits": 13
+        },
+        {
+          "faction": "fuego",
+          "visits": 13
+        },
+        {
+          "faction": "tejedoras",
+          "visits": 13
+        },
+        {
+          "faction": "bala",
+          "visits": 14
+        },
+        {
+          "faction": "negras",
+          "visits": 13
+        },
+        {
+          "faction": "cortadoras",
+          "visits": 14
+        }
+      ]
+    }
+  ]
+}

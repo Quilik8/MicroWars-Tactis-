@@ -26,6 +26,8 @@ export class Engine {
         // Canvas auxiliar 2D para elementos de UI sobre WebGL
         this.uiCanvas = null;
         this.uiCtx = null;
+        this.profile = new URLSearchParams(window.location.search).has('ai-debug');
+        this.profileSamples = { update: [], overlay: [], renderCpu: [], frameInterval: [] };
     }
 
     /** Se llama desde window 'load' en main.js */
@@ -75,14 +77,46 @@ export class Engine {
         this._resizeHandler = () => this._resize();
         window.addEventListener('resize', this._resizeHandler);
 
+        if (this.profile) {
+            const render = this.app.renderer.render.bind(this.app.renderer);
+            this.app.renderer.render = (...args) => {
+                const started = performance.now();
+                const result = render(...args);
+                this._recordProfile('renderCpu', performance.now() - started);
+                return result;
+            };
+        }
+
         this.app.ticker.add((ticker) => {
             const dt = ticker.deltaMS / 1000;
+            const started = this.profile ? performance.now() : 0;
             if (this.onUpdate) this.onUpdate(dt);
+            if (this.profile) {
+                this._recordProfile('update', performance.now() - started);
+                this._recordProfile('frameInterval', ticker.deltaMS);
+            }
+            const drawStarted = this.profile ? performance.now() : 0;
             if (this.onDraw) {
                 this.uiCtx.clearRect(0, 0, this.width, this.height);
                 this.onDraw(this.uiCtx);
             }
+            if (this.profile) this._recordProfile('overlay', performance.now() - drawStarted);
         });
+    }
+
+    _recordProfile(kind, value) {
+        const samples = this.profileSamples[kind];
+        samples.push(value); if (samples.length > 600) samples.shift();
+        if (kind !== 'update') return;
+        this._profileTick = (this._profileTick || 0) + 1;
+        if (this._profileTick % 60 !== 0) return;
+        const report = {};
+        for (const [key, values] of Object.entries(this.profileSamples)) {
+            const sorted = [...values].sort((a, b) => a - b);
+            const at = p => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))] || 0;
+            report[key] = { samples: sorted.length, p50: at(.5), p95: at(.95), p99: at(.99) };
+        }
+        document.documentElement.dataset.rtsFrameProfile = JSON.stringify(report);
     }
 
     _resize() {
